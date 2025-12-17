@@ -10,39 +10,65 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'booking_id',
         as: 'booking'
       });
+      
+      // BookingModel belongs to Category
+      BookingModel.belongsTo(models.Category, {
+        foreignKey: 'category_id',
+        as: 'category'
+      });
+      
+      // BookingModel belongs to Project
+      BookingModel.belongsTo(models.Project, {
+        foreignKey: 'project_id',
+        as: 'project'
+      });
     }
   }
-  
+
   BookingModel.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     booking_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    model_name: {
-      type: DataTypes.STRING(100),
+    category_id: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
-    model_category: {
-      type: DataTypes.STRING(100),
+    project_id: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
-    description: {
+    project_title: {
+      type: DataTypes.STRING(200),
+      allowNull: false
+    },
+    price: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true
+    },
+    notes: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    display_order: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {
     sequelize,
     modelName: 'BookingModel',
     tableName: 'booking_models',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false
   });
-  
+
   return BookingModel;
 };

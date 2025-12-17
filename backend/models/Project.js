@@ -10,41 +10,60 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'category_id',
         as: 'category'
       });
-
+      
+      // Project belongs to Admin
+      Project.belongsTo(models.Admin, {
+        foreignKey: 'created_by',
+        as: 'creator'
+      });
+      
       // Project has many ProjectPhotos
       Project.hasMany(models.ProjectPhoto, {
         foreignKey: 'project_id',
         as: 'photos'
       });
-
+      
       // Project has many ProjectDetails
       Project.hasMany(models.ProjectDetail, {
         foreignKey: 'project_id',
         as: 'details'
       });
-
+      
       // Project has many ProjectIncludes
       Project.hasMany(models.ProjectInclude, {
         foreignKey: 'project_id',
         as: 'includes'
       });
-
+      
       // Project has many ProjectMoods
       Project.hasMany(models.ProjectMood, {
         foreignKey: 'project_id',
         as: 'moods'
       });
+      
+      // Project has many BookingModels
+      Project.hasMany(models.BookingModel, {
+        foreignKey: 'project_id',
+        as: 'bookingModels'
+      });
+      
+      // Project has many InvoiceItems
+      Project.hasMany(models.InvoiceItem, {
+        foreignKey: 'project_id',
+        as: 'invoiceItems'
+      });
     }
   }
-  
+
   Project.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
-    category_id: {
-      type: DataTypes.INTEGER,
+    title: {
+      type: DataTypes.STRING(200),
       allowNull: false
     },
     slug: {
@@ -52,28 +71,24 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true
     },
-    title: {
-      type: DataTypes.STRING(200),
+    category_id: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
-    client_name: {
+    price: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true
+    },
+    theme: {
       type: DataTypes.STRING(100),
-      allowNull: true
-    },
-    location: {
-      type: DataTypes.STRING(200),
-      allowNull: true
-    },
-    event_date: {
-      type: DataTypes.DATEONLY,
       allowNull: true
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: true
     },
-    cover_image: {
-      type: DataTypes.STRING(255),
+    atmosphere_description: {
+      type: DataTypes.TEXT,
       allowNull: true
     },
     is_featured: {
@@ -82,28 +97,25 @@ module.exports = (sequelize, DataTypes) => {
     },
     is_published: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    published_at: {
-      type: DataTypes.DATE,
-      allowNull: true
+      defaultValue: true
     },
     view_count: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
-    display_order: {
+    created_by: {
       type: DataTypes.INTEGER,
-      defaultValue: 0
+      allowNull: true
     }
   }, {
     sequelize,
     modelName: 'Project',
     tableName: 'projects',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'
   });
-  
+
   return Project;
 };

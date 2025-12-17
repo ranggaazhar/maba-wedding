@@ -10,7 +10,13 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'booking_id',
         as: 'booking'
       });
-
+      
+      // ReviewLink belongs to Admin
+      ReviewLink.belongsTo(models.Admin, {
+        foreignKey: 'created_by',
+        as: 'creator'
+      });
+      
       // ReviewLink has one Review
       ReviewLink.hasOne(models.Review, {
         foreignKey: 'review_link_id',
@@ -18,38 +24,49 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  
+
   ReviewLink.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     booking_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    unique_code: {
-      type: DataTypes.STRING(50),
       allowNull: false,
       unique: true
+    },
+    token: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true
+    },
+    expires_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     },
     is_used: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
-    expires_at: {
+    sent_at: {
       type: DataTypes.DATE,
+      allowNull: true
+    },
+    created_by: {
+      type: DataTypes.INTEGER,
       allowNull: true
     }
   }, {
     sequelize,
     modelName: 'ReviewLink',
     tableName: 'review_links',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: false
   });
-  
+
   return ReviewLink;
 };

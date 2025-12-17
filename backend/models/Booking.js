@@ -10,25 +10,25 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'booking_link_id',
         as: 'bookingLink'
       });
-
+      
       // Booking has many BookingModels
       Booking.hasMany(models.BookingModel, {
         foreignKey: 'booking_id',
         as: 'models'
       });
-
+      
       // Booking has many BookingProperties
       Booking.hasMany(models.BookingProperty, {
         foreignKey: 'booking_id',
         as: 'properties'
       });
-
+      
       // Booking has one Invoice
       Booking.hasOne(models.Invoice, {
         foreignKey: 'booking_id',
         as: 'invoice'
       });
-
+      
       // Booking has one ReviewLink
       Booking.hasOne(models.ReviewLink, {
         foreignKey: 'booking_id',
@@ -36,18 +36,20 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  
+
   Booking.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     booking_link_id: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false,
+      unique: true
     },
-    booking_number: {
+    booking_code: {
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: true
@@ -56,46 +58,71 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(100),
       allowNull: false
     },
-    customer_email: {
-      type: DataTypes.STRING(100),
-      allowNull: false
-    },
     customer_phone: {
       type: DataTypes.STRING(20),
+      allowNull: false
+    },
+    full_address: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    event_venue: {
+      type: DataTypes.TEXT,
       allowNull: false
     },
     event_date: {
       type: DataTypes.DATEONLY,
       allowNull: false
     },
-    event_location: {
-      type: DataTypes.STRING(255),
+    event_type: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
+    referral_source: {
+      type: DataTypes.STRING(100),
       allowNull: true
     },
-    guest_count: {
-      type: DataTypes.INTEGER,
+    theme_color: {
+      type: DataTypes.STRING(100),
       allowNull: true
     },
-    notes: {
+    total_estimate: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true
+    },
+    customer_notes: {
       type: DataTypes.TEXT,
       allowNull: true
     },
-    total_amount: {
-      type: DataTypes.DECIMAL(15, 2),
-      allowNull: false
+    payment_proof_url: {
+      type: DataTypes.TEXT,
+      allowNull: true
     },
-    status: {
-      type: DataTypes.ENUM('pending', 'confirmed', 'cancelled', 'completed'),
-      defaultValue: 'pending'
+    bank_name: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    account_number: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    account_name: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    payment_date: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     modelName: 'Booking',
     tableName: 'bookings',
+    underscored: true,
     timestamps: true,
-    createdAt: 'created_at',
+    createdAt: 'submitted_at',
     updatedAt: 'updated_at'
   });
-  
+
   return Booking;
 };

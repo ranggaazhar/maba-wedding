@@ -5,57 +5,69 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class BookingLink extends Model {
     static associate(models) {
-      // BookingLink has many Bookings
-      BookingLink.hasMany(models.Booking, {
+      // BookingLink belongs to Admin
+      BookingLink.belongsTo(models.Admin, {
+        foreignKey: 'created_by',
+        as: 'creator'
+      });
+      
+      // BookingLink has one Booking
+      BookingLink.hasOne(models.Booking, {
         foreignKey: 'booking_link_id',
-        as: 'bookings'
+        as: 'booking'
       });
     }
   }
-  
+
   BookingLink.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
-    unique_code: {
-      type: DataTypes.STRING(20),
+    token: {
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-    title: {
-      type: DataTypes.STRING(200),
-      allowNull: false
-    },
-    description: {
-      type: DataTypes.TEXT,
+    customer_name: {
+      type: DataTypes.STRING(100),
       allowNull: true
     },
-    is_active: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true
+    customer_phone: {
+      type: DataTypes.STRING(20),
+      allowNull: true
     },
     expires_at: {
       type: DataTypes.DATE,
       allowNull: true
     },
-    max_bookings: {
+    is_used: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    sent_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    created_by: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    current_bookings: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     sequelize,
     modelName: 'BookingLink',
     tableName: 'booking_links',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: false
   });
-  
+
   return BookingLink;
 };

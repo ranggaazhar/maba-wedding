@@ -10,25 +10,34 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'invoice_id',
         as: 'invoice'
       });
+      
+      // InvoiceItem belongs to Project
+      InvoiceItem.belongsTo(models.Project, {
+        foreignKey: 'project_id',
+        as: 'project'
+      });
+      
+      // InvoiceItem belongs to Property
+      InvoiceItem.belongsTo(models.Property, {
+        foreignKey: 'property_id',
+        as: 'property'
+      });
     }
   }
-  
+
   InvoiceItem.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     invoice_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    item_type: {
-      type: DataTypes.ENUM('property', 'service', 'other'),
-      allowNull: false
-    },
     item_name: {
-      type: DataTypes.STRING(200),
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     description: {
@@ -43,18 +52,31 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false
     },
-    total_price: {
+    subtotal: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false
+    },
+    project_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    property_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    display_order: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {
     sequelize,
     modelName: 'InvoiceItem',
     tableName: 'invoice_items',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false
   });
-  
+
   return InvoiceItem;
 };

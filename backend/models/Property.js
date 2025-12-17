@@ -10,57 +10,86 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'category_id',
         as: 'category'
       });
-
+      
+      // Property belongs to Admin
+      Property.belongsTo(models.Admin, {
+        foreignKey: 'created_by',
+        as: 'creator'
+      });
+      
+      // Property has many PropertyImages
+      Property.hasMany(models.PropertyImage, {
+        foreignKey: 'property_id',
+        as: 'images'
+      });
+      
       // Property has many BookingProperties
       Property.hasMany(models.BookingProperty, {
         foreignKey: 'property_id',
         as: 'bookingProperties'
       });
+      
+      // Property has many InvoiceItems
+      Property.hasMany(models.InvoiceItem, {
+        foreignKey: 'property_id',
+        as: 'invoiceItems'
+      });
     }
   }
-  
+
   Property.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
-    },
-    category_id: {
-      type: DataTypes.INTEGER,
+      autoIncrement: true,
       allowNull: false
     },
     name: {
       type: DataTypes.STRING(200),
       allowNull: false
     },
+    slug: {
+      type: DataTypes.STRING(200),
+      allowNull: false,
+      unique: true
+    },
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true
     },
-    base_price: {
+    price: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false
     },
-    image_url: {
-      type: DataTypes.STRING(255),
-      allowNull: true
+    stock_quantity: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1
     },
     is_available: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
-    display_order: {
+    image_url: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    created_by: {
       type: DataTypes.INTEGER,
-      defaultValue: 0
+      allowNull: true
     }
   }, {
     sequelize,
     modelName: 'Property',
     tableName: 'properties',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'
   });
-  
+
   return Property;
 };

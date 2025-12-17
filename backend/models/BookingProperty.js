@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'booking_id',
         as: 'booking'
       });
-
+      
       // BookingProperty belongs to Property
       BookingProperty.belongsTo(models.Property, {
         foreignKey: 'property_id',
@@ -18,12 +18,13 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  
+
   BookingProperty.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     booking_id: {
       type: DataTypes.INTEGER,
@@ -57,10 +58,11 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'BookingProperty',
     tableName: 'booking_properties',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false
   });
-  
+
   return BookingProperty;
 };

@@ -5,15 +5,20 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class SiteSetting extends Model {
     static associate(models) {
-      // No associations for SiteSetting
+      // SiteSetting belongs to Admin
+      SiteSetting.belongsTo(models.Admin, {
+        foreignKey: 'updated_by',
+        as: 'updater'
+      });
     }
   }
-  
+
   SiteSetting.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     setting_key: {
       type: DataTypes.STRING(100),
@@ -25,21 +30,26 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     setting_type: {
-      type: DataTypes.ENUM('text', 'number', 'boolean', 'json'),
+      type: DataTypes.STRING(50),
       defaultValue: 'text'
     },
     description: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    updated_by: {
+      type: DataTypes.INTEGER,
       allowNull: true
     }
   }, {
     sequelize,
     modelName: 'SiteSetting',
     tableName: 'site_settings',
+    underscored: true,
     timestamps: true,
-    createdAt: 'created_at',
+    createdAt: false,
     updatedAt: 'updated_at'
   });
-  
+
   return SiteSetting;
 };

@@ -7,24 +7,25 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // ProjectDetailItem belongs to ProjectDetail
       ProjectDetailItem.belongsTo(models.ProjectDetail, {
-        foreignKey: 'project_detail_id',
+        foreignKey: 'detail_id',
         as: 'detail'
       });
     }
   }
-  
+
   ProjectDetailItem.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
-    project_detail_id: {
+    detail_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    item_text: {
-      type: DataTypes.STRING(255),
+    content: {
+      type: DataTypes.TEXT,
       allowNull: false
     },
     display_order: {
@@ -35,10 +36,11 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'ProjectDetailItem',
     tableName: 'project_detail_items',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: false
   });
-  
+
   return ProjectDetailItem;
 };

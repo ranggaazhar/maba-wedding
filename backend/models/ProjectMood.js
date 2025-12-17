@@ -12,19 +12,20 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  
+
   ProjectMood.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     project_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    mood_name: {
-      type: DataTypes.STRING(50),
+    mood: {
+      type: DataTypes.STRING(100),
       allowNull: false
     },
     display_order: {
@@ -35,10 +36,11 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'ProjectMood',
     tableName: 'project_moods',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: false
   });
-  
+
   return ProjectMood;
 };

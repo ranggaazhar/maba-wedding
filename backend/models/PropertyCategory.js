@@ -12,12 +12,13 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  
+
   PropertyCategory.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     slug: {
       type: DataTypes.STRING(100),
@@ -44,10 +45,11 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'PropertyCategory',
     tableName: 'property_categories',
+    underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'
   });
-  
+
   return PropertyCategory;
 };

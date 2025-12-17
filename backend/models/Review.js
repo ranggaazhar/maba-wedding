@@ -10,20 +10,34 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'review_link_id',
         as: 'reviewLink'
       });
+      
+      // Review belongs to Admin (replied_by)
+      Review.belongsTo(models.Admin, {
+        foreignKey: 'replied_by',
+        as: 'replier'
+      });
+      
+      // Review belongs to Admin (moderated_by)
+      Review.belongsTo(models.Admin, {
+        foreignKey: 'moderated_by',
+        as: 'moderator'
+      });
     }
   }
-  
+
   Review.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     review_link_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
-    reviewer_name: {
+    customer_name: {
       type: DataTypes.STRING(100),
       allowNull: false
     },
@@ -37,24 +51,49 @@ module.exports = (sequelize, DataTypes) => {
     },
     review_text: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: false
     },
     is_approved: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    is_published: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
     is_featured: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    admin_reply: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    replied_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    replied_by: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    moderated_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    moderated_by: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {
     sequelize,
     modelName: 'Review',
     tableName: 'reviews',
+    underscored: true,
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    createdAt: 'submitted_at',
+    updatedAt: false
   });
-  
+
   return Review;
 };
