@@ -99,10 +99,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
-    view_count: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: true
