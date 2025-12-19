@@ -1,6 +1,7 @@
-import { type ReactNode } from "react";
-import { AdminSidebar } from "./AdminSidebar";
-import { AdminHeader } from "./AdminHeader";
+// src/components/admin/AdminLayout.tsx
+import { type ReactNode } from 'react';
+import { AdminSidebar } from './AdminSidebar';
+import { AdminHeader } from './AdminHeader';
 
 interface AdminLayoutProps {
   children: ReactNode;

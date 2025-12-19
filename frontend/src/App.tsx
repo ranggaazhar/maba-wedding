@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/toaster';
+import { AdminLayout } from './components/admin/AdminLayout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -35,12 +36,14 @@ function App() {
             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />}
           />
 
-          Protected Routes
+          {/* Protected Routes with AdminLayout */}
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <AdminLayout>
+                  <Dashboard />
+                </AdminLayout>
               </ProtectedRoute>
             }
           />
@@ -48,7 +51,9 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute>
-                <Profile />
+                <AdminLayout>
+                  <Profile />
+                </AdminLayout>
               </ProtectedRoute>
             }
           />
