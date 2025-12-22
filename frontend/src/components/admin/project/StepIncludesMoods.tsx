@@ -133,7 +133,6 @@ export function StepIncludesMoods({ formData, updateFormData }: StepIncludesMood
         <h2 className="text-lg font-semibold text-foreground mb-4">Yang Termasuk</h2>
 
         <div className="space-y-4">
-          {/* Add Form */}
           <div className="flex gap-2">
             <Input
               value={newInclude}
@@ -141,7 +140,8 @@ export function StepIncludesMoods({ formData, updateFormData }: StepIncludesMood
               placeholder="Contoh: 1 Set Pelaminan Utama"
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInclude())}
             />
-            <Button onClick={addInclude}>
+            <Button onClick={addInclude}
+            className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
               <Plus size={18} className="mr-2" />
               Tambah
             </Button>
@@ -223,7 +223,8 @@ export function StepIncludesMoods({ formData, updateFormData }: StepIncludesMood
               placeholder="Contoh: Romantic"
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addMood())}
             />
-            <Button onClick={addMood}>
+            <Button onClick={addMood}
+            className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
               <Plus size={18} className="mr-2" />
               Tambah
             </Button>

@@ -13,7 +13,12 @@ import Categories from './pages/Categories';
 import PropertyCategories from './pages/PropertyCategories';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
-import ProjectForm from './pages/ProjectForm'; // Pastikan import ini ada
+import ProjectForm from './pages/ProjectForm';
+
+// ✅ IMPORT PROPERTIES PAGES
+import Properties from './pages/Properties';
+import PropertyDetail from './pages/PropertyDetail';
+import PropertyForm from './pages/PropertyForm';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -57,9 +62,7 @@ function App() {
             }
           />
           
-          {/* --- PROJECT ROUTES (URUTAN DIPERBAIKI) --- */}
-          
-          {/* 1. List Project */}
+          {/* --- PROJECT ROUTES --- */}
           <Route
             path="/projects"
             element={
@@ -70,8 +73,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* 2. Create Project (HARUS DI ATAS :id) */}
           <Route
             path="/projects/new"
             element={
@@ -82,8 +83,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* 3. Edit Project (HARUS DI ATAS :id) */}
           <Route
             path="/projects/edit/:id"
             element={
@@ -94,8 +93,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* 4. Detail Project (TARUH PALING BAWAH agar tidak bentrok) */}
           <Route
             path="/projects/:id"
             element={
@@ -107,8 +104,49 @@ function App() {
             }
           />
 
-          {/* --- END PROJECT ROUTES --- */}
+          {/* ✅ PROPERTY ROUTES (SAME PATTERN AS PROJECTS) */}
+          <Route
+            path="/properties"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Properties />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/properties/new"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PropertyForm />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/properties/edit/:id"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PropertyForm />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/properties/:id"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PropertyDetail />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
 
+          {/* --- CATEGORY ROUTES --- */}
           <Route
             path="/categories"
             element={
@@ -129,6 +167,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
+          {/* --- PROFILE ROUTE --- */}
           <Route
             path="/profile"
             element={

@@ -1,5 +1,39 @@
-// controllers/propertyController.js
+// controllers/propertyController.js - FIXED (Bind Context)
 const propertyService = require('../services/propertyService');
+const FileHelper = require('../utils/fileHelper');
+
+// ✅ SOLUTION: Make helper function standalone
+function addFullUrlsToProperty(property, req) {
+  if (!property) return property;
+  
+  // Handle both Sequelize instance and plain object
+  let propertyData;
+  try {
+    propertyData = property.toJSON ? property.toJSON() : { ...property };
+  } catch (error) {
+    console.error('Error converting property to JSON:', error);
+    propertyData = { ...property };
+  }
+  
+  // Add full URL to images array
+  if (propertyData.images && Array.isArray(propertyData.images)) {
+    propertyData.images = propertyData.images.map(img => {
+      const imageData = img.toJSON ? img.toJSON() : { ...img };
+      return {
+        ...imageData,
+        url: FileHelper.getFileUrl(imageData.url, req),
+        original_url: imageData.url // Keep original path
+      };
+    });
+  }
+  
+  // Add full URL to primary image_url if exists
+  if (propertyData.image_url) {
+    propertyData.image_url = FileHelper.getFileUrl(propertyData.image_url, req);
+  }
+  
+  return propertyData;
+}
 
 class PropertyController {
   async getAllProperties(req, res) {
@@ -19,12 +53,23 @@ class PropertyController {
       
       const properties = await propertyService.getAllProperties(filters);
       
+      // ✅ FIXED: Use standalone function
+      const propertiesWithUrls = properties.map(prop => {
+        try {
+          return addFullUrlsToProperty(prop, req);
+        } catch (error) {
+          console.error('Error processing property:', prop.id, error);
+          return prop.toJSON ? prop.toJSON() : prop;
+        }
+      });
+      
       return res.status(200).json({
         success: true,
         message: 'Properties retrieved successfully',
-        data: properties
+        data: propertiesWithUrls
       });
     } catch (error) {
+      console.error('getAllProperties error:', error);
       return res.status(500).json({
         success: false,
         message: 'Failed to retrieve properties',
@@ -39,13 +84,15 @@ class PropertyController {
       const includeRelations = req.query.include_relations !== 'false';
       
       const property = await propertyService.getPropertyById(id, includeRelations);
+      const propertyWithUrls = addFullUrlsToProperty(property, req);
       
       return res.status(200).json({
         success: true,
         message: 'Property retrieved successfully',
-        data: property
+        data: propertyWithUrls
       });
     } catch (error) {
+      console.error('getPropertyById error:', error);
       const statusCode = error.message === 'Property not found' ? 404 : 500;
       return res.status(statusCode).json({
         success: false,
@@ -60,13 +107,15 @@ class PropertyController {
       const includeRelations = req.query.include_relations !== 'false';
       
       const property = await propertyService.getPropertyBySlug(slug, includeRelations);
+      const propertyWithUrls = addFullUrlsToProperty(property, req);
       
       return res.status(200).json({
         success: true,
         message: 'Property retrieved successfully',
-        data: property
+        data: propertyWithUrls
       });
     } catch (error) {
+      console.error('getPropertyBySlug error:', error);
       const statusCode = error.message === 'Property not found' ? 404 : 500;
       return res.status(statusCode).json({
         success: false,
@@ -83,13 +132,15 @@ class PropertyController {
       };
       
       const property = await propertyService.createProperty(propertyData);
+      const propertyWithUrls = addFullUrlsToProperty(property, req);
       
       return res.status(201).json({
         success: true,
         message: 'Property created successfully',
-        data: property
+        data: propertyWithUrls
       });
     } catch (error) {
+      console.error('createProperty error:', error);
       let statusCode = 500;
       if (error.message === 'Property with this slug already exists') {
         statusCode = 409;
@@ -108,13 +159,15 @@ class PropertyController {
     try {
       const { id } = req.params;
       const property = await propertyService.updateProperty(id, req.body);
+      const propertyWithUrls = addFullUrlsToProperty(property, req);
       
       return res.status(200).json({
         success: true,
         message: 'Property updated successfully',
-        data: property
+        data: propertyWithUrls
       });
     } catch (error) {
+      console.error('updateProperty error:', error);
       let statusCode = 500;
       if (error.message === 'Property not found' || error.message === 'Property category not found') {
         statusCode = 404;
@@ -139,6 +192,7 @@ class PropertyController {
         message: result.message
       });
     } catch (error) {
+      console.error('deleteProperty error:', error);
       const statusCode = error.message === 'Property not found' ? 404 :
                         error.message.includes('Cannot delete') ? 400 : 500;
       return res.status(statusCode).json({
@@ -152,13 +206,15 @@ class PropertyController {
     try {
       const { id } = req.params;
       const property = await propertyService.toggleAvailability(id);
+      const propertyWithUrls = addFullUrlsToProperty(property, req);
       
       return res.status(200).json({
         success: true,
         message: 'Property availability toggled successfully',
-        data: property
+        data: propertyWithUrls
       });
     } catch (error) {
+      console.error('toggleAvailability error:', error);
       const statusCode = error.message === 'Property not found' ? 404 : 500;
       return res.status(statusCode).json({
         success: false,
@@ -180,13 +236,15 @@ class PropertyController {
       }
       
       const property = await propertyService.updateStock(id, parseInt(quantity), operation);
+      const propertyWithUrls = addFullUrlsToProperty(property, req);
       
       return res.status(200).json({
         success: true,
         message: 'Stock updated successfully',
-        data: property
+        data: propertyWithUrls
       });
     } catch (error) {
+      console.error('updateStock error:', error);
       let statusCode = 500;
       if (error.message === 'Property not found') {
         statusCode = 404;
@@ -206,12 +264,23 @@ class PropertyController {
       const categoryId = req.query.category_id ? parseInt(req.query.category_id) : null;
       const properties = await propertyService.getAvailableProperties(categoryId);
       
+      // ✅ FIXED: Use standalone function
+      const propertiesWithUrls = properties.map(prop => {
+        try {
+          return addFullUrlsToProperty(prop, req);
+        } catch (error) {
+          console.error('Error processing property:', prop.id, error);
+          return prop.toJSON ? prop.toJSON() : prop;
+        }
+      });
+      
       return res.status(200).json({
         success: true,
         message: 'Available properties retrieved successfully',
-        data: properties
+        data: propertiesWithUrls
       });
     } catch (error) {
+      console.error('getAvailableProperties error:', error);
       return res.status(500).json({
         success: false,
         message: 'Failed to retrieve available properties',

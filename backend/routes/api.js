@@ -202,6 +202,8 @@ router.delete(
 router.put(
   '/project-photos/:id',
   authMiddleware,
+  upload.projectPhoto.single('photo'), 
+  processImage({ width: 1920, quality: 85 }), 
   projectPhotoController.updatePhoto
 );
 router.get('/projects/:projectId/details', projectDetailController.getDetailsByProject);

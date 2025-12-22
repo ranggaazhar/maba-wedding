@@ -1,3 +1,4 @@
+// services/projectPhotoService.js - FIXED UPDATE & DELETE
 const { ProjectPhoto, Project } = require('../models');
 const FileHelper = require('../utils/fileHelper');
 
@@ -23,14 +24,56 @@ class ProjectPhotoService {
     return photo;
   }
   
-  // ✅ NEW: Create photo with file upload
+  /**
+   * ✅ UPDATE PHOTO - dengan opsi replace file
+   */
+  async updatePhoto(id, data, newFile = null) {
+    const photo = await this.getPhotoById(id);
+    const oldUrl = photo.url; // Simpan URL lama untuk dihapus nanti
+    
+    // Jika ada file baru, hapus file lama dan ganti
+    if (newFile) {
+      // Hapus file lama
+      await FileHelper.deleteFile(oldUrl);
+      
+      // Set URL baru
+      data.url = newFile.path.replace(/\\/g, '/');
+    }
+    
+    // Jika set sebagai hero, unset hero lainnya
+    if (data.is_hero && !photo.is_hero) {
+      await ProjectPhoto.update(
+        { is_hero: false },
+        { where: { project_id: photo.project_id, is_hero: true } }
+      );
+    }
+    
+    await photo.update(data);
+    return photo;
+  }
+  
+  /**
+   * ✅ DELETE PHOTO - hapus file dari storage
+   */
+  async deletePhoto(id) {
+    const photo = await this.getPhotoById(id);
+    const photoUrl = photo.url;
+    
+    // Delete from database
+    await photo.destroy();
+    
+    // Delete file from storage
+    await FileHelper.deleteFile(photoUrl);
+    
+    return { message: 'Photo deleted successfully' };
+  }
+  
   async createPhotoWithFile(projectId, file, data = {}) {
     const project = await Project.findByPk(projectId);
     if (!project) {
       throw new Error('Project not found');
     }
     
-    // If this is set as hero, unset other hero photos
     if (data.is_hero) {
       await ProjectPhoto.update(
         { is_hero: false },
@@ -38,7 +81,6 @@ class ProjectPhotoService {
       );
     }
     
-    // Save relative path
     const url = file.path.replace(/\\/g, '/');
     
     const photo = await ProjectPhoto.create({
@@ -53,7 +95,6 @@ class ProjectPhotoService {
     return photo;
   }
   
-  // Original method for URL-based photos
   async createPhoto(projectId, data) {
     const project = await Project.findByPk(projectId);
     if (!project) {
@@ -75,31 +116,6 @@ class ProjectPhotoService {
     return photo;
   }
   
-  async updatePhoto(id, data) {
-    const photo = await this.getPhotoById(id);
-    
-    if (data.is_hero && !photo.is_hero) {
-      await ProjectPhoto.update(
-        { is_hero: false },
-        { where: { project_id: photo.project_id, is_hero: true } }
-      );
-    }
-    
-    await photo.update(data);
-    return photo;
-  }
-  
-  async deletePhoto(id) {
-    const photo = await this.getPhotoById(id);
-    
-    // Delete file if exists
-    await FileHelper.deleteFile(photo.url);
-    
-    await photo.destroy();
-    return { message: 'Photo deleted successfully' };
-  }
-  
-  // ✅ NEW: Upload multiple photos
   async uploadMultiplePhotos(projectId, files, data = {}) {
     const project = await Project.findByPk(projectId);
     if (!project) {

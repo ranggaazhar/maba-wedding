@@ -23,51 +23,67 @@ class PropertyImageService {
     return image;
   }
   
-  // ✅ NEW: Create image with file upload
+  // ✅ FIXED: Create image with file upload
   async createImageWithFile(propertyId, file, data = {}) {
     const property = await Property.findByPk(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }
     
+    // Parse is_primary
+    const isPrimary = data.is_primary === 'true' || data.is_primary === true;
+    
     // If this is set as primary, unset other primary images
-    if (data.is_primary === 'true' || data.is_primary === true) {
+    if (isPrimary) {
       await PropertyImage.update(
         { is_primary: false },
         { where: { property_id: propertyId, is_primary: true } }
       );
     }
     
-    // Save relative path
+    // Normalize path for database (always use forward slash)
     const url = file.path.replace(/\\/g, '/');
     
     const image = await PropertyImage.create({
       property_id: propertyId,
       url: url,
-      is_primary: data.is_primary === 'true' || data.is_primary === true || false,
+      is_primary: isPrimary,
       display_order: data.display_order || 0
     });
     
     return image;
   }
   
-  // ✅ NEW: Upload multiple images
+  // ✅ FIXED: Upload multiple images with primary selection
   async uploadMultipleImages(propertyId, files, data = {}) {
     const property = await Property.findByPk(propertyId);
     if (!property) {
       throw new Error('Property not found');
     }
     
+    // Parse primary_image_index from request body
+    const primaryIndex = data.primary_image_index !== undefined 
+      ? parseInt(data.primary_image_index) 
+      : 0; // Default: first image is primary
+    
+    // Unset all existing primary images for this property
+    await PropertyImage.update(
+      { is_primary: false },
+      { where: { property_id: propertyId } }
+    );
+    
     const images = [];
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      
+      // Normalize path for database (always use forward slash)
       const url = file.path.replace(/\\/g, '/');
       
       const image = await PropertyImage.create({
         property_id: propertyId,
         url: url,
-        is_primary: false, // Only first image can be primary
+        is_primary: i === primaryIndex, // Set primary based on index
         display_order: data.display_orders ? data.display_orders[i] : i
       });
       

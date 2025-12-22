@@ -1,6 +1,6 @@
 // src/components/admin/project/StepPhotos.tsx
 import { useState, useEffect } from 'react';
-import { Upload, X, Star, GripVertical, Edit2 } from 'lucide-react';
+import { Upload, X, Star, Edit2, Trash2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,22 +18,32 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import type { CreateCompleteProjectData, ProjectPhoto, PhotoWithMetadata } from '@/api/projectApi';
+import { projectApi } from '@/api/projectApi';
+import Swal from 'sweetalert2';
 
 interface StepPhotosProps {
   formData: CreateCompleteProjectData;
   updateFormData: (data: Partial<CreateCompleteProjectData>) => void;
-  existingPhotos?: ProjectPhoto[];
-  // Tambahkan prop ini jika ingin menangani update metadata foto lama di parent
-  onUpdateExistingPhoto?: (index: number, updates: Partial<ProjectPhoto>) => void;
+  existingPhotos: ProjectPhoto[];
+  onRefresh?: () => void;
 }
 
-export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUpdateExistingPhoto }: StepPhotosProps) {
-  const [previews, setPreviews] = useState<string[]>([]);
+// Definisikan tipe untuk posisi foto agar tidak menggunakan 'any'
+type PhotoPosition = 'left' | 'right' | 'center';
 
-  // Generate previews for new photos
+export function StepPhotos({ formData, updateFormData, existingPhotos, onRefresh }: StepPhotosProps) {
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [editingPhoto, setEditingPhoto] = useState<ProjectPhoto | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [newPhotoFile, setNewPhotoFile] = useState<File | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    caption: '',
+    position: 'center' as PhotoPosition,
+    is_hero: false
+  });
+
   useEffect(() => {
     const photos = formData.photos || [];
     
@@ -103,20 +113,103 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
     updateFormData({ photos: newPhotos });
   };
 
-  const movePhoto = (fromIndex: number, direction: 'up' | 'down') => {
-    const photos = [...(formData.photos || [])];
-    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+  const openEditDialog = (photo: ProjectPhoto) => {
+    setEditingPhoto(photo);
+    setEditFormData({
+      caption: photo.caption || '',
+      position: photo.position as PhotoPosition,
+      is_hero: photo.is_hero
+    });
+    setNewPhotoFile(null);
+    setEditDialogOpen(true);
+  };
 
-    if (toIndex < 0 || toIndex >= photos.length) return;
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setNewPhotoFile(file);
+    }
+  };
 
-    [photos[fromIndex], photos[toIndex]] = [photos[toIndex], photos[fromIndex]];
+  const handleSaveEdit = async () => {
+    if (!editingPhoto) return;
 
-    const reordered = photos.map((photo, idx) => ({
-      ...photo,
-      display_order: idx,
-    }));
+    try {
+      const data = new FormData();
+      data.append('caption', editFormData.caption);
+      data.append('position', editFormData.position);
+      data.append('is_hero', String(editFormData.is_hero));
 
-    updateFormData({ photos: reordered });
+      if (newPhotoFile) {
+        data.append('photo', newPhotoFile);
+      }
+
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/project-photos/${editingPhoto.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: data
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Foto berhasil diupdate',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        setEditDialogOpen(false);
+        onRefresh?.();
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Gagal update foto';
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: errorMessage
+      });
+    }
+  };
+
+  const handleDeleteExistingPhoto = async (photoId: number) => {
+    const result = await Swal.fire({
+      title: 'Hapus foto?',
+      text: 'Foto akan dihapus permanen dari storage!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await projectApi.deletePhoto(photoId);
+        await Swal.fire({
+          icon: 'success',
+          title: 'Terhapus!',
+          text: 'Foto berhasil dihapus',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        onRefresh?.();
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus foto';
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal!',
+          text: errorMessage
+        });
+      }
+    }
   };
 
   return (
@@ -148,7 +241,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
                         <Button
                           size="sm"
                           variant={isHero ? "default" : "secondary"}
-                          className={isHero ? "bg-amber-500 hover:bg-amber-600" : ""}
+                          className={isHero ? "bg-amber-500 hover:bg-amber-600 h-8" : "h-8"}
                           onClick={() => setHeroPhoto(index)}
                           type="button"
                         >
@@ -156,46 +249,27 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
                           Hero
                         </Button>
                         
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm" variant="secondary">
-                              <Edit2 size={12} className="mr-1" />
-                              Edit
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Edit Metadata Foto</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4 pt-4">
-                              <div>
-                                <Label>Caption</Label>
-                                <Textarea
-                                  value={photo.caption || ''}
-                                  onChange={(e) => onUpdateExistingPhoto?.(index, { caption: e.target.value })}
-                                  placeholder="Deskripsi foto..."
-                                  rows={3}
-                                />
-                              </div>
-                              <div>
-                                <Label>Position</Label>
-                                <Select
-                                  value={photo.position}
-                                  onValueChange={(value: "left" | "center" | "right") => onUpdateExistingPhoto?.(index, { position: value })}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="left">Left</SelectItem>
-                                    <SelectItem value="center">Center</SelectItem>
-                                    <SelectItem value="right">Right</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Button 
+                          size="sm" 
+                          variant="secondary"
+                          className="h-8"
+                          onClick={() => openEditDialog(photo)}
+                          type="button"
+                        >
+                          <Edit2 size={12} className="mr-1" />
+                          Edit
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-8"
+                          onClick={() => handleDeleteExistingPhoto(photo.id)}
+                          type="button"
+                        >
+                          <Trash2 size={12} className="mr-1" />
+                          Hapus
+                        </Button>
                       </div>
 
                       {isHero && (
@@ -228,7 +302,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
             </label>
           </div>
 
-          {/* New Photos */}
+          {/* New Photos Preview */}
           {previews.length > 0 && (
             <div className="space-y-3">
               <Label className="text-blue-600 flex items-center gap-2">
@@ -236,15 +310,12 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
               </Label>
               <div className="space-y-3">
                 {previews.map((preview, index) => {
-                  const photos = formData.photos || [];
-                  const photoData = photos[index];
-                  if (!photoData) return null;
-
+                  const photoData = formData.photos![index];
                   const actualIndex = existingPhotos.length + index;
                   const isHero = formData.hero_photo_index === actualIndex;
 
                   return (
-                    <div key={`new-photo-${index}`} className="border rounded-lg p-4 bg-card space-y-3">
+                    <div key={index} className="border rounded-lg p-4 bg-card space-y-3">
                       <div className="flex gap-4">
                         <div className="relative w-32 h-32 shrink-0 rounded-lg overflow-hidden border-2 border-blue-200">
                           <img src={preview} alt="New" className="w-full h-full object-cover" />
@@ -272,7 +343,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
                               <Label className="text-xs">Position</Label>
                               <Select
                                 value={photoData.position}
-                                onValueChange={(value: "left" | "center" | "right") => updatePhotoMetadata(index, { position: value })}
+                                onValueChange={(value: PhotoPosition) => updatePhotoMetadata(index, { position: value })}
                               >
                                 <SelectTrigger className="h-9 text-sm">
                                   <SelectValue />
@@ -307,17 +378,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
                           >
                             <Star size={12} className={isHero ? 'fill-current' : ''} />
                           </Button>
-                          
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8"
-                            onClick={() => movePhoto(index, 'up')}
-                            disabled={index === 0}
-                            type="button"
-                          >
-                            <GripVertical size={12} />
-                          </Button>
 
                           <Button
                             size="sm"
@@ -338,6 +398,102 @@ export function StepPhotos({ formData, updateFormData, existingPhotos = [], onUp
           )}
         </div>
       </div>
+{/* Edit Dialog */}
+<Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+  {/* Perbesar max-w agar layout grid terlihat bagus, misal max-w-2xl atau 3xl */}
+  <DialogContent className="max-w-2xl">
+    <DialogHeader>
+      <DialogTitle>Edit Foto</DialogTitle>
+    </DialogHeader>
+
+    {/* Container Grid: Gambar di kiri, Form di kanan */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+      
+      {/* SISI KIRI: Preview Gambar */}
+      <div className="space-y-2">
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Preview</Label>
+        <div className="relative w-full aspect-square rounded-xl overflow-hidden border bg-muted/30">
+          {newPhotoFile ? (
+            <img 
+              src={URL.createObjectURL(newPhotoFile)} 
+              alt="New" 
+              className="w-full h-full object-cover"
+            />
+          ) : editingPhoto ? (
+            <img 
+              src={editingPhoto.url} 
+              alt="Current" 
+              className="w-full h-full object-cover"
+            />
+          ) : null}
+        </div>
+      </div>
+
+      {/* SISI KANAN: Form Inputs */}
+      <div className="space-y-4">
+        {/* Upload New File */}
+        <div>
+          <Label className="text-sm font-medium">Ganti Foto (Opsional)</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleEditFileChange}
+            className="mt-1.5 file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+          />
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Kosongkan jika tidak ingin mengganti file fisik.
+          </p>
+        </div>
+
+        {/* Position */}
+        <div>
+          <Label className="text-sm font-medium">Posisi Tampilan</Label>
+          <Select
+            value={editFormData.position}
+            onValueChange={(value: PhotoPosition) => setEditFormData({ ...editFormData, position: value })}
+          >
+            <SelectTrigger className="mt-1.5">
+              <SelectValue placeholder="Pilih posisi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="left">Left (Kiri)</SelectItem>
+              <SelectItem value="center">Center (Tengah)</SelectItem>
+              <SelectItem value="right">Right (Kanan)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Caption */}
+        <div>
+          <Label className="text-sm font-medium">Keterangan (Caption)</Label>
+          <Textarea
+            value={editFormData.caption}
+            onChange={(e) => setEditFormData({ ...editFormData, caption: e.target.value })}
+            placeholder="Tulis deskripsi singkat foto..."
+            rows={4}
+            className="mt-1.5 resize-none"
+          />
+        </div>
+      </div>
+    </div>
+    <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
+      <Button 
+        variant="outline" 
+        onClick={() => setEditDialogOpen(false)}
+        type="button"
+      >
+        Batal
+      </Button>
+      <Button 
+        onClick={handleSaveEdit}
+        className="px-8"
+        type="button"
+      >
+        Simpan Perubahan
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

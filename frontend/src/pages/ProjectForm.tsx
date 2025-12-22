@@ -259,6 +259,7 @@ export default function ProjectForm() {
             formData={formData} 
             updateFormData={updateFormData} 
             existingPhotos={existingPhotos} 
+            onRefresh={fetchProjectData}
           />
         )}
         {currentStep === 3 && (
@@ -278,11 +279,11 @@ export default function ProjectForm() {
         </Button>
 
         {currentStep < steps.length ? (
-          <Button onClick={nextStep} className="bg-primary text-white hover:bg-primary/90 px-8">
+          <Button onClick={nextStep} className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
             Lanjut <ArrowRight size={18} className="ml-2" />
           </Button>
         ) : (
-          <Button onClick={handleSubmit} disabled={saving} className="bg-primary text-white hover:bg-primary/90 px-10 font-bold">
+          <Button onClick={handleSubmit} disabled={saving}  className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
             {saving ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
             ) : (

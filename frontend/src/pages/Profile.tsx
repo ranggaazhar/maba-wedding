@@ -229,7 +229,7 @@ export default function Profile() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-bold text-sm shadow-md"
+                      className="w-full flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md"
                     >
                       <Save className="w-4 h-4" />
                       {isLoading ? 'Saving...' : 'Save All Changes'}
@@ -315,7 +315,7 @@ export default function Profile() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-bold text-sm shadow-md"
+                      className="w-full bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md"
                     >
                       {isLoading ? 'Updating...' : 'Update Password'}
                     </button>

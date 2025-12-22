@@ -1,3 +1,4 @@
+// controllers/projectPhotoController.js - FIXED UPDATE & DELETE
 const projectPhotoService = require('../services/projectPhotoService');
 const FileHelper = require('../utils/fileHelper');
 
@@ -7,7 +8,6 @@ class ProjectPhotoController {
       const { projectId } = req.params;
       const photos = await projectPhotoService.getPhotosByProjectId(projectId);
       
-      // Add full URLs to response
       const photosWithUrls = photos.map(photo => ({
         ...photo.toJSON(),
         full_url: FileHelper.getFileUrl(photo.url, req)
@@ -49,7 +49,6 @@ class ProjectPhotoController {
     }
   }
   
-  // ✅ NEW: Upload photo with file
   async uploadPhoto(req, res) {
     try {
       const { projectId } = req.params;
@@ -76,7 +75,6 @@ class ProjectPhotoController {
         }
       });
     } catch (error) {
-      // Delete uploaded file on error
       if (req.file) {
         await FileHelper.deleteFile(req.file.path);
       }
@@ -89,7 +87,6 @@ class ProjectPhotoController {
     }
   }
   
-  // ✅ NEW: Upload multiple photos
   async uploadMultiplePhotos(req, res) {
     try {
       const { projectId } = req.params;
@@ -118,7 +115,6 @@ class ProjectPhotoController {
         data: photosWithUrls
       });
     } catch (error) {
-      // Delete uploaded files on error
       if (req.files) {
         for (const file of req.files) {
           await FileHelper.deleteFile(file.path);
@@ -133,7 +129,6 @@ class ProjectPhotoController {
     }
   }
   
-  // Original method for URL-based photos
   async createPhoto(req, res) {
     try {
       const { projectId } = req.params;
@@ -153,10 +148,15 @@ class ProjectPhotoController {
     }
   }
   
+  /**
+   * ✅ UPDATE PHOTO - dengan opsi upload file baru
+   */
   async updatePhoto(req, res) {
     try {
       const { id } = req.params;
-      const photo = await projectPhotoService.updatePhoto(id, req.body);
+      const newFile = req.file || null; // File baru (optional)
+      
+      const photo = await projectPhotoService.updatePhoto(id, req.body, newFile);
       
       return res.status(200).json({
         success: true,
@@ -167,6 +167,11 @@ class ProjectPhotoController {
         }
       });
     } catch (error) {
+      // Cleanup uploaded file jika error
+      if (req.file) {
+        await FileHelper.deleteFile(req.file.path);
+      }
+      
       const statusCode = error.message === 'Photo not found' ? 404 : 500;
       return res.status(statusCode).json({
         success: false,
@@ -175,6 +180,9 @@ class ProjectPhotoController {
     }
   }
   
+  /**
+   * ✅ DELETE PHOTO - hapus dari DB dan storage
+   */
   async deletePhoto(req, res) {
     try {
       const { id } = req.params;

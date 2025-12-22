@@ -158,7 +158,7 @@ export default function Projects() {
           <h1 className="page-title text-2xl font-bold">Projects</h1>
           <p className="page-subtitle text-muted-foreground">Kelola portfolio dekorasi Anda</p>
         </div>
-        <Button className="bg-primary text-primary-foreground" onClick={() => navigate("/projects/new")}>
+        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/projects/new")}>
           <Plus size={18} className="mr-2" /> Tambah Project
         </Button>
       </div>

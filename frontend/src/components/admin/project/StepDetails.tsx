@@ -162,7 +162,7 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
                 // PERBAIKAN: Gunakan tipe literal DetailType, bukan any
                 onValueChange={(v: DetailType) => setNewDetail({ ...newDetail, detail_type: v })}
               >
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,7 +179,7 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
                 value={newDetail.title}
                 onChange={(e) => setNewDetail({ ...newDetail, title: e.target.value })}
                 placeholder="Contoh: Warna Utama"
-                className="mt-1"
+                className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
               />
             </div>
 
@@ -190,11 +190,14 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
                   value={newDetail.item}
                   onChange={(e) => setNewDetail({ ...newDetail, item: e.target.value })}
                   placeholder="Contoh: #FF5733 atau Mawar Merah"
-                  className="mt-1"
+                  className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addDetail())}
                 />
               </div>
-              <Button onClick={addDetail} size="icon" type="button">
+              <Button onClick={addDetail} 
+              size="icon" 
+              type="button"
+              className="mt-6 bg-[hsl(var(--ocean-deep))] text-white hover:bg-[hsl(var(--ocean-soft))] transition-all">
                 <Plus size={18} />
               </Button>
             </div>

@@ -87,7 +87,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
               value={formData.title}
               onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Contoh: Ocean Blue Elegance"
-              className="mt-1"
+              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
             {errors.title && <p className="text-sm text-destructive mt-1">{errors.title}</p>}
           </div>
@@ -102,7 +102,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
               value={formData.slug}
               onChange={(e) => updateFormData({ slug: e.target.value })}
               placeholder="ocean-blue-elegance"
-              className="mt-1"
+              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
             {errors.slug && <p className="text-sm text-destructive mt-1">{errors.slug}</p>}
             <p className="text-xs text-muted-foreground mt-1">URL-friendly identifier (auto-generated dari judul)</p>
@@ -117,7 +117,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
               value={formData.category_id ? String(formData.category_id) : ''}
               onValueChange={(value) => updateFormData({ category_id: parseInt(value) })}
             >
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-1 w-full bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm">
                 <SelectValue placeholder={isFetching ? "Memuat..." : "Pilih kategori"} />
               </SelectTrigger>
               <SelectContent>
@@ -140,7 +140,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
               value={formData.price || ''}
               onChange={(e) => updateFormData({ price: e.target.value })}
               placeholder="15000000"
-              className="mt-1"
+              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
             <p className="text-xs text-muted-foreground mt-1">Kosongkan jika tidak ingin menampilkan harga</p>
           </div>
@@ -153,7 +153,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
               value={formData.theme || ''}
               onChange={(e) => updateFormData({ theme: e.target.value })}
               placeholder="Contoh: Oceanic, Rustic, Modern"
-              className="mt-1"
+              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
             <p className="text-xs text-muted-foreground mt-1">Tema utama dekorasi (opsional)</p>
           </div>
@@ -167,7 +167,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
               onChange={(e) => updateFormData({ description: e.target.value })}
               placeholder="Ceritakan tentang konsep dan detail project ini..."
               rows={4}
-              className="mt-1"
+              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
             <p className="text-xs text-muted-foreground mt-1">Deskripsi umum tentang project</p>
           </div>
@@ -181,7 +181,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
               onChange={(e) => updateFormData({ atmosphere_description: e.target.value })}
               placeholder="Jelaskan suasana yang ingin diciptakan..."
               rows={3}
-              className="mt-1"
+              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
             <p className="text-xs text-muted-foreground mt-1">Deskripsi mood dan atmosphere yang dirasakan (opsional)</p>
           </div>
