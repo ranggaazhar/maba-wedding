@@ -5,13 +5,32 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const connectDatabase = require('./config/db');
 const apiRoutes = require('./routes/api');
+const path = require('path');
 
 const app = express();
-app.use(helmet());
+
+// ⚠️ PENTING: Helmet harus dikonfigurasi dengan benar untuk uploads
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // ✅ Tambahkan ini
+  contentSecurityPolicy: false // Atau konfigurasi sesuai kebutuhan
+}));
 
 const allowedOrigins = process.env.FRONTEND_URL 
   ? process.env.FRONTEND_URL.split(',') 
   : ['http://localhost:5173', 'http://localhost:3000'];
+
+// ✅ FIX: Pindahkan /uploads SEBELUM middleware CORS dan helmet yang lain
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, filepath) => {
+    // Set CORS headers langsung di sini
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    
+    // Set cache headers untuk performa
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+  }
+}));
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -27,8 +46,10 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
@@ -38,6 +59,7 @@ if (process.env.NODE_ENV === 'development') {
     next();
   });
 }
+
 app.get('/health', (req, res) => {
   res.json({
     success: true,
@@ -55,6 +77,7 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       api: '/api',
+      uploads: '/uploads',
       auth: {
         register: 'POST /api/auth/register',
         login: 'POST /api/auth/login',
@@ -106,6 +129,7 @@ const generalLimiter = rateLimit({
 app.use('/api/auth/login', loginLimiter);
 app.use('/api', generalLimiter);
 app.use('/api', apiRoutes);
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -115,6 +139,7 @@ app.use((req, res) => {
     hint: 'Check available endpoints at GET /'
   });
 });
+
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   if (err.message === 'Not allowed by CORS') {
@@ -138,6 +163,7 @@ app.use((err, req, res, next) => {
     })
   });
 });
+
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
@@ -149,6 +175,7 @@ const startServer = async () => {
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 Allowed Origins: ${allowedOrigins.join(', ')}`);
       console.log(`📝 API Base: http://localhost:${PORT}/api`);
+      console.log(`📁 Uploads: http://localhost:${PORT}/uploads`);
       console.log(`📚 Docs: http://localhost:${PORT}/`);
       console.log(`❤️  Health: http://localhost:${PORT}/health`);
       console.log('='.repeat(60));
