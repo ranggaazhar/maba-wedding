@@ -5,20 +5,20 @@ import { Toaster } from './components/ui/toaster';
 import { AdminLayout } from './components/admin/AdminLayout';
 
 // Pages
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Categories from './pages/Categories';
-import PropertyCategories from './pages/PropertyCategories';
-import Projects from './pages/Projects';
-import ProjectDetail from './pages/ProjectDetail';
-import ProjectForm from './pages/ProjectForm';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import Dashboard from './pages/admin/Dashboard';
+import Profile from './pages/admin/profile/Profile';
+import Categories from './pages/admin/kategori/Categories';
+import PropertyCategories from './pages/admin/kategori/PropertyCategories';
+import Projects from './pages/admin/projects/Projects';
+import ProjectDetail from './pages/admin/projects/ProjectDetail';
+import ProjectForm from './pages/admin/projects/ProjectForm';
 
 // ✅ IMPORT PROPERTIES PAGES
-import Properties from './pages/Properties';
-import PropertyDetail from './pages/PropertyDetail';
-import PropertyForm from './pages/PropertyForm';
+import Properties from './pages/admin/property/Properties';
+import PropertyDetail from './pages/admin/property/PropertyDetail';
+import PropertyForm from './pages/admin/property/PropertyForm';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';

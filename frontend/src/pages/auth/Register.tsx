@@ -1,29 +1,39 @@
-// src/pages/Login.tsx
+// src/pages/Register.tsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authApi } from '../api/Authapi';
-import { useAuthStore } from '../store/useAuthStore';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { useToast } from '../components/ui/use-toast';
-import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react';
+import { authApi } from '../../api/Authapi';
+import { useAuthStore } from '../../store/useAuthStore';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { useToast } from '../../components/ui/use-toast';
+import { Eye, EyeOff, UserPlus, Loader2 } from 'lucide-react';
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
+    confirmPassword: '',
+    phone: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 3) {
+      newErrors.name = 'Name must be at least 3 characters';
+    }
 
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -35,6 +45,16 @@ export default function Login() {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (formData.phone && !/^\+?[\d\s-()]+$/.test(formData.phone)) {
+      newErrors.phone = 'Phone number is invalid';
     }
 
     setErrors(newErrors);
@@ -56,20 +76,28 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      const response = await authApi.login(formData);
+      // Prepare register data without confirmPassword
+      const registerData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+      };
+      
+      const response = await authApi.register(registerData);
       
       if (response.success) {
         setAuth(response.data.admin, response.data.token);
         
         toast({
-          title: 'Login Successful',
-          description: `Welcome back, ${response.data.admin.name}!`,
+          title: 'Registration Successful',
+          description: `Welcome, ${response.data.admin.name}!`,
         });
 
         navigate('/dashboard');
       }
     } catch (error) {
-      let errorMessage = 'Login failed. Please try again.';
+      let errorMessage = 'Registration failed. Please try again.';
       
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -79,7 +107,7 @@ export default function Login() {
       }
       
       toast({
-        title: 'Login Failed',
+        title: 'Registration Failed',
         description: errorMessage,
         variant: 'destructive',
       });
@@ -95,14 +123,31 @@ export default function Login() {
           {/* Header */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl mb-4">
-              <LogIn className="w-8 h-8 text-white" />
+              <UserPlus className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-            <p className="text-gray-500">Sign in to your admin account</p>
+            <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
+            <p className="text-gray-500">Join our admin panel</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="John Doe"
+                value={formData.name}
+                onChange={handleChange}
+                className={errors.name ? 'border-red-500' : ''}
+                disabled={isLoading}
+              />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name}</p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <Input
@@ -121,13 +166,30 @@ export default function Login() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number (Optional)</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="+62 812 3456 7890"
+                value={formData.phone}
+                onChange={handleChange}
+                className={errors.phone ? 'border-red-500' : ''}
+                disabled={isLoading}
+              />
+              {errors.phone && (
+                <p className="text-sm text-red-500">{errors.phone}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder="Minimum 6 characters"
                   value={formData.password}
                   onChange={handleChange}
                   className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
@@ -147,6 +209,33 @@ export default function Login() {
               )}
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Re-enter your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  disabled={isLoading}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">{errors.confirmPassword}</p>
+              )}
+            </div>
+
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700"
@@ -155,12 +244,12 @@ export default function Login() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing in...
+                  Creating Account...
                 </>
               ) : (
                 <>
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Create Account
                 </>
               )}
             </Button>
@@ -168,12 +257,12 @@ export default function Login() {
 
           {/* Footer */}
           <div className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
+            Already have an account?{' '}
             <Link
-              to="/register"
+              to="/login"
               className="text-rose-600 hover:text-rose-700 font-semibold"
             >
-              Create Account
+              Sign In
             </Link>
           </div>
         </div>

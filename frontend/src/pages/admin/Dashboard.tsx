@@ -1,12 +1,12 @@
 // src/pages/Dashboard.tsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/useAuthStore';
-import { authApi } from '../api/Authapi';
+import { useAuthStore } from '../../store/useAuthStore';
+import { authApi } from '../../api/Authapi';
 import { Calendar, Package, Star, TrendingUp, Users } from 'lucide-react';
-import { StatCard } from '../components/admin/StatCard';
-import { RecentBookingsTable } from '../components/admin/RecentBookingsTable';
-import { RecentReviews } from '../components/admin/RecentReviews';
+import { StatCard } from '../../components/admin/StatCard';
+import { RecentBookingsTable } from '../../components/admin/RecentBookingsTable';
+import { RecentReviews } from '../../components/admin/RecentReviews';
 
 export default function Dashboard() {
   const navigate = useNavigate();

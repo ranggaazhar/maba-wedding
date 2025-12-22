@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/useAuthStore';
-import { authApi, type UpdateProfileData, type ChangePasswordData } from '../api/Authapi';
-import { useToast } from '../hooks/use-toast';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { authApi, type UpdateProfileData, type ChangePasswordData } from '../../../api/Authapi';
+import { useToast } from '../../../hooks/use-toast';
 import {
   User,
   Mail,
@@ -16,7 +16,7 @@ import {
   Calendar,
   CheckCircle,
 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn } from '../../../lib/utils';
 
 interface ApiError {
   response?: {
