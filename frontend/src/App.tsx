@@ -3,10 +3,19 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/toaster';
 import { AdminLayout } from './components/admin/AdminLayout';
+
+// Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import Categories from './pages/Categories';
+import PropertyCategories from './pages/PropertyCategories';
+import Projects from './pages/Projects';
+import ProjectDetail from './pages/ProjectDetail';
+import ProjectForm from './pages/ProjectForm'; // Pastikan import ini ada
+
+// Components
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -43,6 +52,79 @@ function App() {
               <ProtectedRoute>
                 <AdminLayout>
                   <Dashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* --- PROJECT ROUTES (URUTAN DIPERBAIKI) --- */}
+          
+          {/* 1. List Project */}
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Projects />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 2. Create Project (HARUS DI ATAS :id) */}
+          <Route
+            path="/projects/new"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ProjectForm />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 3. Edit Project (HARUS DI ATAS :id) */}
+          <Route
+            path="/projects/edit/:id"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ProjectForm />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 4. Detail Project (TARUH PALING BAWAH agar tidak bentrok) */}
+          <Route
+            path="/projects/:id"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ProjectDetail />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* --- END PROJECT ROUTES --- */}
+
+          <Route
+            path="/categories"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Categories />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/property-categories"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PropertyCategories />
                 </AdminLayout>
               </ProtectedRoute>
             }

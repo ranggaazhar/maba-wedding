@@ -166,6 +166,27 @@ const updateBookingValidation = [
     .trim()
 ];
 
+const uploadPaymentProofValidation = [
+  param('id')
+    .isInt({ min: 1 }).withMessage('Invalid booking ID'),
+  
+  body('bank_name')
+    .optional()
+    .trim()
+    .isLength({ max: 100 }).withMessage('Bank name must not exceed 100 characters'),
+  
+  body('account_number')
+    .optional()
+    .trim()
+    .isLength({ max: 50 }).withMessage('Account number must not exceed 50 characters'),
+  
+  body('account_name')
+    .optional()
+    .trim()
+    .isLength({ max: 100 }).withMessage('Account name must not exceed 100 characters')
+];
+
+
 const submitPaymentValidation = [
   param('id')
     .isInt({ min: 1 }).withMessage('Invalid booking ID'),
@@ -286,6 +307,7 @@ module.exports = {
   submitPaymentValidation,
   createBookingModelValidation,
   createBookingPropertyValidation,
+  uploadPaymentProofValidation,
   bookingIdValidation,
   bookingCodeValidation,
   validate

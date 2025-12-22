@@ -1,4 +1,3 @@
-// services/propertyService.js
 const { Property, PropertyCategory, PropertyImage, Admin } = require('../models');
 const { Op } = require('sequelize');
 
@@ -133,7 +132,6 @@ class PropertyService {
   }
   
   async createProperty(data) {
-    // Check if slug already exists
     const existingProperty = await Property.findOne({
       where: { slug: data.slug }
     });
@@ -142,7 +140,6 @@ class PropertyService {
       throw new Error('Property with this slug already exists');
     }
     
-    // Verify category exists
     const category = await PropertyCategory.findByPk(data.category_id);
     if (!category) {
       throw new Error('Property category not found');
@@ -155,7 +152,6 @@ class PropertyService {
   async updateProperty(id, data) {
     const property = await this.getPropertyById(id, false);
     
-    // Check if slug is being updated and if it's unique
     if (data.slug && data.slug !== property.slug) {
       const existingProperty = await Property.findOne({
         where: { 
@@ -169,7 +165,6 @@ class PropertyService {
       }
     }
     
-    // Verify category exists if being updated
     if (data.category_id && data.category_id !== property.category_id) {
       const category = await PropertyCategory.findByPk(data.category_id);
       if (!category) {
@@ -182,14 +177,15 @@ class PropertyService {
   }
   
   async deleteProperty(id) {
-    const property = await this.getPropertyById(id);
+    const property = await this.getPropertyById(id, true);
     
-    // Check if property has associated booking properties or invoice items
-    const bookingCount = await property.countBookingProperties();
-    const invoiceCount = await property.countInvoiceItems();
+    // Check associations
+    if (property.bookingProperties && property.bookingProperties.length > 0) {
+      throw new Error('Cannot delete property with existing bookings');
+    }
     
-    if (bookingCount > 0 || invoiceCount > 0) {
-      throw new Error('Cannot delete property with existing bookings or invoices');
+    if (property.invoiceItems && property.invoiceItems.length > 0) {
+      throw new Error('Cannot delete property with existing invoices');
     }
     
     await property.destroy();

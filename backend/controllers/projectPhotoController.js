@@ -1,5 +1,5 @@
-// controllers/projectPhotoController.js
 const projectPhotoService = require('../services/projectPhotoService');
+const FileHelper = require('../utils/fileHelper');
 
 class ProjectPhotoController {
   async getPhotosByProject(req, res) {
@@ -7,10 +7,16 @@ class ProjectPhotoController {
       const { projectId } = req.params;
       const photos = await projectPhotoService.getPhotosByProjectId(projectId);
       
+      // Add full URLs to response
+      const photosWithUrls = photos.map(photo => ({
+        ...photo.toJSON(),
+        full_url: FileHelper.getFileUrl(photo.url, req)
+      }));
+      
       return res.status(200).json({
         success: true,
         message: 'Photos retrieved successfully',
-        data: photos
+        data: photosWithUrls
       });
     } catch (error) {
       return res.status(500).json({
@@ -29,7 +35,10 @@ class ProjectPhotoController {
       return res.status(200).json({
         success: true,
         message: 'Photo retrieved successfully',
-        data: photo
+        data: {
+          ...photo.toJSON(),
+          full_url: FileHelper.getFileUrl(photo.url, req)
+        }
       });
     } catch (error) {
       const statusCode = error.message === 'Photo not found' ? 404 : 500;
@@ -40,6 +49,91 @@ class ProjectPhotoController {
     }
   }
   
+  // ✅ NEW: Upload photo with file
+  async uploadPhoto(req, res) {
+    try {
+      const { projectId } = req.params;
+      
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No file uploaded'
+        });
+      }
+      
+      const photo = await projectPhotoService.createPhotoWithFile(
+        projectId,
+        req.file,
+        req.body
+      );
+      
+      return res.status(201).json({
+        success: true,
+        message: 'Photo uploaded successfully',
+        data: {
+          ...photo.toJSON(),
+          full_url: FileHelper.getFileUrl(photo.url, req)
+        }
+      });
+    } catch (error) {
+      // Delete uploaded file on error
+      if (req.file) {
+        await FileHelper.deleteFile(req.file.path);
+      }
+      
+      const statusCode = error.message === 'Project not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  // ✅ NEW: Upload multiple photos
+  async uploadMultiplePhotos(req, res) {
+    try {
+      const { projectId } = req.params;
+      
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'No files uploaded'
+        });
+      }
+      
+      const photos = await projectPhotoService.uploadMultiplePhotos(
+        projectId,
+        req.files,
+        req.body
+      );
+      
+      const photosWithUrls = photos.map(photo => ({
+        ...photo.toJSON(),
+        full_url: FileHelper.getFileUrl(photo.url, req)
+      }));
+      
+      return res.status(201).json({
+        success: true,
+        message: `${photos.length} photos uploaded successfully`,
+        data: photosWithUrls
+      });
+    } catch (error) {
+      // Delete uploaded files on error
+      if (req.files) {
+        for (const file of req.files) {
+          await FileHelper.deleteFile(file.path);
+        }
+      }
+      
+      const statusCode = error.message === 'Project not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  // Original method for URL-based photos
   async createPhoto(req, res) {
     try {
       const { projectId } = req.params;
@@ -67,7 +161,10 @@ class ProjectPhotoController {
       return res.status(200).json({
         success: true,
         message: 'Photo updated successfully',
-        data: photo
+        data: {
+          ...photo.toJSON(),
+          full_url: FileHelper.getFileUrl(photo.url, req)
+        }
       });
     } catch (error) {
       const statusCode = error.message === 'Photo not found' ? 404 : 500;
@@ -110,10 +207,15 @@ class ProjectPhotoController {
       
       const photos = await projectPhotoService.reorderPhotos(projectId, photoIds);
       
+      const photosWithUrls = photos.map(photo => ({
+        ...photo.toJSON(),
+        full_url: FileHelper.getFileUrl(photo.url, req)
+      }));
+      
       return res.status(200).json({
         success: true,
         message: 'Photos reordered successfully',
-        data: photos
+        data: photosWithUrls
       });
     } catch (error) {
       const statusCode = error.message === 'Project not found' ? 404 : 500;

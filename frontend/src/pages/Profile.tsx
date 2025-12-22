@@ -112,7 +112,7 @@ export default function Profile() {
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
-              <h2 className="text-xl font-extrabold text-[hsl(var(--foreground))] tracking-tight">
+              <h2 className="text-xl font-bold text-[hsl(var(--foreground))] tracking-tight">
                 Profile Settings
               </h2>
             </div>

@@ -1,5 +1,5 @@
-// services/projectPhotoService.js
 const { ProjectPhoto, Project } = require('../models');
+const FileHelper = require('../utils/fileHelper');
 
 class ProjectPhotoService {
   async getPhotosByProjectId(projectId) {
@@ -23,13 +23,43 @@ class ProjectPhotoService {
     return photo;
   }
   
-  async createPhoto(projectId, data) {
+  // ✅ NEW: Create photo with file upload
+  async createPhotoWithFile(projectId, file, data = {}) {
     const project = await Project.findByPk(projectId);
     if (!project) {
       throw new Error('Project not found');
     }
     
     // If this is set as hero, unset other hero photos
+    if (data.is_hero) {
+      await ProjectPhoto.update(
+        { is_hero: false },
+        { where: { project_id: projectId, is_hero: true } }
+      );
+    }
+    
+    // Save relative path
+    const url = file.path.replace(/\\/g, '/');
+    
+    const photo = await ProjectPhoto.create({
+      project_id: projectId,
+      url: url,
+      caption: data.caption || null,
+      position: data.position || 'center',
+      display_order: data.display_order || 0,
+      is_hero: data.is_hero || false
+    });
+    
+    return photo;
+  }
+  
+  // Original method for URL-based photos
+  async createPhoto(projectId, data) {
+    const project = await Project.findByPk(projectId);
+    if (!project) {
+      throw new Error('Project not found');
+    }
+    
     if (data.is_hero) {
       await ProjectPhoto.update(
         { is_hero: false },
@@ -48,7 +78,6 @@ class ProjectPhotoService {
   async updatePhoto(id, data) {
     const photo = await this.getPhotoById(id);
     
-    // If this is set as hero, unset other hero photos
     if (data.is_hero && !photo.is_hero) {
       await ProjectPhoto.update(
         { is_hero: false },
@@ -62,8 +91,40 @@ class ProjectPhotoService {
   
   async deletePhoto(id) {
     const photo = await this.getPhotoById(id);
+    
+    // Delete file if exists
+    await FileHelper.deleteFile(photo.url);
+    
     await photo.destroy();
     return { message: 'Photo deleted successfully' };
+  }
+  
+  // ✅ NEW: Upload multiple photos
+  async uploadMultiplePhotos(projectId, files, data = {}) {
+    const project = await Project.findByPk(projectId);
+    if (!project) {
+      throw new Error('Project not found');
+    }
+    
+    const photos = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const url = file.path.replace(/\\/g, '/');
+      
+      const photo = await ProjectPhoto.create({
+        project_id: projectId,
+        url: url,
+        caption: data.captions ? data.captions[i] : null,
+        position: data.positions ? data.positions[i] : 'center',
+        display_order: data.display_orders ? data.display_orders[i] : i,
+        is_hero: false
+      });
+      
+      photos.push(photo);
+    }
+    
+    return photos;
   }
   
   async reorderPhotos(projectId, photoIds) {

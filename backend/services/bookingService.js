@@ -11,6 +11,7 @@ const {
 } = require('../models');
 const { sequelize } = require('../models');
 const { Op } = require('sequelize');
+const FileHelper = require('../utils/fileHelper');
 
 class BookingService {
   generateBookingCode() {
@@ -266,10 +267,39 @@ class BookingService {
       throw new Error('Cannot delete booking with existing invoice');
     }
     
+    // Delete payment proof file if exists
+    if (booking.payment_proof_url) {
+      await FileHelper.deleteFile(booking.payment_proof_url);
+    }
+    
     await booking.destroy();
     return { message: 'Booking deleted successfully' };
   }
   
+  // ✅ NEW: Submit payment with file upload
+  async submitPaymentWithFile(id, file, paymentData) {
+    const booking = await this.getBookingById(id, false);
+    
+    // Delete old payment proof if exists
+    if (booking.payment_proof_url) {
+      await FileHelper.deleteFile(booking.payment_proof_url);
+    }
+    
+    // Save new payment proof path
+    const paymentProofUrl = file.path.replace(/\\/g, '/');
+    
+    await booking.update({
+      payment_proof_url: paymentProofUrl,
+      bank_name: paymentData.bank_name || null,
+      account_number: paymentData.account_number || null,
+      account_name: paymentData.account_name || null,
+      payment_date: new Date()
+    });
+    
+    return booking;
+  }
+  
+  // Original method for URL-based payment proof
   async submitPayment(id, paymentData) {
     const booking = await this.getBookingById(id, false);
     
@@ -282,6 +312,29 @@ class BookingService {
     });
     
     return booking;
+  }
+  
+  // ✅ NEW: Delete payment proof
+  async deletePaymentProof(id) {
+    const booking = await this.getBookingById(id, false);
+    
+    if (!booking.payment_proof_url) {
+      throw new Error('No payment proof to delete');
+    }
+    
+    // Delete file
+    await FileHelper.deleteFile(booking.payment_proof_url);
+    
+    // Clear payment data
+    await booking.update({
+      payment_proof_url: null,
+      bank_name: null,
+      account_number: null,
+      account_name: null,
+      payment_date: null
+    });
+    
+    return { message: 'Payment proof deleted successfully' };
   }
   
   async getBookingsByDateRange(startDate, endDate) {

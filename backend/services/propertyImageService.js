@@ -1,5 +1,5 @@
-// services/propertyImageService.js
 const { PropertyImage, Property } = require('../models');
+const FileHelper = require('../utils/fileHelper');
 
 class PropertyImageService {
   async getImagesByPropertyId(propertyId) {
@@ -23,8 +23,62 @@ class PropertyImageService {
     return image;
   }
   
+  // ✅ NEW: Create image with file upload
+  async createImageWithFile(propertyId, file, data = {}) {
+    const property = await Property.findByPk(propertyId);
+    if (!property) {
+      throw new Error('Property not found');
+    }
+    
+    // If this is set as primary, unset other primary images
+    if (data.is_primary === 'true' || data.is_primary === true) {
+      await PropertyImage.update(
+        { is_primary: false },
+        { where: { property_id: propertyId, is_primary: true } }
+      );
+    }
+    
+    // Save relative path
+    const url = file.path.replace(/\\/g, '/');
+    
+    const image = await PropertyImage.create({
+      property_id: propertyId,
+      url: url,
+      is_primary: data.is_primary === 'true' || data.is_primary === true || false,
+      display_order: data.display_order || 0
+    });
+    
+    return image;
+  }
+  
+  // ✅ NEW: Upload multiple images
+  async uploadMultipleImages(propertyId, files, data = {}) {
+    const property = await Property.findByPk(propertyId);
+    if (!property) {
+      throw new Error('Property not found');
+    }
+    
+    const images = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const url = file.path.replace(/\\/g, '/');
+      
+      const image = await PropertyImage.create({
+        property_id: propertyId,
+        url: url,
+        is_primary: false, // Only first image can be primary
+        display_order: data.display_orders ? data.display_orders[i] : i
+      });
+      
+      images.push(image);
+    }
+    
+    return images;
+  }
+  
+  // Original URL-based method
   async createImage(propertyId, data) {
-    // Verify property exists
     const property = await Property.findByPk(propertyId);
     if (!property) {
       throw new Error('Property not found');
@@ -63,12 +117,15 @@ class PropertyImageService {
   
   async deleteImage(id) {
     const image = await this.getImageById(id);
+    
+    // Delete file if exists
+    await FileHelper.deleteFile(image.url);
+    
     await image.destroy();
     return { message: 'Image deleted successfully' };
   }
   
   async reorderImages(propertyId, imageIds) {
-    // Verify property exists
     const property = await Property.findByPk(propertyId);
     if (!property) {
       throw new Error('Property not found');
@@ -100,7 +157,6 @@ class PropertyImageService {
   }
   
   async bulkCreateImages(propertyId, images) {
-    // Verify property exists
     const property = await Property.findByPk(propertyId);
     if (!property) {
       throw new Error('Property not found');

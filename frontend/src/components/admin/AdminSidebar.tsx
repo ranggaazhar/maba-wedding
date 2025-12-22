@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
+  Layers
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useState } from 'react';
@@ -21,6 +22,7 @@ import LogoMaba from '../../assets/logomaba.svg';
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: FolderOpen, label: 'Kategori', path: '/categories' },
+  { icon: Layers, label: 'Kategori Properti', path: '/property-categories' },
   { icon: ImageIcon, label: 'Projects', path: '/projects' },
   { icon: Package, label: 'Properties', path: '/properties' },
   { icon: Calendar, label: 'Bookings', path: '/bookings' },

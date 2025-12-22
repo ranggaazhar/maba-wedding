@@ -1,5 +1,5 @@
-// controllers/bookingController.js
 const bookingService = require('../services/bookingService');
+const FileHelper = require('../utils/fileHelper');
 
 class BookingController {
   async getAllBookings(req, res) {
@@ -17,10 +17,19 @@ class BookingController {
       
       const bookings = await bookingService.getAllBookings(filters);
       
+      // Add full URLs for payment proofs
+      const bookingsWithUrls = bookings.map(booking => {
+        const bookingData = booking.toJSON();
+        if (bookingData.payment_proof_url) {
+          bookingData.payment_proof_full_url = FileHelper.getFileUrl(bookingData.payment_proof_url, req);
+        }
+        return bookingData;
+      });
+      
       return res.status(200).json({
         success: true,
         message: 'Bookings retrieved successfully',
-        data: bookings
+        data: bookingsWithUrls
       });
     } catch (error) {
       return res.status(500).json({
@@ -37,11 +46,17 @@ class BookingController {
       const includeAll = req.query.include_all !== 'false';
       
       const booking = await bookingService.getBookingById(id, includeAll);
+      const bookingData = booking.toJSON();
+      
+      // Add full URL for payment proof
+      if (bookingData.payment_proof_url) {
+        bookingData.payment_proof_full_url = FileHelper.getFileUrl(bookingData.payment_proof_url, req);
+      }
       
       return res.status(200).json({
         success: true,
         message: 'Booking retrieved successfully',
-        data: booking
+        data: bookingData
       });
     } catch (error) {
       const statusCode = error.message === 'Booking not found' ? 404 : 500;
@@ -58,11 +73,17 @@ class BookingController {
       const includeAll = req.query.include_all !== 'false';
       
       const booking = await bookingService.getBookingByCode(code, includeAll);
+      const bookingData = booking.toJSON();
+      
+      // Add full URL for payment proof
+      if (bookingData.payment_proof_url) {
+        bookingData.payment_proof_full_url = FileHelper.getFileUrl(bookingData.payment_proof_url, req);
+      }
       
       return res.status(200).json({
         success: true,
         message: 'Booking retrieved successfully',
-        data: booking
+        data: bookingData
       });
     } catch (error) {
       const statusCode = error.message === 'Booking not found' ? 404 : 500;
@@ -135,6 +156,49 @@ class BookingController {
     }
   }
   
+  // ✅ NEW: Upload payment proof with file
+  async uploadPaymentProof(req, res) {
+    try {
+      const { id } = req.params;
+      
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No payment proof file uploaded'
+        });
+      }
+      
+      const booking = await bookingService.submitPaymentWithFile(
+        id,
+        req.file,
+        req.body
+      );
+      
+      const bookingData = booking.toJSON();
+      if (bookingData.payment_proof_url) {
+        bookingData.payment_proof_full_url = FileHelper.getFileUrl(bookingData.payment_proof_url, req);
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Payment proof uploaded successfully',
+        data: bookingData
+      });
+    } catch (error) {
+      // Delete uploaded file on error
+      if (req.file) {
+        await FileHelper.deleteFile(req.file.path);
+      }
+      
+      const statusCode = error.message === 'Booking not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  // Original method for URL-based payment proof
   async submitPayment(req, res) {
     try {
       const { id } = req.params;
@@ -147,6 +211,26 @@ class BookingController {
       });
     } catch (error) {
       const statusCode = error.message === 'Booking not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  // ✅ NEW: Delete payment proof
+  async deletePaymentProof(req, res) {
+    try {
+      const { id } = req.params;
+      const result = await bookingService.deletePaymentProof(id);
+      
+      return res.status(200).json({
+        success: true,
+        message: result.message
+      });
+    } catch (error) {
+      const statusCode = error.message === 'Booking not found' ? 404 :
+                        error.message === 'No payment proof to delete' ? 400 : 500;
       return res.status(statusCode).json({
         success: false,
         message: error.message

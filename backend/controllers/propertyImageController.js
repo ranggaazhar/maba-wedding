@@ -1,5 +1,6 @@
 // controllers/propertyImageController.js
 const propertyImageService = require('../services/propertyImageService');
+const FileHelper = require('../utils/fileHelper');
 
 class PropertyImageController {
   async getImagesByProperty(req, res) {
@@ -7,10 +8,16 @@ class PropertyImageController {
       const { propertyId } = req.params;
       const images = await propertyImageService.getImagesByPropertyId(propertyId);
       
+      // Add full URLs to response
+      const imagesWithUrls = images.map(image => ({
+        ...image.toJSON(),
+        full_url: FileHelper.getFileUrl(image.url, req)
+      }));
+      
       return res.status(200).json({
         success: true,
         message: 'Images retrieved successfully',
-        data: images
+        data: imagesWithUrls
       });
     } catch (error) {
       return res.status(500).json({
@@ -29,7 +36,10 @@ class PropertyImageController {
       return res.status(200).json({
         success: true,
         message: 'Image retrieved successfully',
-        data: image
+        data: {
+          ...image.toJSON(),
+          full_url: FileHelper.getFileUrl(image.url, req)
+        }
       });
     } catch (error) {
       const statusCode = error.message === 'Image not found' ? 404 : 500;
@@ -40,6 +50,91 @@ class PropertyImageController {
     }
   }
   
+  // ✅ NEW: Upload single image
+  async uploadImage(req, res) {
+    try {
+      const { propertyId } = req.params;
+      
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No file uploaded'
+        });
+      }
+      
+      const image = await propertyImageService.createImageWithFile(
+        propertyId,
+        req.file,
+        req.body
+      );
+      
+      return res.status(201).json({
+        success: true,
+        message: 'Image uploaded successfully',
+        data: {
+          ...image.toJSON(),
+          full_url: FileHelper.getFileUrl(image.url, req)
+        }
+      });
+    } catch (error) {
+      // Delete uploaded file on error
+      if (req.file) {
+        await FileHelper.deleteFile(req.file.path);
+      }
+      
+      const statusCode = error.message === 'Property not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  // ✅ NEW: Upload multiple images
+  async uploadMultipleImages(req, res) {
+    try {
+      const { propertyId } = req.params;
+      
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'No files uploaded'
+        });
+      }
+      
+      const images = await propertyImageService.uploadMultipleImages(
+        propertyId,
+        req.files,
+        req.body
+      );
+      
+      const imagesWithUrls = images.map(image => ({
+        ...image.toJSON(),
+        full_url: FileHelper.getFileUrl(image.url, req)
+      }));
+      
+      return res.status(201).json({
+        success: true,
+        message: `${images.length} images uploaded successfully`,
+        data: imagesWithUrls
+      });
+    } catch (error) {
+      // Delete uploaded files on error
+      if (req.files) {
+        for (const file of req.files) {
+          await FileHelper.deleteFile(file.path);
+        }
+      }
+      
+      const statusCode = error.message === 'Property not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  // Original URL-based method
   async createImage(req, res) {
     try {
       const { propertyId } = req.params;
@@ -67,7 +162,10 @@ class PropertyImageController {
       return res.status(200).json({
         success: true,
         message: 'Image updated successfully',
-        data: image
+        data: {
+          ...image.toJSON(),
+          full_url: FileHelper.getFileUrl(image.url, req)
+        }
       });
     } catch (error) {
       const statusCode = error.message === 'Image not found' ? 404 : 500;
@@ -110,10 +208,15 @@ class PropertyImageController {
       
       const images = await propertyImageService.reorderImages(propertyId, imageIds);
       
+      const imagesWithUrls = images.map(image => ({
+        ...image.toJSON(),
+        full_url: FileHelper.getFileUrl(image.url, req)
+      }));
+      
       return res.status(200).json({
         success: true,
         message: 'Images reordered successfully',
-        data: images
+        data: imagesWithUrls
       });
     } catch (error) {
       const statusCode = error.message === 'Property not found' ? 404 : 500;
@@ -132,7 +235,10 @@ class PropertyImageController {
       return res.status(200).json({
         success: true,
         message: 'Primary image set successfully',
-        data: image
+        data: {
+          ...image.toJSON(),
+          full_url: FileHelper.getFileUrl(image.url, req)
+        }
       });
     } catch (error) {
       const statusCode = error.message === 'Image not found' ? 404 : 500;
