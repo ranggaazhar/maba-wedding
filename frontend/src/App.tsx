@@ -20,6 +20,13 @@ import Properties from './pages/admin/property/Properties';
 import PropertyDetail from './pages/admin/property/PropertyDetail';
 import PropertyForm from './pages/admin/property/PropertyForm';
 
+// ✅ IMPORT BOOKING PAGES (ADMIN)
+import Bookings from './pages/admin/bookings/Bookings';
+import CreateBookingLink from './pages/admin/bookings/CreateBookingLink';
+
+// ✅ IMPORT CUSTOMER PAGE
+import CustomerBookingForm from './pages/customer/CustomerBookingForm';
+
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
@@ -49,6 +56,9 @@ function App() {
             path="/register"
             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />}
           />
+
+          {/* ✅ CUSTOMER FORM (PUBLIC) - FIXED PATH */}
+          <Route path="/booking/:token" element={<CustomerBookingForm />} />
 
           {/* Protected Routes with AdminLayout */}
           <Route
@@ -163,6 +173,28 @@ function App() {
               <ProtectedRoute>
                 <AdminLayout>
                   <PropertyCategories />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* --- BOOKING ROUTES (ADMIN) --- */}
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <Bookings />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/booking-links/new"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <CreateBookingLink />
                 </AdminLayout>
               </ProtectedRoute>
             }
