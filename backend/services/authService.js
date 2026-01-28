@@ -5,59 +5,6 @@ const { Admin } = require('../models');
 
 class AuthService {
   /**
-   * Register new admin
-   * @param {Object} data - Registration data
-   * @returns {Object} Admin data and token
-   */
-  async register(data) {
-    const { name, email, password, phone } = data;
-
-    try {
-      // Check if email already exists
-      const existingAdmin = await Admin.findOne({ 
-        where: { email: email.toLowerCase() } // Case-insensitive email
-      });
-      
-      if (existingAdmin) {
-        throw new Error('Email already registered');
-      }
-
-      // Hash password with salt rounds
-      const hashedPassword = await bcrypt.hash(password, 12); // Increased to 12 for better security
-
-      // Create admin
-      const admin = await Admin.create({
-        name: name.trim(),
-        email: email.toLowerCase().trim(), // Normalize email
-        password: hashedPassword,
-        phone: phone?.trim() || null,
-        is_active: true
-      });
-
-      // Generate token
-      const token = this.generateToken(admin.id);
-
-      return {
-        admin: {
-          id: admin.id,
-          name: admin.name,
-          email: admin.email,
-          phone: admin.phone,
-          is_active: admin.is_active,
-          created_at: admin.created_at
-        },
-        token
-      };
-    } catch (error) {
-      // Handle Sequelize unique constraint errors
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        throw new Error('Email already registered');
-      }
-      throw error;
-    }
-  }
-
-  /**
    * Login admin
    * @param {String} email - Admin email
    * @param {String} password - Admin password

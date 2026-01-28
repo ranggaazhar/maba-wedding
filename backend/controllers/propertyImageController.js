@@ -7,8 +7,6 @@ class PropertyImageController {
     try {
       const { propertyId } = req.params;
       const images = await propertyImageService.getImagesByPropertyId(propertyId);
-      
-      // Add full URLs to response
       const imagesWithUrls = images.map(image => ({
         ...image.toJSON(),
         full_url: FileHelper.getFileUrl(image.url, req)
@@ -49,8 +47,7 @@ class PropertyImageController {
       });
     }
   }
-  
-  // ✅ NEW: Upload single image
+
   async uploadImage(req, res) {
     try {
       const { propertyId } = req.params;
@@ -89,8 +86,6 @@ class PropertyImageController {
       });
     }
   }
-  
-  // ✅ NEW: Upload multiple images
   async uploadMultipleImages(req, res) {
     try {
       const { propertyId } = req.params;
@@ -119,7 +114,6 @@ class PropertyImageController {
         data: imagesWithUrls
       });
     } catch (error) {
-      // Delete uploaded files on error
       if (req.files) {
         for (const file of req.files) {
           await FileHelper.deleteFile(file.path);
@@ -133,8 +127,6 @@ class PropertyImageController {
       });
     }
   }
-  
-  // Original URL-based method
   async createImage(req, res) {
     try {
       const { propertyId } = req.params;

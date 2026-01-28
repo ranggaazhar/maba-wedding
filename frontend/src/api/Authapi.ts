@@ -9,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Add token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,7 +22,6 @@ api.interceptors.request.use(
   }
 );
 
-// Handle response errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -36,12 +34,6 @@ api.interceptors.response.use(
   }
 );
 
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-}
 
 export interface LoginData {
   email: string;
@@ -79,10 +71,6 @@ export interface AuthResponse {
 }
 
 export const authApi = {
-  register: async (data: RegisterData) => {
-    const response = await api.post<AuthResponse>('/auth/register', data);
-    return response.data;
-  },
 
   login: async (data: LoginData) => {
     const response = await api.post<AuthResponse>('/auth/login', data);

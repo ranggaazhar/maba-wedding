@@ -97,7 +97,6 @@ class ProjectService {
         }
       }
 
-      // 4. Create Includes
       if (data.includes && Array.isArray(data.includes) && data.includes.length > 0) {
         try {
           const includesData = data.includes.map((item, index) => ({
@@ -109,14 +108,12 @@ class ProjectService {
           }));
 
           await ProjectInclude.bulkCreate(includesData, { transaction });
-          console.log('✅ Includes created');
         } catch (includeError) {
           console.error('❌ Include error:', includeError);
           throw new Error(`Failed to create includes: ${includeError.message}`);
         }
       }
 
-      // 5. Create Moods
       if (data.moods && Array.isArray(data.moods) && data.moods.length > 0) {
         try {
           const moodsData = data.moods.map((mood, index) => ({
@@ -340,7 +337,6 @@ class ProjectService {
     }
   }
 
-  // --- BAGIAN YANG DIPERBAIKI ---
   async getProjectById(id, includeAll = true) {
     const include = [
       { model: Category, as: 'category' },
@@ -387,13 +383,10 @@ class ProjectService {
     if (!project) {
       throw new Error('Project not found');
     }
-    
-    // Jika includeAll false (dipanggil oleh internal service seperti toggle), kembalikan Instance Sequelize
     if (!includeAll) {
       return project;
     }
 
-    // Jika untuk API, kembalikan JSON hasil transformasi
     const projectData = project.toJSON();
     const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
     
@@ -408,8 +401,6 @@ class ProjectService {
     
     return projectData;
   }
-  // ------------------------------
-
   async getProjectBySlug(slug, incrementView = false) {
     const project = await Project.findOne({
       where: { slug },
@@ -475,7 +466,6 @@ class ProjectService {
   }
 
   async toggleProjectStatus(id, field = 'is_published') {
-    // getProjectById(id, false) sekarang mengembalikan Instance asli
     const project = await this.getProjectById(id, false);
     await project.update({ [field]: !project[field] });
     return project;

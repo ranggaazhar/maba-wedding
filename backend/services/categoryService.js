@@ -1,4 +1,3 @@
-// services/categoryService.js
 const { Category, Project, BookingModel } = require('../models');
 const { Op } = require('sequelize');
 
@@ -19,7 +18,7 @@ class CategoryService {
     
     const categories = await Category.findAll({
       where,
-      order: [['display_order', 'ASC'], ['name', 'ASC']],
+      order: [['name', 'ASC']],
       include: filters.includeProjects ? [
         { model: Project, as: 'projects' },
         { model: BookingModel, as: 'bookingModels' }
@@ -63,7 +62,6 @@ class CategoryService {
   }
   
   async createCategory(data) {
-    // Check if slug already exists
     const existingCategory = await Category.findOne({
       where: { slug: data.slug }
     });
@@ -79,7 +77,6 @@ class CategoryService {
   async updateCategory(id, data) {
     const category = await this.getCategoryById(id);
     
-    // Check if slug is being updated and if it's unique
     if (data.slug && data.slug !== category.slug) {
       const existingCategory = await Category.findOne({
         where: { 
@@ -99,8 +96,6 @@ class CategoryService {
   
   async deleteCategory(id) {
     const category = await this.getCategoryById(id);
-    
-    // Check if category has associated projects or booking models
     const projectCount = await Project.count({
       where: { category_id: id }
     });

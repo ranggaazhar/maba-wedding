@@ -1,24 +1,6 @@
 const authService = require('../services/authService');
 
 class AuthController {
-  // Register new admin
-  async register(req, res) {
-    try {
-      const result = await authService.register(req.body);
-      
-      return res.status(201).json({
-        success: true,
-        message: 'Admin registered successfully',
-        data: result
-      });
-    } catch (error) {
-      console.error('Register error:', error);
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    }
-  }
 
   // Login admin
   async login(req, res) {

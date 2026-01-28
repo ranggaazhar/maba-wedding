@@ -5,7 +5,6 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class PropertyCategory extends Model {
     static associate(models) {
-      // PropertyCategory has many Properties
       PropertyCategory.hasMany(models.Property, {
         foreignKey: 'category_id',
         as: 'properties'
@@ -32,10 +31,6 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.TEXT,
       allowNull: true
-    },
-    display_order: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
     },
     is_active: {
       type: DataTypes.BOOLEAN,

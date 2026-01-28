@@ -9,25 +9,20 @@ const path = require('path');
 
 const app = express();
 
-// ⚠️ PENTING: Helmet harus dikonfigurasi dengan benar untuk uploads
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }, // ✅ Tambahkan ini
-  contentSecurityPolicy: false // Atau konfigurasi sesuai kebutuhan
+  crossOriginResourcePolicy: { policy: "cross-origin" }, 
+  contentSecurityPolicy: false 
 }));
 
 const allowedOrigins = process.env.FRONTEND_URL 
   ? process.env.FRONTEND_URL.split(',') 
   : ['http://localhost:5173', 'http://localhost:3000'];
 
-// ✅ FIX: Pindahkan /uploads SEBELUM middleware CORS dan helmet yang lain
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   setHeaders: (res, filepath) => {
-    // Set CORS headers langsung di sini
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    
-    // Set cache headers untuk performa
     res.setHeader('Cache-Control', 'public, max-age=31536000');
   }
 }));
@@ -91,9 +86,14 @@ app.get('/', (req, res) => {
   });
 });
 
+// ============================================================
+// RATE LIMITERS - OPTIMIZED FOR PRODUCTION & DEVELOPMENT
+// ============================================================
+
+// 1. Login Limiter - Prevent Brute Force
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 5, // Max 5 attempts
   message: {
     success: false,
     message: 'Too many login attempts, please try again after 15 minutes.'
@@ -109,9 +109,28 @@ const loginLimiter = rateLimit({
   }
 });
 
+
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, 
+  max: process.env.NODE_ENV === 'development' ? 1000 : 500, // Higher limit di development
+  
+  skip: (req) => {
+    const publicGetEndpoints = [
+      '/api/projects',
+      '/api/categories', 
+      '/api/properties',
+      '/api/property-categories',
+      '/api/booking-links/token/',
+      '/api/booking-links/validate/'
+    ];
+    
+    if (req.method === 'GET' && !req.headers.authorization) {
+      return publicGetEndpoints.some(endpoint => req.path.includes(endpoint));
+    }
+    
+    return false;
+  },
+  
   message: {
     success: false,
     message: 'Too many requests, please try again later.'
@@ -119,6 +138,7 @@ const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
+    console.log(`⚠️  Rate limit exceeded: ${req.method} ${req.path} from ${req.ip}`);
     res.status(429).json({
       success: false,
       message: 'Too many requests, please try again later.'
@@ -127,7 +147,14 @@ const generalLimiter = rateLimit({
 });
 
 app.use('/api/auth/login', loginLimiter);
-app.use('/api', generalLimiter);
+
+if (process.env.NODE_ENV === 'production' || process.env.ENABLE_RATE_LIMIT === 'true') {
+  app.use('/api', generalLimiter);
+  console.log('✅ Rate limiting enabled');
+} else {
+  console.log('⚠️  Rate limiting disabled (development mode)');
+}
+
 app.use('/api', apiRoutes);
 
 app.use((req, res) => {
@@ -170,27 +197,11 @@ const startServer = async () => {
   try {
     await connectDatabase();
     const server = app.listen(PORT, () => {
-      console.log('='.repeat(60));
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`\n🚀 Server running on http://localhost:${PORT}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 Allowed Origins: ${allowedOrigins.join(', ')}`);
-      console.log(`📝 API Base: http://localhost:${PORT}/api`);
-      console.log(`📁 Uploads: http://localhost:${PORT}/uploads`);
-      console.log(`📚 Docs: http://localhost:${PORT}/`);
-      console.log(`❤️  Health: http://localhost:${PORT}/health`);
-      console.log('='.repeat(60));
-      if (process.env.NODE_ENV === 'development') {
-        console.log('\n📋 Available Auth Routes:');
-        console.log('  POST   /api/auth/register');
-        console.log('  POST   /api/auth/login');
-        console.log('  GET    /api/auth/profile (🔒)');
-        console.log('  PUT    /api/auth/profile (🔒)');
-        console.log('  POST   /api/auth/change-password (🔒)');
-        console.log('  POST   /api/auth/logout (🔒)');
-        console.log('  GET    /api/auth/verify (🔒)');
-        console.log('\n🔒 = Requires authentication\n');
-      }
     });
+    
     const gracefulShutdown = (signal) => {
       console.log(`\n${signal} received, shutting down gracefully...`);
       server.close(() => {

@@ -510,7 +510,6 @@ export default function ProjectDetail() {
             </CardContent>
           </Card>
 
-          {/* Includes Card */}
           {project.includes && project.includes.length > 0 && (
             <Card>
               <CardHeader>
@@ -562,42 +561,6 @@ export default function ProjectDetail() {
               </CardContent>
             </Card>
           )}
-
-          {/* Stats Card */}
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-primary flex items-center gap-2">
-                <Eye size={20} />
-                Statistik
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Views</span>
-                <span className="font-bold text-2xl text-primary">
-                  {(project.view_count || 0).toLocaleString('id-ID')}
-                </span>
-              </div>
-              
-              <Separator />
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Foto</span>
-                <Badge variant="outline" className="font-bold text-lg">
-                  {project.photos?.length || 0}
-                </Badge>
-              </div>
-              
-              <Separator />
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Status</span>
-                <Badge className={project.is_published ? "bg-green-500" : "bg-gray-500"}>
-                  {project.is_published ? "Published" : "Draft"}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

@@ -3,11 +3,9 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Buat interface untuk item properti agar tidak pakai 'any'
 export interface PropertyItem {
   id: number;
   name: string;
-  // tambahkan field lain jika perlu
 }
 
 export interface PropertyCategory {
@@ -15,9 +13,8 @@ export interface PropertyCategory {
   slug: string;
   name: string;
   description?: string;
-  display_order: number;
   is_active: boolean;
-  properties?: PropertyItem[]; // GANTI: dari any[] ke PropertyItem[]
+  properties?: PropertyItem[]; 
   created_at: string;
   updated_at: string;
 }
@@ -26,11 +23,9 @@ export interface CreatePropertyCategoryData {
   slug: string;
   name: string;
   description?: string;
-  display_order?: number;
   is_active?: boolean;
 }
 
-// GANTI: Jangan pakai interface kosong, pakai type saja
 export type UpdatePropertyCategoryData = Partial<CreatePropertyCategoryData>;
 
 class PropertyCategoryApi {

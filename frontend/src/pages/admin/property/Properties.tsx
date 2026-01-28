@@ -157,7 +157,7 @@ export default function Properties() {
           <p className="page-subtitle text-muted-foreground">Katalog properti untuk disewakan</p>
         </div>
         <Button 
-          className="bg-primary text-primary-foreground"
+          className="gradient-ocean text-primary-foreground"
           onClick={() => navigate("/properties/new")}
         >
           <Plus size={18} className="mr-2" />

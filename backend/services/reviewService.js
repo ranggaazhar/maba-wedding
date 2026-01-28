@@ -258,8 +258,7 @@ class ReviewService {
       order: [['rating', 'DESC']],
       raw: true
     });
-    
-    // Format as object with all ratings (1-5)
+
     const result = {
       5: 0,
       4: 0,

@@ -1,6 +1,6 @@
 // src/pages/Login.tsx
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/Authapi';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from '../../components/ui/button';
@@ -18,7 +18,7 @@ export default function Login() {
     email: '',
     password: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword,] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -135,7 +135,6 @@ export default function Login() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   disabled={isLoading}
                 >
@@ -165,20 +164,7 @@ export default function Login() {
               )}
             </Button>
           </form>
-
-          {/* Footer */}
-          <div className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link
-              to="/register"
-              className="text-rose-600 hover:text-rose-700 font-semibold"
-            >
-              Create Account
-            </Link>
-          </div>
         </div>
-
-        {/* Additional Info */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Wedding Decoration Admin Panel
         </p>

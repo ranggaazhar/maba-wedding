@@ -133,11 +133,6 @@ class BookingLinkService {
   async deleteBookingLink(id) {
     const bookingLink = await this.getBookingLinkById(id, true);
     
-    // Don't allow deleting if already used or has booking
-    if (bookingLink.is_used || bookingLink.booking) {
-      throw new Error('Cannot delete a used booking link or link with existing booking');
-    }
-    
     await bookingLink.destroy();
     return { message: 'Booking link deleted successfully' };
   }

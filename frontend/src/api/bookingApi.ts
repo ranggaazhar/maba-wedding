@@ -83,7 +83,6 @@ export interface CreateBookingData {
   properties?: BookingProperty[];
 }
 
-// ========== BOOKING LINK API ==========
 class BookingLinkApi {
   private getAuthHeaders() {
     const token = localStorage.getItem('token');
@@ -183,7 +182,6 @@ class BookingLinkApi {
   }
 }
 
-// ========== BOOKING API ==========
 class BookingApi {
   private getAuthHeaders() {
     const token = localStorage.getItem('token');
@@ -195,15 +193,6 @@ class BookingApi {
     };
   }
 
-  private getMultipartHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    };
-  }
 
   async getAllBookings(filters?: {
     search?: string;

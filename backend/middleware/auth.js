@@ -3,7 +3,6 @@ const { Admin } = require('../models');
 
 const authMiddleware = async (req, res, next) => {
   try {
-    // Get token from header
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -15,10 +14,7 @@ const authMiddleware = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Find admin
     const admin = await Admin.findOne({
       where: { 
         id: decoded.id,
@@ -34,7 +30,6 @@ const authMiddleware = async (req, res, next) => {
       });
     }
 
-    // Attach admin to request
     req.admin = admin;
     next();
   } catch (error) {

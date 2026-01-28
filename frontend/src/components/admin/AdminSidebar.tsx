@@ -60,13 +60,11 @@ export function AdminSidebar() {
       {/* Header */}
       <div className={cn(
   "flex h-16 items-center justify-between px-4",
-  // TAMBAHKAN KODE DI BAWAH INI:
   "border-b border-white/20" 
 )}>
         {!collapsed && (
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center">
-              {/* Logo SVG dibuat putih dengan brightness-0 invert */}
               <img 
                 src={LogoMaba} 
                 alt="Logo Maba" 
@@ -116,7 +114,6 @@ export function AdminSidebar() {
           onClick={handleLogout}
           className={cn(
             'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium w-full',
-            // Warna Merah Logout sesuai gambar referensi 2
             'text-red-400 hover:bg-red-500/10 hover:text-red-300',
             collapsed && 'justify-center px-0'
           )}

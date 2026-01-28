@@ -2,7 +2,6 @@
 const propertyService = require('../services/propertyService');
 const FileHelper = require('../utils/fileHelper');
 
-// ✅ SOLUTION: Make helper function standalone
 function addFullUrlsToProperty(property, req) {
   if (!property) return property;
   
@@ -15,7 +14,7 @@ function addFullUrlsToProperty(property, req) {
     propertyData = { ...property };
   }
   
-  // Add full URL to images array
+  
   if (propertyData.images && Array.isArray(propertyData.images)) {
     propertyData.images = propertyData.images.map(img => {
       const imageData = img.toJSON ? img.toJSON() : { ...img };

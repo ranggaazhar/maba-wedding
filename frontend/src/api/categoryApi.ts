@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Definisikan tipe generic untuk respons API
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -14,9 +13,8 @@ export interface Category {
   slug: string;
   name: string;
   description?: string;
-  display_order: number;
   is_active: boolean;
-  projects?: unknown[]; // Mengganti any[] dengan unknown[]
+  projects?: unknown[]; 
   bookingModels?: unknown[];
   created_at: string;
   updated_at: string;
@@ -26,11 +24,9 @@ export interface CreateCategoryData {
   slug: string;
   name: string;
   description?: string;
-  display_order?: number;
   is_active?: boolean;
 }
 
-// Perbaikan: Menggunakan Type Alias untuk interface yang kosong
 export type UpdateCategoryData = Partial<CreateCategoryData>;
 
 class CategoryApi {

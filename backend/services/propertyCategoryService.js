@@ -19,7 +19,7 @@ class PropertyCategoryService {
     
     const propertyCategories = await PropertyCategory.findAll({
       where,
-      order: [['display_order', 'ASC'], ['name', 'ASC']],
+      order: [['name', 'ASC']],
       include: filters.includeProperties ? [
         { model: Property, as: 'properties' }
       ] : []

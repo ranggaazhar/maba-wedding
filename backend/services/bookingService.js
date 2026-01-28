@@ -224,7 +224,7 @@ class BookingService {
         }));
         
         await BookingModel.bulkCreate(models, { transaction });
-      }
+      } 
       
       // Create booking properties if provided
       if (data.properties && data.properties.length > 0) {

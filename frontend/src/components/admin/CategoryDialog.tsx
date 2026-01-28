@@ -27,7 +27,7 @@ export function CategoryDialog({
     register,
     handleSubmit,
     reset,
-    control, // Dibutuhkan untuk useWatch
+    control, 
     setValue,
     formState: { errors },
   } = useForm<CreateCategoryData>({
@@ -35,13 +35,10 @@ export function CategoryDialog({
       name: '',
       slug: '',
       description: '',
-      display_order: 0,
       is_active: true,
     },
   });
 
-  // Perbaikan: Gunakan useWatch alih-alih watch('is_active') 
-  // untuk performa dan kompatibilitas React Compiler
   const isActive = useWatch({
     control,
     name: 'is_active',
@@ -53,7 +50,6 @@ export function CategoryDialog({
         name: category.name,
         slug: category.slug,
         description: category.description || '',
-        display_order: category.display_order,
         is_active: category.is_active,
       });
     } else {
@@ -61,13 +57,11 @@ export function CategoryDialog({
         name: '',
         slug: '',
         description: '',
-        display_order: 0,
         is_active: true,
       });
     }
   }, [category, reset]);
 
-  // Auto-generate slug dari name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
     if (!category) {
@@ -123,8 +117,8 @@ export function CategoryDialog({
                 },
               })}
               onChange={(e) => {
-                register('name').onChange(e); // Trigger original onChange
-                handleNameChange(e); // Trigger slug generation
+                register('name').onChange(e); 
+                handleNameChange(e); 
               }}
               placeholder="Wedding Set"
               className="mt-1"
@@ -177,32 +171,6 @@ export function CategoryDialog({
               disabled={isLoading}
             />
           </div>
-
-          {/* Display Order */}
-          <div>
-            <Label htmlFor="display_order">Urutan Tampilan</Label>
-            <Input
-              id="display_order"
-              type="number"
-              {...register('display_order', {
-                valueAsNumber: true,
-                min: {
-                  value: 0,
-                  message: 'Urutan minimal 0',
-                },
-              })}
-              placeholder="0"
-              className="mt-1"
-              disabled={isLoading}
-            />
-            {errors.display_order && (
-              <p className="text-sm text-destructive mt-1">
-                {errors.display_order.message}
-              </p>
-            )}
-          </div>
-
-          {/* Is Active Toggle */}
           <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
             <div>
               <Label htmlFor="is_active" className="cursor-pointer">
@@ -214,7 +182,7 @@ export function CategoryDialog({
             </div>
             <Switch
               id="is_active"
-              checked={!!isActive} // Pastikan boolean
+              checked={!!isActive} 
               onCheckedChange={(checked) => setValue('is_active', checked)}
               disabled={isLoading}
             />

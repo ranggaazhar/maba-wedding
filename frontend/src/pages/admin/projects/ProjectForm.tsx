@@ -1,4 +1,4 @@
-// src/pages/ProjectForm.tsx - COMPLETE WITH ALL METADATA
+// src/pages/ProjectForm.tsx - FULL WIDTH VERSION
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
@@ -66,7 +66,7 @@ export default function ProjectForm() {
           atmosphere_description: p.atmosphere_description ?? '',
           is_featured: p.is_featured ?? false,
           is_published: p.is_published ?? false,
-          photos: [], // New photos will be added here
+          photos: [],
           hero_photo_index: (p.photos ?? []).findIndex((img: ProjectPhoto) => img.is_hero) ?? 0,
           details: (p.details ?? []).map((d: ProjectDetail) => ({
             detail_type: d.detail_type,
@@ -127,14 +127,10 @@ export default function ProjectForm() {
     }
   };
 
-  /**
-   * ✅ ATOMIC SUBMIT - WITH ALL METADATA
-   */
   const handleSubmit = async () => {
     try {
       setSaving(true);
 
-      // Validasi dasar
       if (!formData.title || !formData.category_id) {
         Swal.fire({ icon: 'warning', title: 'Oops!', text: 'Lengkapi info dasar dulu bang.' });
         goToStep(1);
@@ -144,9 +140,7 @@ export default function ProjectForm() {
       let response;
 
       if (isEdit && id) {
-        // ✅ UPDATE (ATOMIC) - WITH ALL METADATA
         const updatePayload: Partial<CreateCompleteProjectData> = {
-          // Basic Info
           title: formData.title,
           slug: formData.slug,
           category_id: formData.category_id,
@@ -156,30 +150,21 @@ export default function ProjectForm() {
           atmosphere_description: formData.atmosphere_description,
           is_featured: formData.is_featured,
           is_published: formData.is_published,
-          
-          // Details with full metadata
           details: formData.details,
-          
-          // Includes with metadata
           includes: formData.includes,
-          
-          // Moods with metadata
           moods: formData.moods,
         };
 
-        // Add new photos with metadata if any
         if (formData.photos && formData.photos.length > 0) {
           updatePayload.photos = formData.photos;
         }
 
-        // Set hero photo
         if (formData.hero_photo_index !== undefined) {
           updatePayload.hero_photo_index = formData.hero_photo_index;
         }
 
         response = await projectApi.updateCompleteProject(Number(id), updatePayload, existingPhotos);
       } else {
-        // ✅ CREATE (ATOMIC) - WITH ALL METADATA
         response = await projectApi.createCompleteProject(formData);
       }
 
@@ -211,7 +196,7 @@ export default function ProjectForm() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 w-full md:px-2 lg:px-8">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/projects')} disabled={saving}>
           <ArrowLeft size={20} />
@@ -228,7 +213,7 @@ export default function ProjectForm() {
 
       <div className="space-y-4">
         <Progress value={(currentStep / steps.length) * 100} className="h-2 transition-all duration-500" />
-        <div className="grid grid-cols-5 gap-1">
+        <div className="grid grid-cols-5 gap-1 md:gap-2">
           {steps.map((step) => (
             <button
               key={step.id}
@@ -250,7 +235,7 @@ export default function ProjectForm() {
         </div>
       </div>
 
-      <div className="bg-card border rounded-xl shadow-sm overflow-hidden min-h-[400px]">
+      <div className="bg-card border rounded-xl shadow-sm overflow-hidden min-h-[400px] w-full">
         {currentStep === 1 && (
           <StepBasicInfo formData={formData} updateFormData={updateFormData} onNext={nextStep} />
         )}
@@ -273,7 +258,7 @@ export default function ProjectForm() {
         )}
       </div>
 
-      <div className="flex items-center justify-between py-6 border-t">
+      <div className="flex items-center justify-between py-6 border-t w-full">
         <Button variant="outline" onClick={prevStep} disabled={currentStep === 1 || saving}>
           <ArrowLeft size={18} className="mr-2" /> Kembali
         </Button>
@@ -283,7 +268,7 @@ export default function ProjectForm() {
             Lanjut <ArrowRight size={18} className="ml-2" />
           </Button>
         ) : (
-          <Button onClick={handleSubmit} disabled={saving}  className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
+          <Button onClick={handleSubmit} disabled={saving} className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
             {saving ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
             ) : (

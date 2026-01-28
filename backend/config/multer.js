@@ -21,7 +21,6 @@ const createUploadDirs = () => {
 
 createUploadDirs();
 
-// Storage configuration for different types
 const createStorage = (destination) => {
   return multer.diskStorage({
     destination: function (req, file, cb) {
@@ -38,7 +37,6 @@ const createStorage = (destination) => {
   });
 };
 
-// File filter - only images
 const imageFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -51,7 +49,6 @@ const imageFilter = (req, file, cb) => {
   }
 };
 
-// Upload configurations for different purposes
 const uploadConfigs = {
   projectPhoto: multer({
     storage: createStorage('uploads/projects'),

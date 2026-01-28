@@ -2,9 +2,6 @@ const sharp = require('sharp');
 const fs = require('fs').promises;
 const path = require('path');
 
-/**
- * Process and optimize single uploaded image
- */
 const processImage = (options = {}) => {
   const {
     width = 1920,
@@ -36,7 +33,6 @@ const processImage = (options = {}) => {
         .toFormat(format, { quality })
         .toFile(outputPath);
 
-      // Cek apakah file asli masih ada sebelum dihapus
       try {
         await fs.access(inputPath);
         await fs.unlink(inputPath);
@@ -44,23 +40,18 @@ const processImage = (options = {}) => {
         console.warn(`Original file ${inputPath} not found for deletion, skipping...`);
       }
 
-      // Update metadata file di request
-      req.file.path = outputPath.replace(/\\/g, '/'); // Normalisasi path untuk DB
+      req.file.path = outputPath.replace(/\\/g, '/'); 
       req.file.filename = path.basename(outputPath);
       req.file.optimized = true;
 
       next();
     } catch (error) {
       console.error('Image optimization error:', error);
-      // Jika gagal, tetap lanjut menggunakan file original agar user tidak error
       next();
     }
   };
 };
 
-/**
- * Process multiple images
- */
 const processMultipleImages = (options = {}) => {
   return async (req, res, next) => {
     if (!req.files || req.files.length === 0) return next();
@@ -88,20 +79,16 @@ const processMultipleImages = (options = {}) => {
             .toFormat(targetFormat, { quality: options.quality || 80 })
             .toFile(outputPath);
 
-          // Hapus file asli
           try {
             await fs.access(inputPath);
             await fs.unlink(inputPath);
           } catch (e) { /* ignore deletion error */ }
-
-          // Update data file
           file.path = outputPath.replace(/\\/g, '/'); // Penting untuk konsistensi database
           file.filename = path.basename(outputPath);
           file.optimized = true;
           
         } catch (fileError) {
           console.error(`Failed to process file ${file.filename}:`, fileError);
-          // Biarkan file original tetap ada jika optimasi gagal
           file.path = file.path.replace(/\\/g, '/');
         }
       });

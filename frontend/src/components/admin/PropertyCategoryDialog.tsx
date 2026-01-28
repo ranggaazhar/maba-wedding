@@ -35,7 +35,6 @@ export function PropertyCategoryDialog({
       name: '',
       slug: '',
       description: '',
-      display_order: 0,
       is_active: true,
     },
   });
@@ -52,7 +51,6 @@ export function PropertyCategoryDialog({
         name: propertyCategory.name,
         slug: propertyCategory.slug,
         description: propertyCategory.description || '',
-        display_order: propertyCategory.display_order,
         is_active: propertyCategory.is_active,
       });
     } else {
@@ -60,7 +58,6 @@ export function PropertyCategoryDialog({
         name: '',
         slug: '',
         description: '',
-        display_order: 0,
         is_active: true,
       });
     }
@@ -133,17 +130,6 @@ export function PropertyCategoryDialog({
           <div>
             <Label htmlFor="description">Deskripsi</Label>
             <Textarea id="description" {...register('description')} className="mt-1" disabled={isLoading} />
-          </div>
-
-          <div>
-            <Label htmlFor="display_order">Urutan Tampilan</Label>
-            <Input
-              id="display_order"
-              type="number"
-              {...register('display_order', { valueAsNumber: true })}
-              className="mt-1"
-              disabled={isLoading}
-            />
           </div>
 
           <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">

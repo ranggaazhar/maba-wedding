@@ -4,9 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/toaster';
 import { AdminLayout } from './components/admin/AdminLayout';
 
-// Pages
 import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
 import Dashboard from './pages/admin/Dashboard';
 import Profile from './pages/admin/profile/Profile';
 import Categories from './pages/admin/kategori/Categories';
@@ -14,20 +12,13 @@ import PropertyCategories from './pages/admin/kategori/PropertyCategories';
 import Projects from './pages/admin/projects/Projects';
 import ProjectDetail from './pages/admin/projects/ProjectDetail';
 import ProjectForm from './pages/admin/projects/ProjectForm';
-
-// ✅ IMPORT PROPERTIES PAGES
 import Properties from './pages/admin/property/Properties';
 import PropertyDetail from './pages/admin/property/PropertyDetail';
 import PropertyForm from './pages/admin/property/PropertyForm';
-
-// ✅ IMPORT BOOKING PAGES (ADMIN)
 import Bookings from './pages/admin/bookings/Bookings';
 import CreateBookingLink from './pages/admin/bookings/CreateBookingLink';
-
-// ✅ IMPORT CUSTOMER PAGE
 import CustomerBookingForm from './pages/customer/CustomerBookingForm';
 
-// Components
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -47,20 +38,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
           <Route
             path="/login"
             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
           />
-          <Route
-            path="/register"
-            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />}
-          />
-
-          {/* ✅ CUSTOMER FORM (PUBLIC) - FIXED PATH */}
           <Route path="/booking/:token" element={<CustomerBookingForm />} />
-
-          {/* Protected Routes with AdminLayout */}
           <Route
             path="/dashboard"
             element={
@@ -71,8 +53,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
-          {/* --- PROJECT ROUTES --- */}
           <Route
             path="/projects"
             element={
@@ -113,8 +93,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* ✅ PROPERTY ROUTES (SAME PATTERN AS PROJECTS) */}
           <Route
             path="/properties"
             element={
@@ -155,8 +133,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* --- CATEGORY ROUTES --- */}
           <Route
             path="/categories"
             element={
@@ -177,8 +153,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
-          {/* --- BOOKING ROUTES (ADMIN) --- */}
           <Route
             path="/bookings"
             element={
@@ -199,8 +173,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
-          {/* --- PROFILE ROUTE --- */}
+
           <Route
             path="/profile"
             element={
@@ -212,13 +185,11 @@ function App() {
             }
           />
 
-          {/* Default Route */}
           <Route
             path="/"
             element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
           />
 
-          {/* 404 Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster />

@@ -73,7 +73,6 @@ class PropertyApi {
     };
   }
 
-  // Get all properties
   async getAllProperties(filters?: {
     is_available?: boolean;
     category_id?: number;
@@ -93,7 +92,6 @@ class PropertyApi {
     return response.data;
   }
 
-  // Get property by ID
   async getPropertyById(id: number) {
     const response = await axios.get(
       `${API_URL}/properties/${id}?include_relations=true`,
@@ -102,9 +100,7 @@ class PropertyApi {
     return response.data;
   }
 
-  // ✅ FIXED: Create property with images
   async createProperty(data: PropertyFormData) {
-    // 1. Create property first
     const propertyData: CreatePropertyData = {
       name: data.name,
       slug: data.slug,
@@ -123,7 +119,6 @@ class PropertyApi {
 
     const createdProperty = propertyResponse.data.data;
 
-    // 2. Upload images if any
     if (data.images && data.images.length > 0) {
       const formData = new FormData();
       
@@ -131,7 +126,6 @@ class PropertyApi {
         formData.append('images', file);
       });
 
-      // ✅ FIXED: Send primary_image_index, not boolean
       if (data.primary_image_index !== undefined) {
         formData.append('primary_image_index', String(data.primary_image_index));
       }
@@ -142,14 +136,12 @@ class PropertyApi {
         this.getMultipartHeaders()
       );
 
-      // Get updated property with images
       return await this.getPropertyById(createdProperty.id);
     }
 
     return propertyResponse.data;
   }
 
-  // Update property
   async updateProperty(id: number, data: Partial<CreatePropertyData>) {
     const response = await axios.put(
       `${API_URL}/properties/${id}`,
@@ -159,7 +151,6 @@ class PropertyApi {
     return response.data;
   }
 
-  // ✅ FIXED: Upload additional images
   async uploadImages(propertyId: number, files: File[], primaryIndex?: number) {
     const formData = new FormData();
     
@@ -167,7 +158,6 @@ class PropertyApi {
       formData.append('images', file);
     });
 
-    // ✅ FIXED: Send primary_image_index once
     if (primaryIndex !== undefined) {
       formData.append('primary_image_index', String(primaryIndex));
     }
@@ -180,7 +170,6 @@ class PropertyApi {
     return response.data;
   }
 
-  // Delete property image
   async deleteImage(imageId: number) {
     const response = await axios.delete(
       `${API_URL}/property-images/${imageId}`,
@@ -189,7 +178,6 @@ class PropertyApi {
     return response.data;
   }
 
-  // Set primary image
   async setPrimaryImage(imageId: number) {
     const response = await axios.patch(
       `${API_URL}/property-images/${imageId}/set-primary`,
@@ -199,7 +187,6 @@ class PropertyApi {
     return response.data;
   }
 
-  // Delete property
   async deleteProperty(id: number) {
     const response = await axios.delete(
       `${API_URL}/properties/${id}`,
@@ -208,7 +195,6 @@ class PropertyApi {
     return response.data;
   }
 
-  // Toggle availability
   async toggleAvailability(id: number) {
     const response = await axios.patch(
       `${API_URL}/properties/${id}/toggle-availability`,
@@ -218,7 +204,6 @@ class PropertyApi {
     return response.data;
   }
 
-  // Update stock
   async updateStock(id: number, quantity: number, operation: 'set' | 'add' | 'subtract' = 'set') {
     const response = await axios.patch(
       `${API_URL}/properties/${id}/update-stock`,

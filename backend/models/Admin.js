@@ -10,14 +10,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'created_by',
         as: 'projects'
       });
-      
-      // Admin has many Properties
+
       Admin.hasMany(models.Property, {
         foreignKey: 'created_by',
         as: 'properties'
       });
-      
-      // Admin has many BookingLinks
+ 
       Admin.hasMany(models.BookingLink, {
         foreignKey: 'created_by',
         as: 'bookingLinks'
