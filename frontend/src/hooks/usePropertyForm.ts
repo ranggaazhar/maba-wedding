@@ -21,7 +21,6 @@ export const usePropertyForm = () => {
     category_id: 0,
     description: "",
     price: "",
-    stock_quantity: 1,
     is_available: true,
     images: [],
     primary_image_index: 0,
@@ -61,7 +60,6 @@ export const usePropertyForm = () => {
             category_id: property.category_id,
             description: property.description || "",
             price: property.price,
-            stock_quantity: property.stock_quantity,
             is_available: property.is_available,
             images: [],
             primary_image_index: 0,
@@ -205,7 +203,6 @@ export const usePropertyForm = () => {
           category_id: formData.category_id,
           description: formData.description,
           price: formData.price,
-          stock_quantity: formData.stock_quantity,
           is_available: formData.is_available,
         });
 

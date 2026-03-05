@@ -85,7 +85,6 @@ class AuthController {
   // Logout
   async logout(req, res) {
     try {
-      // Optional: Implement token blacklist here if needed
       return res.status(200).json({
         success: true,
         message: 'Logout successful'

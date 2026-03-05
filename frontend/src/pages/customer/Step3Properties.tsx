@@ -207,7 +207,6 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
                 <CardContent className="p-4">
                   <h4 className="font-semibold line-clamp-2 mb-2">{property.name}</h4>
                   <Badge variant="outline" className="mb-2">{property.category?.name}</Badge>
-                  <p className="text-sm text-muted-foreground mb-2">Stok: {property.stock_quantity}</p>
                   <p className="text-lg font-bold text-primary mb-3">
                     Rp {Number(property.price).toLocaleString("id-ID")}
                   </p>
@@ -215,7 +214,6 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
                     size="sm"
                     className="w-full"
                     onClick={() => handleAddProperty(property)}
-                    disabled={property.stock_quantity === 0}
                   >
                     <Plus size={16} className="mr-2" />
                     {selectedProp ? `Tambah (${selectedProp.quantity})` : "Tambah"}

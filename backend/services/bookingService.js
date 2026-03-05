@@ -6,7 +6,9 @@ const {
   BookingProperty, 
   Category, 
   Project,
+  ProjectPhoto,
   Property,
+  PropertyImage,
   Invoice
 } = require('../models');
 const { sequelize } = require('../models');
@@ -94,41 +96,56 @@ class BookingService {
     return bookings;
   }
   
-  async getBookingById(id, includeAll = true) {
-    const include = [
-      { model: BookingLink, as: 'bookingLink' }
-    ];
-    
-    if (includeAll) {
-      include.push(
-        {
-          model: BookingModel,
-          as: 'models',
-          include: [
-            { model: Category, as: 'category' },
-            { model: Project, as: 'project' }
-          ],
-          separate: true,
-          order: [['display_order', 'ASC']]
-        },
-        {
-          model: BookingProperty,
-          as: 'properties',
-          include: [{ model: Property, as: 'property' }],
-          separate: true
-        },
-        { model: Invoice, as: 'invoice' }
-      );
-    }
-    
-    const booking = await Booking.findByPk(id, { include });
-    
-    if (!booking) {
-      throw new Error('Booking not found');
-    }
-    
-    return booking;
+// services/bookingService.js
+
+async getBookingById(id, includeAll = true) {
+  const include = [{ model: BookingLink, as: 'bookingLink' }];
+  
+  if (includeAll) {
+    include.push(
+      {
+        model: BookingModel,
+        as: 'models',
+        include: [
+          { model: Category, as: 'category' },
+          { 
+            model: Project, 
+            as: 'project',
+            include: [{ model: ProjectPhoto, as: 'photos' }] // Project pakai 'photos'
+          }
+        ],
+        separate: true,
+        order: [['display_order', 'ASC']]
+      },
+      {
+        model: BookingProperty,
+        as: 'properties',
+        include: [
+          { 
+            model: Property, 
+            as: 'property',
+            include: [
+              { 
+                model: PropertyImage, // Gunakan objek model PropertyImage
+                as: 'images' // <--- UBAH INI dari 'photos' ke 'images'
+              }
+            ]
+          }
+        ],
+        separate: true
+      },
+      { model: Invoice, as: 'invoice' }
+    );
   }
+  
+  const booking = await Booking.findByPk(id, { include });
+  
+  if (!booking) {
+    throw new Error('Booking not found');
+  }
+  
+  return booking;
+}
   
   async getBookingByCode(code, includeAll = true) {
     const include = [
@@ -253,12 +270,88 @@ class BookingService {
     }
   }
   
-  async updateBooking(id, data) {
-    const booking = await this.getBookingById(id, false);
-    await booking.update(data);
+async updateBooking(id, data) {
+  // Mulai transaksi
+  const transaction = await sequelize.transaction();
+
+  try {
+    // 1. Cari data booking utama
+    const booking = await Booking.findByPk(id);
+    if (!booking) {
+      throw new Error('Booking tidak ditemukan');
+    }
+
+    // 2. Update informasi utama booking (Header)
+    await booking.update({
+      customer_name: data.customer_name,
+      customer_phone: data.customer_phone,
+      full_address: data.full_address,
+      event_venue: data.event_venue,
+      event_date: data.event_date,
+      event_type: data.event_type,
+      referral_source: data.referral_source,
+      theme_color: data.theme_color,
+      total_estimate: data.total_estimate,
+      customer_notes: data.customer_notes
+    }, { transaction });
+
+    // 3. Sinkronisasi Model Dekorasi
+    // Kita hapus semua yang lama, lalu masukkan yang baru dari list Frontend
+    if (data.models) {
+      await BookingModel.destroy({ 
+        where: { booking_id: id }, 
+        transaction 
+      });
+
+      if (data.models.length > 0) {
+        const modelEntries = data.models.map((m, index) => ({
+          booking_id: id,
+          category_id: m.category_id,
+          project_id: m.project_id,
+          project_title: m.project_title,
+          price: m.price,
+          notes: m.notes,
+          display_order: index
+        }));
+        await BookingModel.bulkCreate(modelEntries, { transaction });
+      }
+    }
+
+    // 4. Sinkronisasi Properties
+    // Sama seperti model, kita bersihkan data lama dan masukkan data baru
+    if (data.properties) {
+      await BookingProperty.destroy({ 
+        where: { booking_id: id }, 
+        transaction 
+      });
+
+      if (data.properties.length > 0) {
+        const propertyEntries = data.properties.map(p => ({
+          booking_id: id,
+          property_id: p.property_id,
+          property_name: p.property_name,
+          property_category: p.property_category,
+          quantity: p.quantity,
+          price: p.price,
+          subtotal: p.subtotal
+        }));
+        await BookingProperty.bulkCreate(propertyEntries, { transaction });
+      }
+    }
+
+    // Jika semua proses di atas berhasil, simpan permanen ke database
+    await transaction.commit();
+
+    // Kembalikan data terbaru yang sudah di-update (termasuk relasi fotonya)
     return await this.getBookingById(id);
+
+  } catch (error) {
+    // Jika ada satu saja yang error, batalkan semua perubahan
+    await transaction.rollback();
+    console.error("Update Booking Error:", error);
+    throw error;
   }
-  
+}
   async deleteBooking(id) {
     const booking = await this.getBookingById(id, true);
     

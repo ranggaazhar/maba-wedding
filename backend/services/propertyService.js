@@ -31,10 +31,6 @@ class PropertyService {
         : { [Op.lte]: filters.max_price };
     }
     
-    if (filters.in_stock) {
-      where.stock_quantity = { [Op.gt]: 0 };
-    }
-    
     const include = [
       { model: PropertyCategory, as: 'category' }
     ];
@@ -198,33 +194,10 @@ class PropertyService {
     return property;
   }
   
-  async updateStock(id, quantity, operation = 'set') {
-    const property = await this.getPropertyById(id, false);
-    
-    let newQuantity;
-    switch (operation) {
-      case 'add':
-        newQuantity = property.stock_quantity + quantity;
-        break;
-      case 'subtract':
-        newQuantity = property.stock_quantity - quantity;
-        if (newQuantity < 0) {
-          throw new Error('Insufficient stock');
-        }
-        break;
-      case 'set':
-      default:
-        newQuantity = quantity;
-    }
-    
-    await property.update({ stock_quantity: newQuantity });
-    return property;
-  }
   
   async getAvailableProperties(categoryId = null) {
     const where = {
       is_available: true,
-      stock_quantity: { [Op.gt]: 0 }
     };
     
     if (categoryId) {

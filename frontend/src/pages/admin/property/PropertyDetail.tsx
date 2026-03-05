@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { propertyApi, type Property, type PropertyImage } from "@/api/propertyApi";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -21,7 +19,6 @@ export default function PropertyDetail() {
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string>("");
-  const [stockUpdate, setStockUpdate] = useState<number>(0);
 
   const fetchPropertyDetail = useCallback(async () => {
     if (!id) return;
@@ -35,7 +32,6 @@ export default function PropertyDetail() {
         
         const primaryImg = response.data.images?.find((p: PropertyImage) => p.is_primary);
         setSelectedImage(primaryImg?.url || response.data.images?.[0]?.url || "");
-        setStockUpdate(response.data.stock_quantity);
       }
     } catch (error: unknown) {
       const message = axios.isAxiosError(error) 
@@ -128,31 +124,6 @@ export default function PropertyDetail() {
     }
   };
 
-  const handleUpdateStock = async () => {
-    if (!property || stockUpdate === property.stock_quantity) return;
-    
-    try {
-      const response = await propertyApi.updateStock(property.id, stockUpdate, 'set');
-      
-      if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: "Stok berhasil diperbarui",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        fetchPropertyDetail();
-      }
-    } catch (error: unknown) {
-      console.error("Error updating stock:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Gagal!",
-        text: "Tidak bisa mengupdate stok."
-      });
-    }
-  };
 
   const formatPrice = (price: string): string => {
     try {
@@ -217,10 +188,6 @@ export default function PropertyDetail() {
                       <EyeOff size={12} className="mr-1" />
                       Tidak Tersedia
                     </Badge>
-                  )}
-                  
-                  {property.stock_quantity === 0 && (
-                    <Badge variant="destructive">Habis</Badge>
                   )}
                 </div>
                 
@@ -402,35 +369,6 @@ export default function PropertyDetail() {
                 Manajemen Stok
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <span className="text-sm text-muted-foreground">Stok Saat Ini</span>
-                <span className="font-bold text-2xl text-primary">
-                  {property.stock_quantity}
-                </span>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <Label htmlFor="stock">Update Stok</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="stock"
-                    type="number"
-                    value={stockUpdate}
-                    onChange={(e) => setStockUpdate(Number(e.target.value))}
-                    min="0"
-                  />
-                  <Button 
-                    onClick={handleUpdateStock}
-                    disabled={stockUpdate === property.stock_quantity}
-                  >
-                    Update
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
@@ -452,9 +390,6 @@ export default function PropertyDetail() {
               
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Stok Tersedia</span>
-                <span className="font-bold text-2xl text-primary">
-                  {property.stock_quantity}
-                </span>
               </div>
             </CardContent>
           </Card>

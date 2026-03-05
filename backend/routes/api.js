@@ -7,10 +7,6 @@ const authController = require('../controllers/authController');
 const categoryController = require('../controllers/categoryController');
 const propertyCategoryController = require('../controllers/propertyCategoryController');
 const projectController = require('../controllers/projectController');
-const projectPhotoController = require('../controllers/projectPhotoController');
-const projectDetailController = require('../controllers/projectDetailController');
-const projectIncludeController = require('../controllers/projectIncludeController');
-const projectMoodController = require('../controllers/projectMoodController');
 const propertyController = require('../controllers/propertyController');
 const propertyImageController = require('../controllers/propertyImageController');
 const bookingLinkController = require('../controllers/bookingLinkController');
@@ -107,16 +103,6 @@ router.put('/projects/:id/complete', authMiddleware,upload.projectPhoto.array('p
 router.delete('/projects/:id',authMiddleware,projectIdValidation,projectValidate,projectController.deleteProject);
 router.patch('/projects/:id/toggle-publish',authMiddleware,projectIdValidation,projectValidate,projectController.togglePublishStatus);
 router.patch('/projects/:id/toggle-featured',authMiddleware,projectIdValidation,projectValidate,projectController.toggleFeaturedStatus);
-router.get('/projects/:projectId/photos', projectPhotoController.getPhotosByProject);
-router.get('/project-photos/:id', projectPhotoController.getPhotoById);
-router.delete('/project-photos/:id',authMiddleware,projectPhotoController.deletePhoto);
-router.put('/project-photos/:id',authMiddleware,upload.projectPhoto.single('photo'),processImage({ width: 1920, quality: 85 }), projectPhotoController.updatePhoto);
-router.get('/projects/:projectId/details', projectDetailController.getDetailsByProject);
-router.get('/project-details/:id', projectDetailController.getDetailById);
-router.get('/projects/:projectId/includes', projectIncludeController.getIncludesByProject);
-router.get('/project-includes/:id', projectIncludeController.getIncludeById);
-router.get('/projects/:projectId/moods', projectMoodController.getMoodsByProject);
-router.get('/project-moods/:id', projectMoodController.getMoodById);
 
 // PROPERTY ROUTES
 router.get('/properties', propertyController.getAllProperties);
@@ -127,7 +113,6 @@ router.post('/properties', authMiddleware, createPropertyValidation, propertyVal
 router.put('/properties/:id', authMiddleware, updatePropertyValidation, propertyValidate, propertyController.updateProperty);
 router.delete('/properties/:id', authMiddleware, propertyIdValidation, propertyValidate, propertyController.deleteProperty);
 router.patch('/properties/:id/toggle-availability', authMiddleware, propertyIdValidation, propertyValidate, propertyController.toggleAvailability);
-router.patch('/properties/:id/update-stock', authMiddleware, propertyIdValidation, propertyValidate, propertyController.updateStock);
 router.get('/properties/:propertyId/images', propertyImageController.getImagesByProperty);
 router.get('/property-images/:id', imageIdValidation, propertyValidate, propertyImageController.getImageById);
 router.post('/properties/:propertyId/images/upload',authMiddleware,upload.propertyImage.single('image'),processImage({ width: 1920, quality: 85 }),propertyImageController.uploadImage);
@@ -143,12 +128,10 @@ router.patch('/property-images/:id/set-primary', authMiddleware, imageIdValidati
 router.get('/booking-links/token/:token', bookingLinkTokenValidation, bookingValidate, bookingLinkController.getBookingLinkByToken);
 router.post('/booking-links/validate/:token', bookingLinkTokenValidation, bookingValidate, bookingLinkController.validateBookingLink);
 router.get('/booking-links', authMiddleware, bookingLinkController.getAllBookingLinks);
-router.get('/booking-links/statistics', authMiddleware, bookingLinkController.getStatistics);
 router.get('/booking-links/:id', authMiddleware, bookingLinkController.getBookingLinkById);
 router.post('/booking-links', authMiddleware, createBookingLinkValidation, bookingValidate, bookingLinkController.createBookingLink);
 router.put('/booking-links/:id', authMiddleware, updateBookingLinkValidation, bookingValidate, bookingLinkController.updateBookingLink);
 router.delete('/booking-links/:id', authMiddleware, bookingLinkController.deleteBookingLink);
-router.patch('/booking-links/:id/mark-sent', authMiddleware, bookingLinkController.markAsSent);
 router.patch('/booking-links/:id/regenerate-token', authMiddleware, bookingLinkController.regenerateToken);
 
 // BOOKING ROUTES 
@@ -162,23 +145,7 @@ router.get('/bookings/date-range', authMiddleware, bookingController.getBookings
 router.get('/bookings/:id', authMiddleware, bookingIdValidation, bookingValidate, bookingController.getBookingById);
 router.put('/bookings/:id', authMiddleware, updateBookingValidation, bookingValidate, bookingController.updateBooking);
 router.delete('/bookings/:id', authMiddleware, bookingIdValidation, bookingValidate, bookingController.deleteBooking);
-router.delete('/bookings/:id/payment-proof',authMiddleware,bookingIdValidation,bookingValidate,bookingController.deletePaymentProof);
-router.get('/bookings/:bookingId/models', bookingModelController.getModelsByBooking);
-router.get('/booking-models/:id', bookingModelController.getModelById);
-router.post('/bookings/:bookingId/models', authMiddleware, createBookingModelValidation, bookingValidate, bookingModelController.createModel);
-router.post('/bookings/:bookingId/models/bulk', authMiddleware, bookingModelController.bulkCreateModels);
-router.post('/bookings/:bookingId/models/reorder', authMiddleware, bookingModelController.reorderModels);
-router.put('/booking-models/:id', authMiddleware, bookingModelController.updateModel);
-router.delete('/booking-models/:id', authMiddleware, bookingModelController.deleteModel);
 
-// BOOKING PROPERTY ROUTES
-router.get('/bookings/:bookingId/properties', bookingPropertyController.getPropertiesByBooking);
-router.get('/bookings/:bookingId/properties/calculate-total', bookingPropertyController.calculateTotal);
-router.get('/booking-properties/:id', bookingPropertyController.getPropertyById);
-router.post('/bookings/:bookingId/properties', authMiddleware, createBookingPropertyValidation, bookingValidate, bookingPropertyController.createProperty);
-router.post('/bookings/:bookingId/properties/bulk', authMiddleware, bookingPropertyController.bulkCreateProperties);
-router.put('/booking-properties/:id', authMiddleware, bookingPropertyController.updateProperty);
-router.delete('/booking-properties/:id', authMiddleware, bookingPropertyController.deleteProperty);
 // REVIEW LINK ROUTES
 router.get('/review-links/token/:token', reviewLinkTokenValidation, reviewValidate, reviewLinkController.getReviewLinkByToken);
 router.post('/review-links/validate/:token', reviewLinkTokenValidation, reviewValidate, reviewLinkController.validateReviewLink);

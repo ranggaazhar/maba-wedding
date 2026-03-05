@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PropertyCategoryDialog } from '@/components/admin/PropertyCategoryDialog';
+import { PropertyCategoryDialog } from '@/pages/admin/kategori/PropertyCategoryDialog';
 import {
   propertyCategoryApi,
   type PropertyCategory,

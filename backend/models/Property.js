@@ -65,10 +65,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false
     },
-    stock_quantity: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1
-    },
     is_available: {
       type: DataTypes.BOOLEAN,
       defaultValue: true

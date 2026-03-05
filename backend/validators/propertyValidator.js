@@ -25,11 +25,7 @@ const createPropertyValidation = [
     .notEmpty().withMessage('Price is required')
     .isDecimal({ decimal_digits: '0,2' }).withMessage('Price must be a valid decimal number')
     .custom(value => parseFloat(value) >= 0).withMessage('Price must be a positive number'),
-  
-  body('stock_quantity')
-    .optional()
-    .isInt({ min: 0 }).withMessage('Stock quantity must be a positive integer'),
-  
+
   body('is_available')
     .optional()
     .isBoolean().withMessage('is_available must be a boolean'),
@@ -73,10 +69,6 @@ const updatePropertyValidation = [
     .optional()
     .isDecimal({ decimal_digits: '0,2' }).withMessage('Price must be a valid decimal number')
     .custom(value => parseFloat(value) >= 0).withMessage('Price must be a positive number'),
-  
-  body('stock_quantity')
-    .optional()
-    .isInt({ min: 0 }).withMessage('Stock quantity must be a positive integer'),
   
   body('is_available')
     .optional()

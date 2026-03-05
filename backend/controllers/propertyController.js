@@ -43,7 +43,6 @@ class PropertyController {
         search: req.query.search,
         min_price: req.query.min_price ? parseFloat(req.query.min_price) : undefined,
         max_price: req.query.max_price ? parseFloat(req.query.max_price) : undefined,
-        in_stock: req.query.in_stock === 'true',
         includeImages: req.query.include_images === 'true',
         includeCreator: req.query.include_creator === 'true',
         orderBy: req.query.order_by || 'created_at',
@@ -222,41 +221,6 @@ class PropertyController {
     }
   }
   
-  async updateStock(req, res) {
-    try {
-      const { id } = req.params;
-      const { quantity, operation } = req.body;
-      
-      if (quantity === undefined || quantity === null) {
-        return res.status(400).json({
-          success: false,
-          message: 'Quantity is required'
-        });
-      }
-      
-      const property = await propertyService.updateStock(id, parseInt(quantity), operation);
-      const propertyWithUrls = addFullUrlsToProperty(property, req);
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Stock updated successfully',
-        data: propertyWithUrls
-      });
-    } catch (error) {
-      console.error('updateStock error:', error);
-      let statusCode = 500;
-      if (error.message === 'Property not found') {
-        statusCode = 404;
-      } else if (error.message === 'Insufficient stock') {
-        statusCode = 400;
-      }
-      
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message
-      });
-    }
-  }
   
   async getAvailableProperties(req, res) {
     try {

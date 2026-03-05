@@ -21,6 +21,8 @@ import CustomerBookingForm from './pages/customer/CustomerBookingForm';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
+import BookingEdit from './pages/admin/bookings/BookingEdit';
+import BookingDetail from './pages/admin/bookings/BookingDetail';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -173,7 +175,26 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/bookings/:id"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <BookingDetail />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings/edit/:id"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <BookingEdit />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/profile"
             element={

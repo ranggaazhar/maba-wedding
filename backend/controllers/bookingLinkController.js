@@ -125,25 +125,7 @@ class BookingLinkController {
       });
     }
   }
-  
-  async markAsSent(req, res) {
-    try {
-      const { id } = req.params;
-      const bookingLink = await bookingLinkService.markAsSent(id);
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Booking link marked as sent',
-        data: bookingLink
-      });
-    } catch (error) {
-      const statusCode = error.message === 'Booking link not found' ? 404 : 500;
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message
-      });
-    }
-  }
+
   
   async validateBookingLink(req, res) {
     try {

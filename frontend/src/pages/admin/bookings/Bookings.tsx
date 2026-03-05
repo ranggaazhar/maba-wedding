@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   Search, Eye, Trash2, Calendar, Loader2, 
   CheckCircle2, XCircle, Filter, 
-  Link2, Send, RefreshCw
+  Link2, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,18 +186,6 @@ export default function Bookings() {
     });
   };
 
-  const handleMarkAsSent = async (id: number) => {
-    try {
-      await bookingLinkApi.markAsSent(id);
-      Swal.fire("Berhasil!", "Link ditandai sebagai terkirim", "success");
-      fetchBookingLinks();
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error) 
-        ? error.response?.data?.message 
-        : "Gagal update status";
-      Swal.fire("Gagal!", message, "error");
-    }
-  };
 
   const handleRegenerateToken = async (id: number) => {
     const result = await Swal.fire({
@@ -524,16 +512,6 @@ export default function Bookings() {
                             >
                               <Link2 size={16} />
                             </Button>
-                            {!link.sent_at && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 text-success hover:bg-success/10"
-                                onClick={() => handleMarkAsSent(link.id)}
-                              >
-                                <Send size={16} />
-                              </Button>
-                            )}
                             {!link.is_used && (
                               <Button 
                                 variant="ghost" 

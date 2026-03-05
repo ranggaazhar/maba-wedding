@@ -236,7 +236,6 @@ export default function Properties() {
                 />
                 <div className="absolute top-3 left-3 flex gap-2">
                   {!property.is_available && <Badge variant="secondary">Tidak Tersedia</Badge>}
-                  {property.stock_quantity === 0 && <Badge variant="destructive">Habis</Badge>}
                 </div>
                 <div className="absolute top-3 right-3">
                   <DropdownMenu>
@@ -281,9 +280,6 @@ export default function Properties() {
                       {property.category?.name || "No Category"}
                     </Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    Stok: {property.stock_quantity}
-                  </span>
                 </div>
                 <div className="pt-2 border-t">
                   <p className="font-bold text-primary text-lg">

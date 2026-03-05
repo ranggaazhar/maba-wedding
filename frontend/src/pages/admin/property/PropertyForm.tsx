@@ -171,20 +171,6 @@ export default function PropertyForm() {
                     min="0"
                   />
                 </div>
-
-                {/* Stock */}
-                <div className="space-y-2">
-                  <Label htmlFor="stock">Stok *</Label>
-                  <Input
-                    id="stock"
-                    type="number"
-                    value={formData.stock_quantity}
-                    onChange={(e) => updateFormData("stock_quantity", Number(e.target.value))}
-                    placeholder="10"
-                    required
-                    min="0"
-                  />
-                </div>
               </div>
 
               {/* Availability */}

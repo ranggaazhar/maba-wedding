@@ -26,7 +26,6 @@ export interface Property {
   category_id: number;
   description?: string;
   price: string;
-  stock_quantity: number;
   is_available: boolean;
   image_url?: string;
   created_by?: number;
@@ -42,7 +41,6 @@ export interface CreatePropertyData {
   category_id: number;
   description?: string;
   price: string;
-  stock_quantity?: number;
   is_available?: boolean;
   image_url?: string;
 }
@@ -107,7 +105,6 @@ class PropertyApi {
       category_id: data.category_id,
       description: data.description,
       price: data.price,
-      stock_quantity: data.stock_quantity || 1,
       is_available: data.is_available ?? true,
     };
 
@@ -199,15 +196,6 @@ class PropertyApi {
     const response = await axios.patch(
       `${API_URL}/properties/${id}/toggle-availability`,
       {},
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
-
-  async updateStock(id: number, quantity: number, operation: 'set' | 'add' | 'subtract' = 'set') {
-    const response = await axios.patch(
-      `${API_URL}/properties/${id}/update-stock`,
-      { quantity, operation },
       this.getAuthHeaders()
     );
     return response.data;

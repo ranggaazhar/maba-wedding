@@ -86,7 +86,7 @@ export default function CreateBookingLink() {
             {/* Nama Customer */}
             <div className="space-y-2">
               <Label htmlFor="customer_name" className="text-sm font-medium">
-                Nama Customer (Opsional)
+                Nama Customer
               </Label>
               <Input
                 id="customer_name"
@@ -100,7 +100,7 @@ export default function CreateBookingLink() {
             {/* Nomor Telepon */}
             <div className="space-y-2">
               <Label htmlFor="customer_phone" className="text-sm font-medium">
-                Nomor Telepon (Opsional)
+                Nomor Telepon
               </Label>
               <Input
                 id="customer_phone"
@@ -114,7 +114,7 @@ export default function CreateBookingLink() {
             {/* Tanggal Expired */}
             <div className="space-y-2">
               <Label htmlFor="expires_at" className="text-sm font-medium">
-                Tanggal Expired (Opsional)
+                Tanggal Expired
               </Label>
               <Input
                 id="expires_at"
@@ -131,7 +131,7 @@ export default function CreateBookingLink() {
             {/* Catatan */}
             <div className="space-y-2">
               <Label htmlFor="notes" className="text-sm font-medium">
-                Catatan (Opsional)
+                Catatan
               </Label>
               <Textarea
                 id="notes"

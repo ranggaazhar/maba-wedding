@@ -4,6 +4,19 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // ========== INTERFACES ==========
+export interface PropertyImage {
+  id: number;
+  url: string;
+  is_primary: boolean;
+}
+
+export interface ProjectPhoto {
+  id: number;
+  url: string;
+  is_hero: boolean;
+  caption?: string;
+}
+
 export interface BookingLink {
   id: number;
   token: string;
@@ -27,6 +40,12 @@ export interface BookingModel {
   price?: string;
   notes?: string;
   display_order?: number;
+  category?: { name: string };
+  project?: {
+    photos: ProjectPhoto[];
+    thumbnail_url?: string;
+  };
+  display_image?: string;
 }
 
 export interface BookingProperty {
@@ -38,6 +57,11 @@ export interface BookingProperty {
   quantity: number;
   price: string;
   subtotal: string;
+  property?: {
+    images: PropertyImage[];
+    thumbnail_url?: string;
+  };
+  display_image?: string;
 }
 
 export interface Booking {
@@ -54,6 +78,7 @@ export interface Booking {
   theme_color?: string;
   total_estimate?: string;
   customer_notes?: string;
+  admin_notes?: string;
   payment_proof_url?: string;
   payment_proof_full_url?: string;
   bank_name?: string;
@@ -83,6 +108,8 @@ export interface CreateBookingData {
   properties?: BookingProperty[];
 }
 
+// ========== API CLASSES ==========
+
 class BookingLinkApi {
   private getAuthHeaders() {
     const token = localStorage.getItem('token');
@@ -106,14 +133,6 @@ class BookingLinkApi {
 
     const response = await axios.get(
       `${API_URL}/booking-links?${params.toString()}`,
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
-
-  async getBookingLinkById(id: number) {
-    const response = await axios.get(
-      `${API_URL}/booking-links/${id}`,
       this.getAuthHeaders()
     );
     return response.data;
@@ -155,27 +174,10 @@ class BookingLinkApi {
     return response.data;
   }
 
-  async markAsSent(id: number) {
-    const response = await axios.patch(
-      `${API_URL}/booking-links/${id}/mark-sent`,
-      {},
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
-
   async regenerateToken(id: number) {
     const response = await axios.patch(
       `${API_URL}/booking-links/${id}/regenerate-token`,
       {},
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
-
-  async getStatistics() {
-    const response = await axios.get(
-      `${API_URL}/booking-links/statistics`,
       this.getAuthHeaders()
     );
     return response.data;
@@ -192,7 +194,6 @@ class BookingApi {
       },
     };
   }
-
 
   async getAllBookings(filters?: {
     search?: string;
@@ -220,7 +221,38 @@ class BookingApi {
       `${API_URL}/bookings/${id}`,
       this.getAuthHeaders()
     );
-    return response.data;
+
+    const data = response.data;
+
+    // --- HELPER PROSES GAMBAR ---
+    if (data.success && data.data) {
+      const booking = data.data;
+      const BASE_URL = API_URL.replace('/api', '');
+
+      // Proses Gambar Model
+      booking.models = booking.models?.map((m: BookingModel) => {
+        const rawPath = m.project?.photos?.find(p => p.is_hero)?.url || 
+                        m.project?.photos?.[0]?.url || 
+                        m.project?.thumbnail_url;
+        return {
+          ...m,
+          display_image: rawPath ? `${BASE_URL}/${rawPath}` : '/placeholder.png'
+        };
+      });
+
+      // Proses Gambar Property
+      booking.properties = booking.properties?.map((p: BookingProperty) => {
+        const rawPath = p.property?.images?.find(i => i.is_primary)?.url || 
+                        p.property?.images?.[0]?.url || 
+                        p.property?.thumbnail_url;
+        return {
+          ...p,
+          display_image: rawPath ? `${BASE_URL}/${rawPath}` : '/placeholder.png'
+        };
+      });
+    }
+
+    return data;
   }
 
   async getBookingByCode(code: string) {

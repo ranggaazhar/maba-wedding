@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CategoryDialog } from '@/components/admin/CategoryDialog';
+import { CategoryDialog } from '@/pages/admin/kategori/CategoryDialog';
 import { categoryApi, type Category, type CreateCategoryData } from '@/api/categoryApi';
 import Swal from 'sweetalert2';
 import axios from 'axios';

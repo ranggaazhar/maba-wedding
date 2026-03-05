@@ -12,11 +12,11 @@ import Swal from "sweetalert2";
 import axios from "axios";
 
 // Import step components
-import Step1CustomerInfo from "@/components/customer/Step1CustomerInfo";
-import Step2Models from "@/components/customer/Step2Models";
-import Step3Properties from "@/components/customer/Step3Properties";
-import Step4Payment from "@/components/customer/Step4Payment";
-import BookingSuccess from "@/components/customer/BookingSuccess";
+import Step1CustomerInfo from "@/pages/customer/Step1CustomerInfo";
+import Step2Models from "@/pages/customer/Step2Models";
+import Step3Properties from "@/pages/customer/Step3Properties";
+import Step4Payment from "@/pages/customer/Step4Payment";
+import BookingSuccess from "@/pages/customer/BookingSuccess";
 
 interface BookingLinkResponse {
   id: number;
