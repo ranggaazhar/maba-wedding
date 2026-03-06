@@ -64,28 +64,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Wedding Decoration API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      api: '/api',
-      uploads: '/uploads',
-      auth: {
-        register: 'POST /api/auth/register',
-        login: 'POST /api/auth/login',
-        profile: 'GET /api/auth/profile (protected)',
-        updateProfile: 'PUT /api/auth/profile (protected)',
-        changePassword: 'POST /api/auth/change-password (protected)',
-        logout: 'POST /api/auth/logout (protected)',
-        verify: 'GET /api/auth/verify (protected)'
-      }
-    }
-  });
-});
-
 // ============================================================
 // RATE LIMITERS - OPTIMIZED FOR PRODUCTION & DEVELOPMENT
 // ============================================================
@@ -112,7 +90,7 @@ const loginLimiter = rateLimit({
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: process.env.NODE_ENV === 'development' ? 1000 : 500, // Higher limit di development
+  max: process.env.NODE_ENV === 'development' ? 1000 : 500, 
   
   skip: (req) => {
     const publicGetEndpoints = [

@@ -67,33 +67,6 @@ class BookingController {
     }
   }
   
-  async getBookingByCode(req, res) {
-    try {
-      const { code } = req.params;
-      const includeAll = req.query.include_all !== 'false';
-      
-      const booking = await bookingService.getBookingByCode(code, includeAll);
-      const bookingData = booking.toJSON();
-      
-      // Add full URL for payment proof
-      if (bookingData.payment_proof_url) {
-        bookingData.payment_proof_full_url = FileHelper.getFileUrl(bookingData.payment_proof_url, req);
-      }
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Booking retrieved successfully',
-        data: bookingData
-      });
-    } catch (error) {
-      const statusCode = error.message === 'Booking not found' ? 404 : 500;
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message
-      });
-    }
-  }
-  
   async createBooking(req, res) {
     try {
       const booking = await bookingService.createBooking(req.body);

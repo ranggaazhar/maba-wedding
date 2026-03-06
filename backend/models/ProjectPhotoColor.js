@@ -1,32 +1,39 @@
-// models/ProjectDetailItem.js
+// models/ProjectPhotoColor.js
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class ProjectDetailItem extends Model {
+  class ProjectPhotoColor extends Model {
     static associate(models) {
-      // ProjectDetailItem belongs to ProjectDetail
-      ProjectDetailItem.belongsTo(models.ProjectDetail, {
-        foreignKey: 'detail_id',
-        as: 'detail'
+      ProjectPhotoColor.belongsTo(models.ProjectPhoto, {
+        foreignKey: 'photo_id',
+        as: 'photo'
       });
     }
   }
 
-  ProjectDetailItem.init({
+  ProjectPhotoColor.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
-    detail_id: {
+    photo_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    content: {
-      type: DataTypes.TEXT,
+    color_name: {
+      type: DataTypes.STRING(100),
       allowNull: false
+    },
+    color_hex: {
+      type: DataTypes.STRING(7),
+      allowNull: true
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
     },
     display_order: {
       type: DataTypes.INTEGER,
@@ -34,13 +41,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'ProjectDetailItem',
-    tableName: 'project_detail_items',
+    modelName: 'ProjectPhotoColor',
+    tableName: 'project_photo_colors',
     underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false
   });
 
-  return ProjectDetailItem;
+  return ProjectPhotoColor;
 };

@@ -1,67 +1,55 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { 
-  ArrowLeft, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Star, 
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Eye,
   Calendar,
-  Loader2,
-  ImageIcon,
-  CheckCircle2,
-  Package,
   Palette,
-  Heart,
-  DollarSign,
+  Flower2,
+  Star,
+  Share2,
+  Check,
+  ImageIcon,
+  Loader2,
   EyeOff,
-  Sparkles
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { projectApi, type Project, type ProjectPhoto } from "@/api/projectApi";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-export default function ProjectDetail() {
+export default function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // Fetch project detail
   const fetchProjectDetail = useCallback(async () => {
     if (!id) return;
-    
     try {
       setIsLoading(true);
       const response = await projectApi.getProjectById(Number(id));
-      
       if (response.success) {
         setProject(response.data);
-        
-        // Set hero image as default, fallback to first photo
-        const heroImg = response.data.photos?.find((p: ProjectPhoto) => p.is_hero);
-        setSelectedImage(heroImg?.url || response.data.photos?.[0]?.url || "");
+        const heroIndex = response.data.photos?.findIndex((p: ProjectPhoto) => p.is_hero) ?? 0;
+        setActiveIndex(heroIndex >= 0 ? heroIndex : 0);
       }
     } catch (error: unknown) {
-      const message = axios.isAxiosError(error) 
-        ? error.response?.data?.message 
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
         : "Terjadi kesalahan saat memuat data";
-      
-      console.error("Error fetching project:", error);
-      
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Memuat Data",
-        text: message,
-      }).then(() => navigate("/projects"));
+      Swal.fire({ icon: "error", title: "Gagal Memuat Data", text: message }).then(() =>
+        navigate("/projects")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -71,10 +59,8 @@ export default function ProjectDetail() {
     fetchProjectDetail();
   }, [fetchProjectDetail]);
 
-  // Delete project handler
   const handleDelete = async () => {
     if (!project) return;
-    
     const result = await Swal.fire({
       title: "Yakin hapus project ini?",
       html: `Project <strong>"${project.title}"</strong> akan dihapus permanen!<br/>Semua foto dan data terkait akan ikut terhapus.`,
@@ -84,103 +70,63 @@ export default function ProjectDetail() {
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Ya, Hapus!",
       cancelButtonText: "Batal",
-      reverseButtons: true
+      reverseButtons: true,
     });
-
     if (result.isConfirmed) {
       try {
         const response = await projectApi.deleteProject(project.id);
-        
         if (response.success) {
-          await Swal.fire({
-            icon: "success",
-            title: "Terhapus!",
-            text: "Project berhasil dihapus.",
-            timer: 1500,
-            showConfirmButton: false
-          });
+          await Swal.fire({ icon: "success", title: "Terhapus!", text: "Project berhasil dihapus.", timer: 1500, showConfirmButton: false });
           navigate("/projects");
         }
       } catch (error: unknown) {
-        console.error("Error deleting project:", error);
-        const message = axios.isAxiosError(error)
-          ? error.response?.data?.message
-          : "Gagal menghapus project";
-        
-        Swal.fire({
-          icon: "error",
-          title: "Gagal!",
-          text: message
-        });
+        const message = axios.isAxiosError(error) ? error.response?.data?.message : "Gagal menghapus project";
+        Swal.fire({ icon: "error", title: "Gagal!", text: message });
       }
     }
   };
 
-  // Toggle publish status
   const handleTogglePublish = async () => {
     if (!project) return;
-    
     try {
       const response = await projectApi.togglePublishStatus(project.id);
-      
       if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: `Project ${!project.is_published ? 'dipublish' : 'di-draft'}`,
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        Swal.fire({ icon: "success", title: "Berhasil!", text: "Status diubah", timer: 1500, showConfirmButton: false });
         fetchProjectDetail();
       }
-    } catch (error: unknown) {
-      console.error("Error toggling publish:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Gagal!",
-        text: "Tidak bisa mengubah status publish."
-      });
+    } catch {
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Tidak bisa mengubah status publish." });
     }
   };
 
-  // Toggle featured status
   const handleToggleFeatured = async () => {
     if (!project) return;
-    
     try {
       const response = await projectApi.toggleFeaturedStatus(project.id);
-      
       if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: `Project ${!project.is_featured ? 'ditandai' : 'dihapus dari'} featured`,
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        Swal.fire({ icon: "success", title: "Berhasil!", text: "Status featured diperbarui", timer: 1500, showConfirmButton: false });
         fetchProjectDetail();
       }
-    } catch (error: unknown) {
-      console.error("Error toggling featured:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Gagal!",
-        text: "Tidak bisa mengubah status featured."
-      });
+    } catch {
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Tidak bisa mengubah status featured." });
     }
   };
 
-  // Format price safely
   const formatPrice = (price: string | null | undefined): string => {
     if (!price || price === "0") return "Hubungi Admin";
     try {
-      return Number(price).toLocaleString("id-ID");
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(Number(price));
     } catch {
       return "Hubungi Admin";
     }
   };
 
-  // Loading state
+  // Loading
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
@@ -190,7 +136,7 @@ export default function ProjectDetail() {
     );
   }
 
-  // No project found
+  // Not found
   if (!project) {
     return (
       <Card className="max-w-md mx-auto mt-8">
@@ -199,8 +145,7 @@ export default function ProjectDetail() {
             <ImageIcon className="h-16 w-16 text-muted-foreground" />
             <p className="text-muted-foreground text-center">Project tidak ditemukan</p>
             <Button onClick={() => navigate("/projects")}>
-              <ArrowLeft size={16} className="mr-2" />
-              Kembali ke Projects
+              <ArrowLeft size={16} className="mr-2" /> Kembali ke Projects
             </Button>
           </div>
         </CardContent>
@@ -208,359 +153,396 @@ export default function ProjectDetail() {
     );
   }
 
+  const photos = project.photos || [];
+  const totalPhotos = photos.length;
+  const activePhoto = photos[activeIndex] ?? null;
+  const prevPhoto = () => setActiveIndex((i) => (i - 1 + totalPhotos) % totalPhotos);
+  const nextPhoto = () => setActiveIndex((i) => (i + 1) % totalPhotos);
+
+  // Kumpulkan semua warna & bunga unik dari seluruh foto
+  const allColors = project.photos?.flatMap((p) => p.colors || []) || [];
+  const uniqueColors = allColors.filter(
+    (color, index, self) => index === self.findIndex((c) => c.color_name === color.color_name)
+  );
+  const allFlowers = project.photos?.flatMap((p) => p.flowers || []) || [];
+  const uniqueFlowers = allFlowers.filter(
+    (flower, index, self) => index === self.findIndex((f) => f.flower_name === flower.flower_name)
+  );
+
   return (
     <div className="space-y-6">
-      {/* Header Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={() => navigate("/projects")}
-                className="shrink-0"
-              >
-                <ArrowLeft size={20} />
-              </Button>
-              
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <CardTitle className="text-2xl">{project.title}</CardTitle>
-                  
-                  {project.is_featured && (
-                    <Badge className="bg-amber-500 hover:bg-amber-600">
-                      <Star size={12} className="mr-1 fill-current" />
-                      Featured
-                    </Badge>
-                  )}
-                  
-                  {project.is_published ? (
-                    <Badge className="bg-green-500 hover:bg-green-600">
-                      <Eye size={12} className="mr-1" />
-                      Published
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">
-                      <EyeOff size={12} className="mr-1" />
-                      Draft
-                    </Badge>
-                  )}
-                </div>
-                
-                <CardDescription className="flex items-center gap-2">
-                  <span>{project.category?.name || "Uncategorized"}</span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Eye size={14} />
-                    {(project.view_count || 0).toLocaleString('id-ID')} views
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Calendar size={14} />
-                    {new Date(project.created_at).toLocaleDateString("id-ID", {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </CardDescription>
-              </div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => navigate("/projects")}>
+            <ArrowLeft size={18} />
+          </Button>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-2xl font-bold text-foreground">{project.title}</h1>
+              {project.is_featured && (
+                <Badge className="bg-warning text-warning-foreground">Featured</Badge>
+              )}
+              {!project.is_published && <Badge variant="secondary">Draft</Badge>}
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleTogglePublish}
-              >
-                {project.is_published ? (
-                  <><EyeOff size={16} className="mr-2" />Unpublish</>
-                ) : (
-                  <><Eye size={16} className="mr-2" />Publish</>
-                )}
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleToggleFeatured}
-              >
-                <Star 
-                  size={16} 
-                  className={`mr-2 ${project.is_featured ? "fill-amber-500 text-amber-500" : ""}`} 
-                />
-                {project.is_featured ? "Unfeature" : "Feature"}
-              </Button>
-              
-              <Button 
-                variant="default" 
-                size="sm" 
-                onClick={() => navigate(`/projects/edit/${project.id}`)}
-              >
-                <Edit size={16} className="mr-2" />
-                Edit
-              </Button>
-              
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                onClick={handleDelete}
-              >
-                <Trash2 size={16} className="mr-2" />
-                Hapus
-              </Button>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Badge variant="outline">{project.category?.name || "Uncategorized"}</Badge>
+              <span>•</span>
+              <div className="flex items-center gap-1">
+                <Eye size={14} />
+                <span>{(project.view_count || 0).toLocaleString("id-ID")} views</span>
+              </div>
             </div>
           </div>
-        </CardHeader>
-      </Card>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Images & Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Main Image Display */}
-          <Card>
-            <CardContent className="p-0">
-              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                {selectedImage ? (
-                  <img 
-                    src={selectedImage} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover" 
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full gap-2">
-                    <ImageIcon size={48} className="text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Tidak ada gambar</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Thumbnail Gallery */}
-          {project.photos && project.photos.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <ImageIcon size={18} />
-                  Gallery ({project.photos.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                  {project.photos.map((photo) => (
-                    <button
-                      key={photo.id}
-                      onClick={() => setSelectedImage(photo.url || "")}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
-                        selectedImage === photo.url 
-                          ? "border-primary ring-2 ring-primary/20 scale-105" 
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <img 
-                        src={photo.url || ""} 
-                        alt={`${project.title} - ${photo.caption || 'Photo'}`}
-                        className="w-full h-full object-cover" 
-                      />
-                      
-                      {photo.is_hero && (
-                        <div className="absolute top-1 right-1 bg-amber-500 rounded-full p-1 shadow-md">
-                          <Star size={10} className="text-white fill-current" />
-                        </div>
-                      )}
-                      
-                      {photo.caption && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-[8px] p-1 text-center truncate">
-                          {photo.caption}
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Tabs for Description & Details */}
-          <Card>
-            <Tabs defaultValue="description" className="w-full">
-              <CardHeader>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="description" className="flex items-center gap-2">
-                    <Package size={16} />
-                    Deskripsi
-                  </TabsTrigger>
-                  <TabsTrigger value="details" className="flex items-center gap-2">
-                    <Palette size={16} />
-                    Detail Dekorasi
-                  </TabsTrigger>
-                </TabsList>
-              </CardHeader>
-              
-              <CardContent>
-                <TabsContent value="description" className="space-y-4 mt-0">
-                  <div>
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <Package size={18} className="text-primary" />
-                      Deskripsi Project
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                      {project.description || "Tidak ada deskripsi."}
-                    </p>
-                  </div>
-                  
-                  {project.atmosphere_description && (
-                    <>
-                      <Separator />
-                      <div>
-                        <h3 className="font-semibold mb-2 flex items-center gap-2">
-                          <Heart size={18} className="text-primary" />
-                          Suasana & Atmosfer
-                        </h3>
-                        <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                          {project.atmosphere_description}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="details" className="mt-0">
-                  {project.details && project.details.length > 0 ? (
-                    <div className="space-y-6">
-                      {project.details.map((detail) => (
-                        <div key={detail.id}>
-                          <h4 className="font-semibold mb-3 text-primary uppercase tracking-wide text-sm flex items-center gap-2">
-                            <Sparkles size={14} />
-                            {detail.title}
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {detail.items && detail.items.length > 0 && detail.items.map((item) => (
-                              <Alert key={item.id} className="py-2">
-                                <AlertDescription className="text-sm">
-                                  {item.content}
-                                </AlertDescription>
-                              </Alert>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-center py-8">
-                      Tidak ada detail dekorasi
-                    </p>
-                  )}
-                </TabsContent>
-              </CardContent>
-            </Tabs>
-          </Card>
         </div>
 
-        {/* Right Column: Sidebar Info */}
-        <div className="space-y-6">
-          {/* Price & Info Card */}
-          <Card>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={handleTogglePublish} title={project.is_published ? "Unpublish" : "Publish"}>
+            {project.is_published ? <EyeOff size={18} /> : <Eye size={18} />}
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleToggleFeatured} title={project.is_featured ? "Unfeature" : "Feature"}>
+            <Star size={18} className={project.is_featured ? "fill-amber-500 text-amber-500" : ""} />
+          </Button>
+          <Button variant="outline" size="icon">
+            <Share2 size={18} />
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => navigate(`/projects/edit/${project.id}`)}>
+            <Edit size={16} /> Edit
+          </Button>
+          <Button variant="destructive" size="icon" onClick={handleDelete}>
+            <Trash2 size={18} />
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-6">
+
+          {/* Carousel */}
+          <div className="space-y-3">
+            <div className="relative rounded-xl overflow-hidden aspect-video shadow-elegant bg-muted group">
+              {activePhoto ? (
+                <>
+                  <img
+                    key={activePhoto.id}
+                    src={activePhoto.url}
+                    alt={activePhoto.caption || project.title}
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent" />
+
+                  {/* Caption + color/flower badges */}
+                  <div className="absolute bottom-10 left-4 right-4 flex items-end justify-between">
+                    <p className="text-white text-sm opacity-90 drop-shadow">
+                      {activePhoto.caption || ""}
+                    </p>
+                    <div className="flex gap-1.5">
+                      {(activePhoto.colors?.length ?? 0) > 0 && (
+                        <span className="text-[10px] bg-black/50 text-purple-200 px-2 py-0.5 rounded-full">
+                          🎨 {activePhoto.colors!.length}
+                        </span>
+                      )}
+                      {(activePhoto.flowers?.length ?? 0) > 0 && (
+                        <span className="text-[10px] bg-black/50 text-pink-200 px-2 py-0.5 rounded-full">
+                          🌸 {activePhoto.flowers!.length}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Dots indicator */}
+                  {totalPhotos > 1 && (
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                      {photos.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveIndex(i)}
+                          className={`rounded-full transition-all duration-300 ${
+                            i === activeIndex
+                              ? "w-5 h-2 bg-white"
+                              : "w-2 h-2 bg-white/50 hover:bg-white/80"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Arrow buttons */}
+                  {totalPhotos > 1 && (
+                    <>
+                      <button
+                        onClick={prevPhoto}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button
+                        onClick={nextPhoto}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </>
+                  )}
+
+                  {/* Hero badge */}
+                  {activePhoto.is_hero && (
+                    <div className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Star size={10} className="fill-current" /> Hero
+                    </div>
+                  )}
+
+                  {/* Counter */}
+                  {totalPhotos > 1 && (
+                    <div className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm">
+                      {activeIndex + 1} / {totalPhotos}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full gap-2">
+                  <ImageIcon size={48} className="text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Tidak ada gambar</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Detail warna & bunga foto aktif */}
+          {activePhoto && ((activePhoto.colors?.length ?? 0) > 0 || (activePhoto.flowers?.length ?? 0) > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {activePhoto.colors && activePhoto.colors.length > 0 && (
+                <Card className="shadow-soft">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Palette size={18} className="text-primary" />
+                      Palet Warna
+                      {activePhoto.caption && (
+                        <span className="text-xs text-muted-foreground font-normal">— {activePhoto.caption}</span>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {activePhoto.colors.map((color, i) => (
+                        <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                          {color.color_hex ? (
+                            <div className="w-5 h-5 rounded-full border shadow-sm shrink-0" style={{ backgroundColor: color.color_hex }} />
+                          ) : (
+                            <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0 ml-1.5" />
+                          )}
+                          <span>{color.color_name}</span>
+                          {color.color_hex && <span className="text-xs opacity-60">{color.color_hex}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+              {activePhoto.flowers && activePhoto.flowers.length > 0 && (
+                <Card className="shadow-soft">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Flower2 size={18} className="text-primary" />
+                      Jenis Bunga
+                      {activePhoto.caption && (
+                        <span className="text-xs text-muted-foreground font-normal">— {activePhoto.caption}</span>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {activePhoto.flowers.map((flower, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0" />
+                          <span>{flower.flower_name}</span>
+                          {flower.description && (
+                            <span className="text-xs opacity-60">— {flower.description}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* Description */}
+          <Card className="shadow-soft">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign size={20} />
-                Detail Project
-              </CardTitle>
+              <CardTitle className="text-lg">Deskripsi</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Price Display */}
-              <div className="flex justify-between items-center py-3 border-b">
-                <span className="text-muted-foreground text-sm">Harga</span>
-                {project.price && project.price !== "0" ? (
-                  <span className="font-bold text-primary text-lg">
-                    Rp {formatPrice(project.price)}
-                  </span>
-                ) : (
-                  <Badge variant="outline">
-                    Hubungi Admin
-                  </Badge>
-                )}
+              <p className="text-muted-foreground leading-relaxed">
+                {project.description || "Tidak ada deskripsi."}
+              </p>
+              {project.atmosphere_description && (
+                <div className="pt-4 border-t border-border">
+                  <h4 className="font-semibold text-foreground mb-2">Suasana & Atmosfer</h4>
+                  <p className="text-muted-foreground leading-relaxed">{project.atmosphere_description}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Summary semua warna & bunga dari seluruh foto */}
+          {(uniqueColors.length > 0 || uniqueFlowers.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {uniqueColors.length > 0 && (
+                <Card className="shadow-soft">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Palette size={18} className="text-primary" /> Palet Warna
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {uniqueColors.map((color, i) => (
+                        <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                          {color.color_hex ? (
+                            <div className="w-5 h-5 rounded-full border shadow-sm shrink-0" style={{ backgroundColor: color.color_hex }} />
+                          ) : (
+                            <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0 ml-1.5" />
+                          )}
+                          <span>{color.color_name}</span>
+                          {color.color_hex && <span className="text-xs opacity-60">{color.color_hex}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {uniqueFlowers.length > 0 && (
+                <Card className="shadow-soft">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Flower2 size={18} className="text-primary" /> Jenis Bunga
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {uniqueFlowers.map((flower, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0" />
+                          <span>{flower.flower_name}</span>
+                          {flower.description && (
+                            <span className="text-xs opacity-60">— {flower.description}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Price Card */}
+          <Card className="shadow-elegant border-primary/20 bg-gradient-to-br from-card to-primary/5">
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground mb-1">Harga Mulai Dari</p>
+              {project.price && project.price !== "0" ? (
+                <p className="text-3xl font-bold text-primary">{formatPrice(project.price)}</p>
+              ) : (
+                <p className="text-xl font-semibold text-muted-foreground">Hubungi Admin</p>
+              )}
+              <Separator className="my-4" />
+              <Button className="w-full gradient-ocean text-primary-foreground">
+                Buat Booking Link
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Info Card */}
+          <Card className="shadow-soft">
+            <CardHeader>
+              <CardTitle className="text-lg">Informasi</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Calendar size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Dibuat</p>
+                  <p className="font-medium text-foreground">
+                    {new Date(project.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                </div>
               </div>
-              
-              <div className="flex justify-between items-center py-3 border-b">
-                <span className="text-muted-foreground text-sm">Tema</span>
-                <span className="font-medium">{project.theme || "-"}</span>
+
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Palette size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Tema</p>
+                  <p className="font-medium text-foreground">{project.theme || "-"}</p>
+                </div>
               </div>
-              
-              <div className="flex justify-between items-center py-3 border-b">
-                <span className="text-muted-foreground text-sm">Kategori</span>
-                <Badge variant="outline">{project.category?.name || "N/A"}</Badge>
-              </div>
-              
-              <div className="flex justify-between items-center py-3">
-                <span className="text-muted-foreground text-sm">Dibuat</span>
-                <div className="flex items-center gap-1 text-sm">
-                  <Calendar size={14} />
-                  {new Date(project.created_at).toLocaleDateString("id-ID", {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                  })}
+
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Star size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Kategori</p>
+                  <p className="font-medium text-foreground">{project.category?.name || "-"}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Includes */}
           {project.includes && project.includes.length > 0 && (
-            <Card>
+            <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <CheckCircle2 size={18} className="text-green-500" />
-                  Paket Termasuk
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Check size={18} className="text-success" />
+                  Yang Termasuk
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {project.includes.map((inc) => (
-                    <div 
-                      key={inc.id} 
-                      className="flex items-start gap-2 text-sm p-2 rounded-md hover:bg-muted transition-colors"
-                    >
-                      <CheckCircle2 
-                        size={16} 
-                        className="text-green-500 shrink-0 mt-0.5" 
-                      />
-                      <span>{inc.item}</span>
-                    </div>
+                <ul className="space-y-3">
+                  {project.includes.map((item) => (
+                    <li key={item.id} className="flex items-center gap-3 text-sm">
+                      <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center shrink-0">
+                        <Check size={12} className="text-success" />
+                      </div>
+                      <span className="text-muted-foreground">{item.item}</span>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </CardContent>
             </Card>
           )}
 
-          {/* Moods Card */}
-          {project.moods && project.moods.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Heart size={18} className="text-pink-500" />
-                  Mood & Suasana
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {project.moods.map((mood) => (
-                    <Badge 
-                      key={mood.id} 
-                      variant="secondary"
-                      className="hover:bg-primary hover:text-white transition-colors"
-                    >
-                      {mood.mood}
-                    </Badge>
-                  ))}
+          {/* Stats */}
+          <Card className="shadow-soft">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <p className="text-2xl font-bold text-foreground">
+                    {(project.view_count || 0).toLocaleString("id-ID")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Total Views</p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <div>
+                  <p className="text-2xl font-bold text-foreground">
+                    {project.photos?.length || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Foto</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

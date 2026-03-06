@@ -23,22 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         as: 'photos'
       });
       
-      // Project has many ProjectDetails
-      Project.hasMany(models.ProjectDetail, {
-        foreignKey: 'project_id',
-        as: 'details'
-      });
-      
       // Project has many ProjectIncludes
       Project.hasMany(models.ProjectInclude, {
         foreignKey: 'project_id',
         as: 'includes'
-      });
-      
-      // Project has many ProjectMoods
-      Project.hasMany(models.ProjectMood, {
-        foreignKey: 'project_id',
-        as: 'moods'
       });
       
       // Project has many BookingModels

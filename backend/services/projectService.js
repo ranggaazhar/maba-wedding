@@ -1,11 +1,10 @@
 const { 
   Project, 
   Category, 
-  ProjectPhoto, 
-  ProjectDetail, 
-  ProjectDetailItem,
+  ProjectPhoto,
+  ProjectPhotoColor,
+  ProjectPhotoFlower,
   ProjectInclude, 
-  ProjectMood,
   Admin 
 } = require('../models');
 const { Op } = require('sequelize');
@@ -39,64 +38,57 @@ class ProjectService {
 
       console.log('✅ Project created:', project.id);
 
-      // 2. Upload & Create Photos
+      // 2. Create Photos with Colors & Flowers
       if (files && files.length > 0) {
         try {
           const photosMetadata = data.photos_metadata || [];
           console.log('📸 Processing photos:', { count: files.length, metadata: photosMetadata });
-          
-          const photoData = files.map((file, index) => {
+
+          for (let index = 0; index < files.length; index++) {
+            const file = files[index];
             const metadata = photosMetadata[index] || {};
-            return {
+
+            const photo = await ProjectPhoto.create({
               project_id: project.id,
               url: file.path.replace(/\\/g, '/'),
               caption: metadata.caption || null,
               position: metadata.position || 'center',
               display_order: metadata.display_order !== undefined ? metadata.display_order : index,
               is_hero: index === (parseInt(data.hero_photo_index) || 0)
-            };
-          });
+            }, { transaction });
 
-          await ProjectPhoto.bulkCreate(photoData, { transaction });
-          console.log('✅ Photos created');
+            // Create colors untuk foto ini
+            if (metadata.colors && metadata.colors.length > 0) {
+              const colorsData = metadata.colors.map((color, i) => ({
+                photo_id: photo.id,
+                color_name: color.color_name,
+                color_hex: color.color_hex || null,
+                description: color.description || null,
+                display_order: color.display_order !== undefined ? color.display_order : i
+              }));
+              await ProjectPhotoColor.bulkCreate(colorsData, { transaction });
+            }
+
+            // Create flowers untuk foto ini
+            if (metadata.flowers && metadata.flowers.length > 0) {
+              const flowersData = metadata.flowers.map((flower, i) => ({
+                photo_id: photo.id,
+                flower_name: flower.flower_name,
+                description: flower.description || null,
+                display_order: flower.display_order !== undefined ? flower.display_order : i
+              }));
+              await ProjectPhotoFlower.bulkCreate(flowersData, { transaction });
+            }
+          }
+
+          console.log('✅ Photos with colors & flowers created');
         } catch (photoError) {
           console.error('❌ Photo error:', photoError);
           throw new Error(`Failed to create photos: ${photoError.message}`);
         }
       }
 
-      // 3. Create Details
-      if (data.details && Array.isArray(data.details) && data.details.length > 0) {
-        try {
-          console.log('📝 Creating details:', data.details.length);
-          
-          for (let detailIndex = 0; detailIndex < data.details.length; detailIndex++) {
-            const detail = data.details[detailIndex];
-            
-            const createdDetail = await ProjectDetail.create({
-              project_id: project.id,
-              detail_type: detail.detail_type || 'other',
-              title: detail.title,
-              display_order: detail.display_order !== undefined ? detail.display_order : detailIndex
-            }, { transaction });
-
-            if (detail.items && detail.items.length > 0) {
-              const itemsData = detail.items.map((item, itemIndex) => ({
-                detail_id: createdDetail.id,
-                content: item.content,
-                display_order: item.display_order !== undefined ? item.display_order : itemIndex
-              }));
-
-              await ProjectDetailItem.bulkCreate(itemsData, { transaction });
-            }
-          }
-          console.log('✅ Details created');
-        } catch (detailError) {
-          console.error('❌ Detail error:', detailError);
-          throw new Error(`Failed to create details: ${detailError.message}`);
-        }
-      }
-
+      // 3. Create Includes
       if (data.includes && Array.isArray(data.includes) && data.includes.length > 0) {
         try {
           const includesData = data.includes.map((item, index) => ({
@@ -108,27 +100,10 @@ class ProjectService {
           }));
 
           await ProjectInclude.bulkCreate(includesData, { transaction });
+          console.log('✅ Includes created');
         } catch (includeError) {
           console.error('❌ Include error:', includeError);
           throw new Error(`Failed to create includes: ${includeError.message}`);
-        }
-      }
-
-      if (data.moods && Array.isArray(data.moods) && data.moods.length > 0) {
-        try {
-          const moodsData = data.moods.map((mood, index) => ({
-            project_id: project.id,
-            mood: typeof mood === 'string' ? mood : mood.mood,
-            display_order: typeof mood === 'object' && mood.display_order !== undefined
-              ? mood.display_order
-              : index
-          }));
-
-          await ProjectMood.bulkCreate(moodsData, { transaction });
-          console.log('✅ Moods created');
-        } catch (moodError) {
-          console.error('❌ Mood error:', moodError);
-          throw new Error(`Failed to create moods: ${moodError.message}`);
         }
       }
 
@@ -160,6 +135,7 @@ class ProjectService {
         throw new Error('Project not found');
       }
 
+      // 1. Update project fields
       await project.update({
         title: data.title !== undefined ? data.title : project.title,
         slug: data.slug !== undefined ? data.slug : project.slug,
@@ -172,24 +148,49 @@ class ProjectService {
         is_published: data.is_published !== undefined ? data.is_published : project.is_published
       }, { transaction });
 
+      // 2. Add new photos with colors & flowers
       if (newFiles && newFiles.length > 0) {
-        const photosMetadata = data.photos_metadata ? (typeof data.photos_metadata === 'string' ? JSON.parse(data.photos_metadata) : data.photos_metadata) : [];
-        
-        const photoData = newFiles.map((file, index) => {
+        const photosMetadata = data.photos_metadata 
+          ? (typeof data.photos_metadata === 'string' ? JSON.parse(data.photos_metadata) : data.photos_metadata) 
+          : [];
+
+        for (let index = 0; index < newFiles.length; index++) {
+          const file = newFiles[index];
           const metadata = photosMetadata[index] || {};
-          return {
+
+          const photo = await ProjectPhoto.create({
             project_id: project.id,
             url: file.path.replace(/\\/g, '/'),
             caption: metadata.caption || null,
             position: metadata.position || 'center',
             display_order: metadata.display_order !== undefined ? metadata.display_order : index,
             is_hero: false
-          };
-        });
+          }, { transaction });
 
-        await ProjectPhoto.bulkCreate(photoData, { transaction });
+          if (metadata.colors && metadata.colors.length > 0) {
+            const colorsData = metadata.colors.map((color, i) => ({
+              photo_id: photo.id,
+              color_name: color.color_name,
+              color_hex: color.color_hex || null,
+              description: color.description || null,
+              display_order: color.display_order !== undefined ? color.display_order : i
+            }));
+            await ProjectPhotoColor.bulkCreate(colorsData, { transaction });
+          }
+
+          if (metadata.flowers && metadata.flowers.length > 0) {
+            const flowersData = metadata.flowers.map((flower, i) => ({
+              photo_id: photo.id,
+              flower_name: flower.flower_name,
+              description: flower.description || null,
+              display_order: flower.display_order !== undefined ? flower.display_order : i
+            }));
+            await ProjectPhotoFlower.bulkCreate(flowersData, { transaction });
+          }
+        }
       }
 
+      // 3. Update existing photos metadata (caption, position, display_order, is_hero)
       if (data.update_photos_metadata) {
         const updatePhotos = typeof data.update_photos_metadata === 'string' 
           ? JSON.parse(data.update_photos_metadata) 
@@ -205,9 +206,39 @@ class ProjectService {
             where: { id: photoUpdate.id, project_id: id },
             transaction
           });
+
+          // Update colors foto yang sudah ada (replace semua)
+          if (photoUpdate.colors !== undefined) {
+            await ProjectPhotoColor.destroy({ where: { photo_id: photoUpdate.id }, transaction });
+            if (photoUpdate.colors.length > 0) {
+              const colorsData = photoUpdate.colors.map((color, i) => ({
+                photo_id: photoUpdate.id,
+                color_name: color.color_name,
+                color_hex: color.color_hex || null,
+                description: color.description || null,
+                display_order: color.display_order !== undefined ? color.display_order : i
+              }));
+              await ProjectPhotoColor.bulkCreate(colorsData, { transaction });
+            }
+          }
+
+          // Update flowers foto yang sudah ada (replace semua)
+          if (photoUpdate.flowers !== undefined) {
+            await ProjectPhotoFlower.destroy({ where: { photo_id: photoUpdate.id }, transaction });
+            if (photoUpdate.flowers.length > 0) {
+              const flowersData = photoUpdate.flowers.map((flower, i) => ({
+                photo_id: photoUpdate.id,
+                flower_name: flower.flower_name,
+                description: flower.description || null,
+                display_order: flower.display_order !== undefined ? flower.display_order : i
+              }));
+              await ProjectPhotoFlower.bulkCreate(flowersData, { transaction });
+            }
+          }
         }
       }
 
+      // 4. Set hero photo
       if (data.hero_photo_id) {
         await ProjectPhoto.update(
           { is_hero: false },
@@ -219,34 +250,27 @@ class ProjectService {
         );
       }
 
-      if (data.details !== undefined) {
-        const details = typeof data.details === 'string' ? JSON.parse(data.details) : data.details;
-        await ProjectDetail.destroy({ where: { project_id: id }, transaction });
+      // 5. Delete specific photos
+      if (data.delete_photo_ids) {
+        const deleteIds = typeof data.delete_photo_ids === 'string'
+          ? JSON.parse(data.delete_photo_ids)
+          : data.delete_photo_ids;
 
-        if (details && details.length > 0) {
-          for (let detailIndex = 0; detailIndex < details.length; detailIndex++) {
-            const detail = details[detailIndex];
-            
-            const createdDetail = await ProjectDetail.create({
-              project_id: project.id,
-              detail_type: detail.detail_type || 'other',
-              title: detail.title,
-              display_order: detail.display_order !== undefined ? detail.display_order : detailIndex
-            }, { transaction });
+        const photosToDelete = await ProjectPhoto.findAll({
+          where: { id: deleteIds, project_id: id },
+          transaction
+        });
 
-            if (detail.items && detail.items.length > 0) {
-              const itemsData = detail.items.map((item, itemIndex) => ({
-                detail_id: createdDetail.id,
-                content: item.content,
-                display_order: item.display_order !== undefined ? item.display_order : itemIndex
-              }));
+        // Colors & flowers terhapus otomatis via CASCADE
+        await ProjectPhoto.destroy({ where: { id: deleteIds, project_id: id }, transaction });
 
-              await ProjectDetailItem.bulkCreate(itemsData, { transaction });
-            }
-          }
+        // Hapus file fisik setelah commit
+        for (const photo of photosToDelete) {
+          await FileHelper.deleteFile(photo.url);
         }
       }
 
+      // 6. Update includes (replace semua)
       if (data.includes !== undefined) {
         const includes = typeof data.includes === 'string' ? JSON.parse(data.includes) : data.includes;
         await ProjectInclude.destroy({ where: { project_id: id }, transaction });
@@ -259,25 +283,7 @@ class ProjectService {
               ? item.display_order
               : index
           }));
-
           await ProjectInclude.bulkCreate(includesData, { transaction });
-        }
-      }
-
-      if (data.moods !== undefined) {
-        const moods = typeof data.moods === 'string' ? JSON.parse(data.moods) : data.moods;
-        await ProjectMood.destroy({ where: { project_id: id }, transaction });
-        
-        if (moods && moods.length > 0) {
-          const moodsData = moods.map((mood, index) => ({
-            project_id: project.id,
-            mood: typeof mood === 'string' ? mood : mood.mood,
-            display_order: typeof mood === 'object' && mood.display_order !== undefined
-              ? mood.display_order
-              : index
-          }));
-
-          await ProjectMood.bulkCreate(moodsData, { transaction });
         }
       }
 
@@ -300,7 +306,7 @@ class ProjectService {
     
     try {
       const project = await Project.findByPk(id);
-      if(!project) throw new Error('Project not found');
+      if (!project) throw new Error('Project not found');
       
       const photos = await ProjectPhoto.findAll({
         where: { project_id: id },
@@ -308,23 +314,14 @@ class ProjectService {
         transaction
       });
 
-      await ProjectDetailItem.destroy({
-        where: {
-          detail_id: {
-            [Op.in]: sequelize.literal(`(SELECT id FROM project_details WHERE project_id = ${id})`)
-          }
-        },
-        transaction
-      });
-
-      await ProjectDetail.destroy({ where: { project_id: id }, transaction });
+      // Colors & flowers terhapus otomatis via CASCADE ketika photos dihapus
       await ProjectInclude.destroy({ where: { project_id: id }, transaction });
-      await ProjectMood.destroy({ where: { project_id: id }, transaction });
       await ProjectPhoto.destroy({ where: { project_id: id }, transaction });
       await project.destroy({ transaction });
 
       await transaction.commit();
 
+      // Hapus file fisik setelah commit
       for (const photo of photos) {
         await FileHelper.deleteFile(photo.url);
       }
@@ -349,29 +346,23 @@ class ProjectService {
           model: ProjectPhoto, 
           as: 'photos',
           separate: true,
-          order: [['display_order', 'ASC'], ['created_at', 'ASC']]
-        },
-        { 
-          model: ProjectDetail, 
-          as: 'details',
-          include: [{ 
-            model: ProjectDetailItem, 
-            as: 'items',
-            separate: true,
-            order: [['display_order', 'ASC']]
-          }],
-          separate: true,
-          order: [['display_order', 'ASC']]
+          order: [['display_order', 'ASC'], ['created_at', 'ASC']],
+          include: [
+            { 
+              model: ProjectPhotoColor, 
+              as: 'colors',
+              order: [['display_order', 'ASC']]
+            },
+            { 
+              model: ProjectPhotoFlower, 
+              as: 'flowers',
+              order: [['display_order', 'ASC']]
+            }
+          ]
         },
         { 
           model: ProjectInclude, 
           as: 'includes',
-          separate: true,
-          order: [['display_order', 'ASC']]
-        },
-        { 
-          model: ProjectMood, 
-          as: 'moods',
           separate: true,
           order: [['display_order', 'ASC']]
         }
@@ -383,6 +374,7 @@ class ProjectService {
     if (!project) {
       throw new Error('Project not found');
     }
+
     if (!includeAll) {
       return project;
     }
@@ -401,21 +393,24 @@ class ProjectService {
     
     return projectData;
   }
+
   async getProjectBySlug(slug, incrementView = false) {
     const project = await Project.findOne({
       where: { slug },
       include: [
         { model: Category, as: 'category' },
         { model: Admin, as: 'creator', attributes: ['id', 'name', 'email'] },
-        { model: ProjectPhoto, as: 'photos', separate: true, order: [['display_order', 'ASC']] },
         { 
-          model: ProjectDetail, 
-          as: 'details',
-          include: [{ model: ProjectDetailItem, as: 'items', separate: true, order: [['display_order', 'ASC']] }],
-          separate: true, order: [['display_order', 'ASC']]
+          model: ProjectPhoto, 
+          as: 'photos', 
+          separate: true, 
+          order: [['display_order', 'ASC']],
+          include: [
+            { model: ProjectPhotoColor, as: 'colors', order: [['display_order', 'ASC']] },
+            { model: ProjectPhotoFlower, as: 'flowers', order: [['display_order', 'ASC']] }
+          ]
         },
-        { model: ProjectInclude, as: 'includes', separate: true, order: [['display_order', 'ASC']] },
-        { model: ProjectMood, as: 'moods', separate: true, order: [['display_order', 'ASC']] }
+        { model: ProjectInclude, as: 'includes', separate: true, order: [['display_order', 'ASC']] }
       ]
     });
     
@@ -425,8 +420,20 @@ class ProjectService {
       await project.increment('view_count');
       await project.reload();
     }
+
+    const projectData = project.toJSON();
+    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+    if (projectData.photos && Array.isArray(projectData.photos)) {
+      projectData.photos = projectData.photos.map(photo => ({
+        ...photo,
+        url: photo.url && photo.url.startsWith('http')
+          ? photo.url
+          : `${BASE_URL}/${photo.url}`
+      }));
+    }
     
-    return project;
+    return projectData;
   }
 
   async getAllProjects(filters = {}) {
@@ -444,7 +451,16 @@ class ProjectService {
     
     const include = [{ model: Category, as: 'category' }];
     if (filters.includePhotos) {
-      include.push({ model: ProjectPhoto, as: 'photos', separate: true, order: [['display_order', 'ASC']] });
+      include.push({ 
+        model: ProjectPhoto, 
+        as: 'photos', 
+        separate: true, 
+        order: [['display_order', 'ASC']],
+        include: [
+          { model: ProjectPhotoColor, as: 'colors', order: [['display_order', 'ASC']] },
+          { model: ProjectPhotoFlower, as: 'flowers', order: [['display_order', 'ASC']] }
+        ]
+      });
     }
     
     const orderBy = filters.orderBy || 'created_at';
@@ -465,6 +481,84 @@ class ProjectService {
     });
   }
 
+  async updateProjectPhoto(photoId, { caption, position, is_hero, colors, flowers, file }) {
+    const transaction = await sequelize.transaction();
+    try {
+      const photo = await ProjectPhoto.findByPk(photoId);
+      if (!photo) throw new Error('Photo not found');
+
+      // Ganti file jika ada upload baru
+      let newUrl = photo.url;
+      if (file) {
+        if (photo.url) await FileHelper.deleteFile(photo.url).catch(() => {});
+        newUrl = file.path.replace(/\\/g, '/');
+      }
+
+      await photo.update({
+        caption: caption !== undefined ? caption : photo.caption,
+        position: position !== undefined ? position : photo.position,
+        is_hero: is_hero !== undefined ? (is_hero === 'true' || is_hero === true) : photo.is_hero,
+        url: newUrl
+      }, { transaction });
+
+      // Replace colors jika dikirim
+      if (colors !== undefined) {
+        let parsed = typeof colors === 'string' ? JSON.parse(colors) : colors;
+        await ProjectPhotoColor.destroy({ where: { photo_id: photoId }, transaction });
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          await ProjectPhotoColor.bulkCreate(
+            parsed.map((c, i) => ({
+              photo_id: photoId,
+              color_name: c.color_name,
+              color_hex: c.color_hex || null,
+              description: c.description || null,
+              display_order: c.display_order ?? i
+            })),
+            { transaction }
+          );
+        }
+      }
+
+      // Replace flowers jika dikirim
+      if (flowers !== undefined) {
+        let parsed = typeof flowers === 'string' ? JSON.parse(flowers) : flowers;
+        await ProjectPhotoFlower.destroy({ where: { photo_id: photoId }, transaction });
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          await ProjectPhotoFlower.bulkCreate(
+            parsed.map((f, i) => ({
+              photo_id: photoId,
+              flower_name: f.flower_name,
+              description: f.description || null,
+              display_order: f.display_order ?? i
+            })),
+            { transaction }
+          );
+        }
+      }
+
+      await transaction.commit();
+
+      // Kembalikan data terbaru lengkap
+      return await ProjectPhoto.findByPk(photoId, {
+        include: [
+          { model: ProjectPhotoColor, as: 'colors', order: [['display_order', 'ASC']] },
+          { model: ProjectPhotoFlower, as: 'flowers', order: [['display_order', 'ASC']] }
+        ]
+      });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
+  async deleteProjectPhoto(photoId) {
+    const photo = await ProjectPhoto.findByPk(photoId);
+    if (!photo) throw new Error('Photo not found');
+
+    if (photo.url) await FileHelper.deleteFile(photo.url).catch(() => {});
+    await photo.destroy(); // colors & flowers auto-cascade
+  }
+
   async toggleProjectStatus(id, field = 'is_published') {
     const project = await this.getProjectById(id, false);
     await project.update({ [field]: !project[field] });
@@ -472,14 +566,37 @@ class ProjectService {
   }
 
   async getFeaturedProjects(limit = 6) {
-    return await Project.findAll({
+    const projects = await Project.findAll({
       where: { is_featured: true, is_published: true },
       include: [
         { model: Category, as: 'category' },
-        { model: ProjectPhoto, as: 'photos', where: { is_hero: true }, required: false, limit: 1 }
+        { 
+          model: ProjectPhoto, 
+          as: 'photos', 
+          where: { is_hero: true }, 
+          required: false, 
+          limit: 1,
+          include: [
+            { model: ProjectPhotoColor, as: 'colors' },
+            { model: ProjectPhotoFlower, as: 'flowers' }
+          ]
+        }
       ],
       order: [['created_at', 'DESC']],
       limit
+    });
+
+    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+    return projects.map(project => {
+      const projectData = project.toJSON();
+      if (projectData.photos && Array.isArray(projectData.photos)) {
+        projectData.photos = projectData.photos.map(photo => ({
+          ...photo,
+          url: photo.url && photo.url.startsWith('http') ? photo.url : `${BASE_URL}/${photo.url}`
+        }));
+      }
+      return projectData;
     });
   }
 }

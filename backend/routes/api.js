@@ -11,8 +11,6 @@ const propertyController = require('../controllers/propertyController');
 const propertyImageController = require('../controllers/propertyImageController');
 const bookingLinkController = require('../controllers/bookingLinkController');
 const bookingController = require('../controllers/bookingController');
-const bookingModelController = require('../controllers/bookingModelController');
-const bookingPropertyController = require('../controllers/bookingPropertyController');
 const reviewLinkController = require('../controllers/reviewLinkController');
 const reviewController = require('../controllers/reviewController');
 const siteSettingController = require('../controllers/siteSettingController');
@@ -38,8 +36,6 @@ const {
   updateBookingValidation,
   submitPaymentValidation,
   uploadPaymentProofValidation,
-  createBookingModelValidation,
-  createBookingPropertyValidation,
   bookingIdValidation,
   bookingCodeValidation,
   validate: bookingValidate
@@ -103,6 +99,17 @@ router.put('/projects/:id/complete', authMiddleware,upload.projectPhoto.array('p
 router.delete('/projects/:id',authMiddleware,projectIdValidation,projectValidate,projectController.deleteProject);
 router.patch('/projects/:id/toggle-publish',authMiddleware,projectIdValidation,projectValidate,projectController.togglePublishStatus);
 router.patch('/projects/:id/toggle-featured',authMiddleware,projectIdValidation,projectValidate,projectController.toggleFeaturedStatus);
+router.put('/projects/:id/photos/:photoId',authMiddleware,upload.projectPhoto.single('photo'),          // field 'photo', 1 fileprocessMultipleImages({ width: 1920, quality: 85 }),
+projectController.updatePhoto
+);
+
+router.delete(
+  '/projects/:id/photos/:photoId',
+  authMiddleware,
+  projectIdValidation,
+  projectValidate,
+  projectController.deletePhoto
+);
 
 // PROPERTY ROUTES
 router.get('/properties', propertyController.getAllProperties);
@@ -136,7 +143,6 @@ router.patch('/booking-links/:id/regenerate-token', authMiddleware, bookingLinkC
 
 // BOOKING ROUTES 
 router.post('/bookings', createBookingValidation, bookingValidate, bookingController.createBooking);
-router.get('/bookings/code/:code', bookingCodeValidation, bookingValidate, bookingController.getBookingByCode);
 router.post('/bookings/:id/payment-proof/upload',upload.paymentProof.single('payment_proof'),processImage({ width: 1920, quality: 80 }),uploadPaymentProofValidation,bookingValidate,bookingController.uploadPaymentProof);
 router.post('/bookings/:id/submit-payment', bookingIdValidation, submitPaymentValidation, bookingValidate, bookingController.submitPayment);
 router.get('/bookings', authMiddleware, bookingController.getAllBookings);

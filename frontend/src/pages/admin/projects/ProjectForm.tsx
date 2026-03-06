@@ -1,4 +1,3 @@
-// src/pages/ProjectForm.tsx - FULL WIDTH VERSION
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
@@ -6,19 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { StepBasicInfo } from '@/pages/admin/projects/project/StepBasicInfo';
 import { StepPhotos } from '@/pages/admin/projects/project/StepPhotos';
-import { StepDetails } from '@/pages/admin/projects/project/StepDetails';
-import { StepIncludesMoods } from '@/pages/admin/projects/project/StepIncludesMoods';
+import { StepIncludes } from '@/pages/admin/projects/project/StepIncludes';
 import { StepReview } from '@/pages/admin/projects/project/StepReview';
-import { projectApi, type CreateCompleteProjectData, type ProjectPhoto, type ProjectDetail, type ProjectInclude, type ProjectMood } from '@/api/projectApi';
+import { projectApi, type CreateCompleteProjectData, type ProjectPhoto, type ProjectInclude } from '@/api/projectApi';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
 const steps = [
   { id: 1, name: 'Info Dasar', description: 'Informasi project' },
-  { id: 2, name: 'Foto', description: 'Upload gambar' },
-  { id: 3, name: 'Detail', description: 'Warna & bunga' },
-  { id: 4, name: 'Konten', description: 'Includes & mood' },
-  { id: 5, name: 'Review', description: 'Cek & simpan' },
+  { id: 2, name: 'Foto', description: 'Upload & detail foto' },
+  { id: 3, name: 'Konten', description: 'Yang termasuk' },
+  { id: 4, name: 'Review', description: 'Cek & simpan' },
 ];
 
 export default function ProjectForm() {
@@ -30,7 +27,7 @@ export default function ProjectForm() {
   const [saving, setSaving] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(isEdit);
   const [existingPhotos, setExistingPhotos] = useState<ProjectPhoto[]>([]);
-  
+
   const [formData, setFormData] = useState<CreateCompleteProjectData>({
     title: '',
     slug: '',
@@ -43,9 +40,7 @@ export default function ProjectForm() {
     is_published: true,
     photos: [],
     hero_photo_index: 0,
-    details: [],
     includes: [],
-    moods: [],
   });
 
   const fetchProjectData = useCallback(async () => {
@@ -55,7 +50,7 @@ export default function ProjectForm() {
       const response = await projectApi.getProjectById(Number(id));
       if (response.success) {
         const p = response.data;
-        
+
         setFormData({
           title: p.title ?? '',
           slug: p.slug ?? '',
@@ -68,25 +63,12 @@ export default function ProjectForm() {
           is_published: p.is_published ?? false,
           photos: [],
           hero_photo_index: (p.photos ?? []).findIndex((img: ProjectPhoto) => img.is_hero) ?? 0,
-          details: (p.details ?? []).map((d: ProjectDetail) => ({
-            detail_type: d.detail_type,
-            title: d.title,
-            display_order: d.display_order,
-            items: d.items.map(item => ({
-              content: item.content,
-              display_order: item.display_order
-            }))
-          })),
           includes: (p.includes ?? []).map((i: ProjectInclude) => ({
             item: i.item,
-            display_order: i.display_order
-          })),
-          moods: (p.moods ?? []).map((m: ProjectMood) => ({
-            mood: m.mood,
-            display_order: m.display_order
+            display_order: i.display_order,
           })),
         });
-        
+
         setExistingPhotos(p.photos ?? []);
       }
     } catch (error: unknown) {
@@ -150,9 +132,7 @@ export default function ProjectForm() {
           atmosphere_description: formData.atmosphere_description,
           is_featured: formData.is_featured,
           is_published: formData.is_published,
-          details: formData.details,
           includes: formData.includes,
-          moods: formData.moods,
         };
 
         if (formData.photos && formData.photos.length > 0) {
@@ -213,7 +193,7 @@ export default function ProjectForm() {
 
       <div className="space-y-4">
         <Progress value={(currentStep / steps.length) * 100} className="h-2 transition-all duration-500" />
-        <div className="grid grid-cols-5 gap-1 md:gap-2">
+        <div className="grid grid-cols-4 gap-1 md:gap-2">
           {steps.map((step) => (
             <button
               key={step.id}
@@ -222,7 +202,7 @@ export default function ProjectForm() {
               disabled={saving}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
-                currentStep === step.id ? 'border-primary bg-primary text-white scale-110' : 
+                currentStep === step.id ? 'border-primary bg-primary text-white scale-110' :
                 currentStep > step.id ? 'border-green-500 bg-green-500 text-white' : 'border-muted text-muted-foreground'
               }`}>
                 {currentStep > step.id ? <Check size={16} strokeWidth={3} /> : step.id}
@@ -240,21 +220,19 @@ export default function ProjectForm() {
           <StepBasicInfo formData={formData} updateFormData={updateFormData} onNext={nextStep} />
         )}
         {currentStep === 2 && (
-          <StepPhotos 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            existingPhotos={existingPhotos} 
+          <StepPhotos
+            formData={formData}
+            updateFormData={updateFormData}
+            existingPhotos={existingPhotos}
+            projectId={id ? Number(id) : undefined}
             onRefresh={fetchProjectData}
           />
         )}
         {currentStep === 3 && (
-          <StepDetails formData={formData} updateFormData={updateFormData} />
+          <StepIncludes formData={formData} updateFormData={updateFormData} />
         )}
         {currentStep === 4 && (
-          <StepIncludesMoods formData={formData} updateFormData={updateFormData} />
-        )}
-        {currentStep === 5 && (
-          <StepReview formData={formData} goToStep={goToStep} isEdit={isEdit} />
+          <StepReview formData={formData} goToStep={goToStep} isEdit={isEdit} existingPhotos={existingPhotos} />
         )}
       </div>
 

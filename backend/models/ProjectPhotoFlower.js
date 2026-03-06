@@ -1,32 +1,35 @@
-// models/ProjectMood.js
+// models/ProjectPhotoFlower.js
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class ProjectMood extends Model {
+  class ProjectPhotoFlower extends Model {
     static associate(models) {
-      // ProjectMood belongs to Project
-      ProjectMood.belongsTo(models.Project, {
-        foreignKey: 'project_id',
-        as: 'project'
+      ProjectPhotoFlower.belongsTo(models.ProjectPhoto, {
+        foreignKey: 'photo_id',
+        as: 'photo'
       });
     }
   }
 
-  ProjectMood.init({
+  ProjectPhotoFlower.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
-    project_id: {
+    photo_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    mood: {
+    flower_name: {
       type: DataTypes.STRING(100),
       allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
     },
     display_order: {
       type: DataTypes.INTEGER,
@@ -34,13 +37,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'ProjectMood',
-    tableName: 'project_moods',
+    modelName: 'ProjectPhotoFlower',
+    tableName: 'project_photo_flowers',
     underscored: true,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false
   });
 
-  return ProjectMood;
+  return ProjectPhotoFlower;
 };

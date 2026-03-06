@@ -1,73 +1,76 @@
-// controllers/projectController.js - COMPLETE REPLACEMENT
 const projectService = require('../services/projectService');
 
 class ProjectController {
- async createCompleteProject(req, res) {
-  try {
-    const projectData = {
-      ...req.body,
-      created_by: req.admin?.id || req.body.created_by
-    };
+  async createCompleteProject(req, res) {
     try {
-      if (typeof projectData.details === 'string') {
-        projectData.details = JSON.parse(projectData.details);
+      const projectData = {
+        ...req.body,
+        created_by: req.admin?.id || req.body.created_by
+      };
+
+      try {
+        if (typeof projectData.includes === 'string') {
+          projectData.includes = JSON.parse(projectData.includes);
+        }
+        if (typeof projectData.photos_metadata === 'string') {
+          projectData.photos_metadata = JSON.parse(projectData.photos_metadata);
+        }
+      } catch (parseError) {
+        console.error('❌ JSON Parse Error:', parseError);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid JSON format in request data',
+          error: parseError.message
+        });
       }
-      if (typeof projectData.includes === 'string') {
-        projectData.includes = JSON.parse(projectData.includes);
-      }
-      if (typeof projectData.moods === 'string') {
-        projectData.moods = JSON.parse(projectData.moods);
-      }
-      if (typeof projectData.photos_metadata === 'string') {
-        projectData.photos_metadata = JSON.parse(projectData.photos_metadata);
-      }
-    } catch (parseError) {
-      console.error('❌ JSON Parse Error:', parseError);
-      return res.status(400).json({
+
+      const files = req.files || [];
+      const project = await projectService.createCompleteProject(projectData, files);
+
+      return res.status(201).json({
+        success: true,
+        message: 'Project created successfully with all related data',
+        data: project
+      });
+    } catch (error) {
+      return res.status(500).json({
         success: false,
-        message: 'Invalid JSON format in request data',
-        error: parseError.message
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
-    const files = req.files || [];
-    const project = await projectService.createCompleteProject(projectData, files);
-    
-    return res.status(201).json({
-      success: true,
-      message: 'Project created successfully with all related data',
-      data: project
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
   }
-}
+
   async updateCompleteProject(req, res) {
     try {
       const { id } = req.params;
       const updateData = { ...req.body };
-      if (typeof updateData.details === 'string') {
-        updateData.details = JSON.parse(updateData.details);
-      }
-      if (typeof updateData.includes === 'string') {
-        updateData.includes = JSON.parse(updateData.includes);
-      }
-      if (typeof updateData.moods === 'string') {
-        updateData.moods = JSON.parse(updateData.moods);
-      }
-      if (typeof updateData.photos_metadata === 'string') {
-        updateData.photos_metadata = JSON.parse(updateData.photos_metadata);
-      }
-      if (typeof updateData.update_photos_metadata === 'string') {
-        updateData.update_photos_metadata = JSON.parse(updateData.update_photos_metadata);
+
+      try {
+        if (typeof updateData.includes === 'string') {
+          updateData.includes = JSON.parse(updateData.includes);
+        }
+        if (typeof updateData.photos_metadata === 'string') {
+          updateData.photos_metadata = JSON.parse(updateData.photos_metadata);
+        }
+        if (typeof updateData.update_photos_metadata === 'string') {
+          updateData.update_photos_metadata = JSON.parse(updateData.update_photos_metadata);
+        }
+        if (typeof updateData.delete_photo_ids === 'string') {
+          updateData.delete_photo_ids = JSON.parse(updateData.delete_photo_ids);
+        }
+      } catch (parseError) {
+        console.error('❌ JSON Parse Error:', parseError);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid JSON format in request data',
+          error: parseError.message
+        });
       }
 
       const newFiles = req.files || [];
       const project = await projectService.updateCompleteProject(id, updateData, newFiles);
-      
+
       return res.status(200).json({
         success: true,
         message: 'Project updated successfully with all related data',
@@ -86,7 +89,7 @@ class ProjectController {
     try {
       const { id } = req.params;
       const result = await projectService.deleteProject(id);
-      
+
       return res.status(200).json({
         success: true,
         message: result.message
@@ -111,9 +114,9 @@ class ProjectController {
         orderBy: req.query.order_by,
         orderDir: req.query.order_dir
       };
-      
+
       const projects = await projectService.getAllProjects(filters);
-      
+
       return res.status(200).json({
         success: true,
         message: 'Projects retrieved successfully',
@@ -128,14 +131,11 @@ class ProjectController {
     }
   }
 
-  /**
-   * GET PROJECT BY ID
-   */
   async getProjectById(req, res) {
     try {
       const { id } = req.params;
       const project = await projectService.getProjectById(id);
-      
+
       return res.status(200).json({
         success: true,
         message: 'Project retrieved successfully',
@@ -150,16 +150,13 @@ class ProjectController {
     }
   }
 
-  /**
-   * GET PROJECT BY SLUG
-   */
   async getProjectBySlug(req, res) {
     try {
       const { slug } = req.params;
       const incrementView = req.query.increment_view === 'true';
-      
+
       const project = await projectService.getProjectBySlug(slug, incrementView);
-      
+
       return res.status(200).json({
         success: true,
         message: 'Project retrieved successfully',
@@ -174,14 +171,11 @@ class ProjectController {
     }
   }
 
-  /**
-   * TOGGLE PUBLISH STATUS
-   */
   async togglePublishStatus(req, res) {
     try {
       const { id } = req.params;
       const project = await projectService.toggleProjectStatus(id, 'is_published');
-      
+
       return res.status(200).json({
         success: true,
         message: 'Project publish status toggled successfully',
@@ -196,14 +190,11 @@ class ProjectController {
     }
   }
 
-  /**
-   * TOGGLE FEATURED STATUS
-   */
   async toggleFeaturedStatus(req, res) {
     try {
       const { id } = req.params;
       const project = await projectService.toggleProjectStatus(id, 'is_featured');
-      
+
       return res.status(200).json({
         success: true,
         message: 'Project featured status toggled successfully',
@@ -218,14 +209,11 @@ class ProjectController {
     }
   }
 
-  /**
-   * GET FEATURED PROJECTS
-   */
   async getFeaturedProjects(req, res) {
     try {
       const limit = parseInt(req.query.limit) || 6;
       const projects = await projectService.getFeaturedProjects(limit);
-      
+
       return res.status(200).json({
         success: true,
         message: 'Featured projects retrieved successfully',
@@ -236,6 +224,54 @@ class ProjectController {
         success: false,
         message: 'Failed to retrieve featured projects',
         error: error.message
+      });
+    }
+  }
+
+  // PUT /projects/:id/photos/:photoId
+  async updatePhoto(req, res) {
+    try {
+      const { photoId } = req.params;
+      const { caption, position, is_hero, colors, flowers } = req.body;
+
+      const photo = await projectService.updateProjectPhoto(photoId, {
+        caption,
+        position,
+        is_hero,
+        colors,
+        flowers,
+        file: req.file || null
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Foto berhasil diperbarui',
+        data: photo
+      });
+    } catch (error) {
+      const statusCode = error.message === 'Photo not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+  // DELETE /projects/:id/photos/:photoId
+  async deletePhoto(req, res) {
+    try {
+      const { photoId } = req.params;
+      await projectService.deleteProjectPhoto(photoId);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Foto berhasil dihapus'
+      });
+    } catch (error) {
+      const statusCode = error.message === 'Photo not found' ? 404 : 500;
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message
       });
     }
   }
