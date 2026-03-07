@@ -5,31 +5,22 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Booking extends Model {
     static associate(models) {
-      // Booking belongs to BookingLink
       Booking.belongsTo(models.BookingLink, {
         foreignKey: 'booking_link_id',
         as: 'bookingLink'
       });
-      
-      // Booking has many BookingModels
       Booking.hasMany(models.BookingModel, {
         foreignKey: 'booking_id',
         as: 'models'
       });
-      
-      // Booking has many BookingProperties
       Booking.hasMany(models.BookingProperty, {
         foreignKey: 'booking_id',
         as: 'properties'
       });
-      
-      // Booking has one Invoice
       Booking.hasOne(models.Invoice, {
         foreignKey: 'booking_id',
         as: 'invoice'
       });
-      
-      // Booking has one ReviewLink
       Booking.hasOne(models.ReviewLink, {
         foreignKey: 'booking_id',
         as: 'reviewLink'
@@ -90,6 +81,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: true
     },
+    dp_amount: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true
+    },
     customer_notes: {
       type: DataTypes.TEXT,
       allowNull: true
@@ -112,6 +107,24 @@ module.exports = (sequelize, DataTypes) => {
     },
     payment_date: {
       type: DataTypes.DATE,
+      allowNull: true
+    },
+    // ── Field baru ──────────────────────────────────────
+    payment_status: {
+      type: DataTypes.ENUM('PENDING', 'WAITING_CONFIRMATION', 'CONFIRMED', 'REJECTED'),
+      defaultValue: 'PENDING',
+      allowNull: false
+    },
+    confirmed_by: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    confirmed_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    rejection_reason: {
+      type: DataTypes.TEXT,
       allowNull: true
     }
   }, {

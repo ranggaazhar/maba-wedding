@@ -14,6 +14,8 @@ const {
 const { sequelize } = require('../models');
 const { Op } = require('sequelize');
 const FileHelper = require('../utils/fileHelper');
+const bookingPdfService = require('./bookingPdfService');
+const whatsappService = require('./whatsappService');
 
 class BookingService {
   generateBookingCode() {
@@ -369,27 +371,90 @@ async updateBooking(id, data) {
     return { message: 'Booking deleted successfully' };
   }
   
-  // ✅ NEW: Submit payment with file upload
-  async submitPaymentWithFile(id, file, paymentData) {
+    async submitPaymentWithFile(id, file, paymentData) {
     const booking = await this.getBookingById(id, false);
-    
-    // Delete old payment proof if exists
+
     if (booking.payment_proof_url) {
       await FileHelper.deleteFile(booking.payment_proof_url);
     }
-    
-    // Save new payment proof path
+
     const paymentProofUrl = file.path.replace(/\\/g, '/');
-    
+
     await booking.update({
       payment_proof_url: paymentProofUrl,
       bank_name: paymentData.bank_name || null,
       account_number: paymentData.account_number || null,
       account_name: paymentData.account_name || null,
-      payment_date: new Date()
+      payment_date: new Date(),
+      payment_status: 'WAITING_CONFIRMATION'  // ← otomatis saat customer upload
     });
-    
+
     return booking;
+  }
+
+async confirmPayment(id, adminId = null) {
+    const booking = await this.getBookingById(id, true);
+    if (!booking) throw new Error('Booking not found');
+
+    if (!booking.payment_proof_url) {
+      throw new Error('Belum ada bukti pembayaran yang diupload customer');
+    }
+
+    if (booking.payment_status === 'CONFIRMED') {
+      throw new Error('Pembayaran sudah pernah dikonfirmasi sebelumnya');
+    }
+
+    await Booking.update(
+      { payment_status: 'CONFIRMED', confirmed_by: adminId, confirmed_at: new Date() },
+      { where: { id } }
+    );
+
+    let pdfPath = null;        // full absolute path  → untuk whatsappService
+    let pdfRelative = null;    // relative path       → untuk dikembalikan ke controller
+
+    try {
+      const bookingData = booking.toJSON ? booking.toJSON() : booking;
+      pdfPath = await bookingPdfService.generateBookingPdf(bookingData);
+
+      // Konversi: "D:\MYPROJECT\...\uploads\booking-pdfs\file.pdf"
+      //       → "uploads/booking-pdfs/file.pdf"
+      const normalized = pdfPath.replace(/\\/g, '/');
+      const splitResult = normalized.split('/uploads/');
+      pdfRelative = splitResult.length > 1 ? `uploads/${splitResult[1]}` : normalized;
+
+    } catch (e) {
+      console.error('❌ PDF gagal:', e.message);
+    }
+
+    let waResult = null;
+    if (pdfPath && pdfRelative) {
+      try {
+        const bookingData = booking.toJSON ? booking.toJSON() : booking;
+        // Kirim pdfRelative ke WA — nanti digabung BASE_URL di whatsappService
+        waResult = await whatsappService.sendBookingConfirmation(bookingData, pdfRelative);
+      } catch (e) {
+        console.error('❌ WA gagal:', e.message);
+      }
+    }
+
+    return {
+      booking: await this.getBookingById(id, false),
+      pdf_generated: !!pdfPath,
+      pdf_path: pdfRelative,   // ← relative path, bisa langsung dibuka di browser
+      whatsapp_sent: waResult?.success || false,
+    };
+  }
+
+  async rejectPayment(id, reason = '') {
+    const booking = await this.getBookingById(id, false);
+    if (!booking) throw new Error('Booking not found');
+
+    await Booking.update(
+      { payment_status: 'REJECTED', rejection_reason: reason || null },
+      { where: { id } }
+    );
+
+    return await this.getBookingById(id, false);
   }
   
   // Original method for URL-based payment proof

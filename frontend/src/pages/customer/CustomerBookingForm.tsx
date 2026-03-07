@@ -11,7 +11,6 @@ import { bookingLinkApi, bookingApi, type CreateBookingData } from "@/api/bookin
 import Swal from "sweetalert2";
 import axios from "axios";
 
-// Import step components
 import Step1CustomerInfo from "@/pages/customer/Step1CustomerInfo";
 import Step2Models from "@/pages/customer/Step2Models";
 import Step3Properties from "@/pages/customer/Step3Properties";
@@ -34,7 +33,7 @@ const STEPS = [
   { id: 1, title: "Data Diri", icon: User, description: "Informasi customer" },
   { id: 2, title: "Pilih Model", icon: Package, description: "Model dekorasi" },
   { id: 3, title: "Pilih Property", icon: ShoppingCart, description: "Properti tambahan" },
-  { id: 4, title: "Pembayaran", icon: CreditCard, description: "Upload bukti DP" },
+  { id: 4, title: "Pembayaran", icon: CreditCard, description: "Bayar DP 10%" },
 ];
 
 export default function CustomerBookingForm() {
@@ -48,7 +47,6 @@ export default function CustomerBookingForm() {
   const [createdBookingId, setCreatedBookingId] = useState<number | null>(null);
   const [bookingCode, setBookingCode] = useState<string>("");
 
-  // Form data state
   const [formData, setFormData] = useState<CreateBookingData>({
     booking_link_id: 0,
     customer_name: "",
@@ -72,7 +70,16 @@ export default function CustomerBookingForm() {
     account_name: "",
   });
 
-  // Validate booking link on mount
+  // Hitung total estimate dari models + properties
+  const totalEstimate = (() => {
+    let total = 0;
+    formData.models?.forEach(m => { total += Number(m.price || 0); });
+    formData.properties?.forEach(p => { total += Number(p.subtotal || 0); });
+    return total;
+  })();
+
+  const dpAmount = Math.ceil(totalEstimate * 0.1);
+
   useEffect(() => {
     const validateLink = async () => {
       if (!token) {
@@ -87,7 +94,6 @@ export default function CustomerBookingForm() {
         
         if (response.success) {
           const data = response.data as BookingLinkResponse;
-          
           setFormData(prev => ({
             ...prev,
             booking_link_id: data.id,
@@ -99,7 +105,6 @@ export default function CustomerBookingForm() {
         const message = axios.isAxiosError(error)
           ? error.response?.data?.message
           : "Link booking tidak valid atau sudah expired";
-        
         Swal.fire("Error", message, "error").then(() => navigate("/"));
       } finally {
         setIsValidating(false);
@@ -112,14 +117,14 @@ export default function CustomerBookingForm() {
   const handleNext = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep(prev => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -127,48 +132,25 @@ export default function CustomerBookingForm() {
     try {
       setIsSubmitting(true);
 
-      // Validate required fields
       if (!formData.customer_name || !formData.customer_phone || !formData.event_date) {
         Swal.fire("Error", "Data customer tidak lengkap", "error");
         setCurrentStep(1);
-        setIsSubmitting(false);
         return;
       }
 
       if (!formData.models || formData.models.length === 0) {
         Swal.fire("Error", "Pilih minimal 1 model dekorasi", "error");
         setCurrentStep(2);
-        setIsSubmitting(false);
         return;
       }
 
-      // Calculate total estimate
-      let totalEstimate = 0;
-      
-      // Add model prices
-      if (formData.models) {
-        formData.models.forEach(model => {
-          totalEstimate += Number(model.price || 0);
-        });
-      }
-      
-      // Add property prices
-      if (formData.properties) {
-        formData.properties.forEach(prop => {
-          totalEstimate += Number(prop.subtotal || 0);
-        });
-      }
-
-      // Prepare booking data
       const bookingDataToSubmit: CreateBookingData = {
         ...formData,
         total_estimate: String(totalEstimate),
-        // Ensure models and properties are arrays
+        dp_amount: String(dpAmount),
         models: formData.models || [],
         properties: formData.properties || [],
       };
-
-      console.log("Submitting booking data:", bookingDataToSubmit);
 
       const bookingResponse = await bookingApi.createBooking(bookingDataToSubmit);
 
@@ -179,28 +161,22 @@ export default function CustomerBookingForm() {
         setCreatedBookingId(bookingId);
         setBookingCode(bookingCodeStr);
 
-        // Upload payment proof if exists
+        // Upload bukti bayar (wajib karena sudah divalidasi di Step4)
         if (paymentFile) {
           try {
             await bookingApi.uploadPaymentProof(bookingId, paymentFile, paymentData);
           } catch (uploadError) {
             console.error("Payment upload error:", uploadError);
-            // Continue even if upload fails
           }
         }
 
         setCurrentStep(5);
       }
     } catch (error: unknown) {
-      console.error("Booking submission error:", error);
-      
       let message = "Gagal menyimpan booking";
-      
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.message || message;
-        console.error("API Error Response:", error.response?.data);
       }
-      
       Swal.fire("Error", message, "error");
     } finally {
       setIsSubmitting(false);
@@ -245,19 +221,13 @@ export default function CustomerBookingForm() {
                 return (
                   <div key={step.id} className="flex items-center flex-1">
                     <div className="flex flex-col items-center gap-2 flex-1">
-                      <div
-                        className={`
-                          w-12 h-12 rounded-full flex items-center justify-center transition-all
-                          ${isCompleted ? "bg-green-500 text-white" : ""}
-                          ${isActive ? "bg-primary text-white ring-4 ring-primary/20" : ""}
-                          ${!isActive && !isCompleted ? "bg-muted text-muted-foreground" : ""}
-                        `}
-                      >
-                        {isCompleted ? (
-                          <CheckCircle2 size={24} />
-                        ) : (
-                          <Icon size={24} />
-                        )}
+                      <div className={`
+                        w-12 h-12 rounded-full flex items-center justify-center transition-all
+                        ${isCompleted ? "bg-green-500 text-white" : ""}
+                        ${isActive ? "bg-primary text-white ring-4 ring-primary/20" : ""}
+                        ${!isActive && !isCompleted ? "bg-muted text-muted-foreground" : ""}
+                      `}>
+                        {isCompleted ? <CheckCircle2 size={24} /> : <Icon size={24} />}
                       </div>
                       <div className="text-center">
                         <p className={`text-sm font-medium ${isActive ? "text-primary" : ""}`}>
@@ -268,11 +238,8 @@ export default function CustomerBookingForm() {
                         </p>
                       </div>
                     </div>
-
                     {index < STEPS.length - 1 && (
-                      <Separator
-                        className={`flex-1 mx-4 ${isCompleted ? "bg-green-500" : ""}`}
-                      />
+                      <Separator className={`flex-1 mx-4 ${isCompleted ? "bg-green-500" : ""}`} />
                     )}
                   </div>
                 );
@@ -285,13 +252,8 @@ export default function CustomerBookingForm() {
         <Card>
           <CardContent className="pt-6">
             {currentStep === 1 && (
-              <Step1CustomerInfo
-                formData={formData}
-                setFormData={setFormData}
-                onNext={handleNext}
-              />
+              <Step1CustomerInfo formData={formData} setFormData={setFormData} onNext={handleNext} />
             )}
-
             {currentStep === 2 && (
               <Step2Models
                 models={formData.models || []}
@@ -300,7 +262,6 @@ export default function CustomerBookingForm() {
                 onBack={handleBack}
               />
             )}
-
             {currentStep === 3 && (
               <Step3Properties
                 properties={formData.properties || []}
@@ -309,13 +270,13 @@ export default function CustomerBookingForm() {
                 onBack={handleBack}
               />
             )}
-
             {currentStep === 4 && (
               <Step4Payment
                 paymentFile={paymentFile}
                 setPaymentFile={setPaymentFile}
                 paymentData={paymentData}
                 setPaymentData={setPaymentData}
+                totalEstimate={totalEstimate}
                 onBack={handleBack}
                 onSubmit={handleSubmitBooking}
                 isSubmitting={isSubmitting}

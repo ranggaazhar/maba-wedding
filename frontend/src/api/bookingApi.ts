@@ -64,6 +64,9 @@ export interface BookingProperty {
   display_image?: string;
 }
 
+// Status alur pembayaran
+export type PaymentStatus = 'PENDING' | 'WAITING_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+
 export interface Booking {
   id: number;
   booking_link_id: number;
@@ -77,6 +80,7 @@ export interface Booking {
   referral_source?: string;
   theme_color?: string;
   total_estimate?: string;
+  dp_amount?: string;           // ← tambah
   customer_notes?: string;
   admin_notes?: string;
   payment_proof_url?: string;
@@ -85,6 +89,10 @@ export interface Booking {
   account_number?: string;
   account_name?: string;
   payment_date?: string;
+  payment_status: PaymentStatus; // ← tambah
+  confirmed_by?: number;         // ← tambah
+  confirmed_at?: string;         // ← tambah
+  rejection_reason?: string;     // ← tambah
   submitted_at: string;
   updated_at: string;
   bookingLink?: BookingLink;
@@ -103,6 +111,7 @@ export interface CreateBookingData {
   referral_source?: string;
   theme_color?: string;
   total_estimate?: string;
+  dp_amount?: string;            // ← tambah
   customer_notes?: string;
   models?: BookingModel[];
   properties?: BookingProperty[];
@@ -201,6 +210,7 @@ class BookingApi {
     event_date_from?: string;
     event_date_to?: string;
     has_payment?: boolean;
+    payment_status?: PaymentStatus; // ← tambah filter status
   }) {
     const params = new URLSearchParams();
     if (filters?.search) params.append('search', filters.search);
@@ -208,6 +218,7 @@ class BookingApi {
     if (filters?.event_date_from) params.append('event_date_from', filters.event_date_from);
     if (filters?.event_date_to) params.append('event_date_to', filters.event_date_to);
     if (filters?.has_payment !== undefined) params.append('has_payment', String(filters.has_payment));
+    if (filters?.payment_status) params.append('payment_status', filters.payment_status);
 
     const response = await axios.get(
       `${API_URL}/bookings?${params.toString()}`,
@@ -224,15 +235,13 @@ class BookingApi {
 
     const data = response.data;
 
-    // --- HELPER PROSES GAMBAR ---
     if (data.success && data.data) {
       const booking = data.data;
       const BASE_URL = API_URL.replace('/api', '');
 
-      // Proses Gambar Model
       booking.models = booking.models?.map((m: BookingModel) => {
-        const rawPath = m.project?.photos?.find(p => p.is_hero)?.url || 
-                        m.project?.photos?.[0]?.url || 
+        const rawPath = m.project?.photos?.find(p => p.is_hero)?.url ||
+                        m.project?.photos?.[0]?.url ||
                         m.project?.thumbnail_url;
         return {
           ...m,
@@ -240,10 +249,9 @@ class BookingApi {
         };
       });
 
-      // Proses Gambar Property
       booking.properties = booking.properties?.map((p: BookingProperty) => {
-        const rawPath = p.property?.images?.find(i => i.is_primary)?.url || 
-                        p.property?.images?.[0]?.url || 
+        const rawPath = p.property?.images?.find(i => i.is_primary)?.url ||
+                        p.property?.images?.[0]?.url ||
                         p.property?.thumbnail_url;
         return {
           ...p,
@@ -289,7 +297,7 @@ class BookingApi {
   }) {
     const formData = new FormData();
     formData.append('payment_proof', file);
-    
+
     if (paymentData?.bank_name) formData.append('bank_name', paymentData.bank_name);
     if (paymentData?.account_number) formData.append('account_number', paymentData.account_number);
     if (paymentData?.account_name) formData.append('account_name', paymentData.account_name);
@@ -305,6 +313,26 @@ class BookingApi {
   async deletePaymentProof(id: number) {
     const response = await axios.delete(
       `${API_URL}/bookings/${id}/payment-proof`,
+      this.getAuthHeaders()
+    );
+    return response.data;
+  }
+
+  // ── Tambahan baru ────────────────────────────────────────
+
+  async confirmPayment(id: number) {
+    const response = await axios.post(
+      `${API_URL}/bookings/${id}/confirm-payment`,
+      {},
+      this.getAuthHeaders()
+    );
+    return response.data;
+  }
+
+  async rejectPayment(id: number, reason?: string) {
+    const response = await axios.post(
+      `${API_URL}/bookings/${id}/reject-payment`,
+      { reason: reason || '' },
       this.getAuthHeaders()
     );
     return response.data;

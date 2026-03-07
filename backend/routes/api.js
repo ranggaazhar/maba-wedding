@@ -15,7 +15,6 @@ const reviewLinkController = require('../controllers/reviewLinkController');
 const reviewController = require('../controllers/reviewController');
 const siteSettingController = require('../controllers/siteSettingController');
 const invoiceController = require('../controllers/invoiceController');
-const invoiceItemController = require('../controllers/invoiceItemController');
 
 // Import middlewares
 const authMiddleware = require('../middleware/auth');
@@ -145,6 +144,8 @@ router.patch('/booking-links/:id/regenerate-token', authMiddleware, bookingLinkC
 router.post('/bookings', createBookingValidation, bookingValidate, bookingController.createBooking);
 router.post('/bookings/:id/payment-proof/upload',upload.paymentProof.single('payment_proof'),processImage({ width: 1920, quality: 80 }),uploadPaymentProofValidation,bookingValidate,bookingController.uploadPaymentProof);
 router.post('/bookings/:id/submit-payment', bookingIdValidation, submitPaymentValidation, bookingValidate, bookingController.submitPayment);
+router.post('/bookings/:id/confirm-payment', authMiddleware, bookingIdValidation, bookingValidate, bookingController.confirmPayment);
+router.post('/bookings/:id/reject-payment',  authMiddleware, bookingIdValidation, bookingValidate, bookingController.rejectPayment);
 router.get('/bookings', authMiddleware, bookingController.getAllBookings);
 router.get('/bookings/statistics', authMiddleware, bookingController.getStatistics);
 router.get('/bookings/date-range', authMiddleware, bookingController.getBookingsByDateRange);
@@ -191,26 +192,27 @@ router.put('/site-settings/:id', authMiddleware, updateSiteSettingValidation, se
 router.put('/site-settings/key/:key', authMiddleware, siteSettingController.updateSettingByKey);
 router.delete('/site-settings/:id', authMiddleware, siteSettingController.deleteSetting);
 
-// INVOICE ROUTES
-router.get('/invoices', authMiddleware, invoiceController.getAllInvoices);
-router.get('/invoices/statistics', authMiddleware, invoiceController.getStatistics);
-router.get('/invoices/date-range', authMiddleware, invoiceController.getInvoicesByDateRange);
-router.get('/invoices/:id', authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.getInvoiceById);
-router.post('/invoices', authMiddleware, createInvoiceValidation, settingInvoiceValidate, invoiceController.createInvoice);
+// ── INVOICE ROUTES ────────────────────────────────────────────────────────
+router.get('/invoices',                    authMiddleware, invoiceController.getAllInvoices);
+router.get('/invoices/statistics',         authMiddleware, invoiceController.getStatistics);
+router.get('/invoices/date-range',         authMiddleware, invoiceController.getInvoicesByDateRange);
+router.get('/invoices/:id',                authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.getInvoiceById);
+router.post('/invoices',                   authMiddleware, createInvoiceValidation, settingInvoiceValidate, invoiceController.createInvoice);
 router.post('/invoices/from-booking/:bookingId', authMiddleware, invoiceController.createInvoiceFromBooking);
-router.put('/invoices/:id', authMiddleware, updateInvoiceValidation, settingInvoiceValidate, invoiceController.updateInvoice);
-router.delete('/invoices/:id', authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.deleteInvoice);
-router.patch('/invoices/:id/update-pdf', authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.updatePdfUrl);
-router.patch('/invoices/:id/recalculate', authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.recalculateTotal);
-
-// INVOICE ITEM ROUTES
-router.get('/invoices/:invoiceId/items', authMiddleware, invoiceItemController.getItemsByInvoice);
-router.get('/invoices/:invoiceId/items/calculate-total', authMiddleware, invoiceItemController.calculateItemsTotal);
-router.get('/invoice-items/:id', authMiddleware, invoiceItemController.getItemById);
-router.post('/invoices/:invoiceId/items', authMiddleware, createInvoiceItemValidation, settingInvoiceValidate, invoiceItemController.createItem);
-router.post('/invoices/:invoiceId/items/bulk', authMiddleware, invoiceItemController.bulkCreateItems);
-router.post('/invoices/:invoiceId/items/reorder', authMiddleware, invoiceItemController.reorderItems);
-router.put('/invoice-items/:id', authMiddleware, invoiceItemController.updateItem);
-router.delete('/invoice-items/:id', authMiddleware, invoiceItemController.deleteItem);
+router.put('/invoices/:id',                authMiddleware, updateInvoiceValidation, settingInvoiceValidate, invoiceController.updateInvoice);
+router.delete('/invoices/:id',             authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.deleteInvoice);
+router.patch('/invoices/:id/update-pdf',   authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.updatePdfUrl);
+router.patch('/invoices/:id/recalculate',  authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.recalculateTotal);
+router.patch('/invoices/:id/mark-sent',    authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.markAsSent);
+router.patch('/invoices/:id/mark-paid',    authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.markAsPaid);
+router.patch('/invoices/:id/mark-overdue', authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.markAsOverdue);
+router.get('/invoices/:invoiceId/items',                  authMiddleware, invoiceController.getItemsByInvoice);
+router.get('/invoices/:invoiceId/items/calculate-total',  authMiddleware, invoiceController.calculateItemsTotal);
+router.get('/invoice-items/:id',                          authMiddleware, invoiceController.getItemById);
+router.post('/invoices/:invoiceId/items',                 authMiddleware, createInvoiceItemValidation, settingInvoiceValidate, invoiceController.createItem);
+router.post('/invoices/:invoiceId/items/bulk',            authMiddleware, invoiceController.bulkCreateItems);
+router.post('/invoices/:invoiceId/items/reorder',         authMiddleware, invoiceController.reorderItems);
+router.put('/invoice-items/:id',                          authMiddleware, invoiceController.updateItem);
+router.delete('/invoice-items/:id',                       authMiddleware, invoiceController.deleteItem);
 
 module.exports = router;

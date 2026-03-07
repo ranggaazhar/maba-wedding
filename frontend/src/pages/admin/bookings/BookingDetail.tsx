@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   ArrowLeft, Calendar, MapPin, Phone, Clock, 
   User, Check, X, Send, FileText, Edit, MessageSquare,
-  Package, Palette, Loader2, Download
+  Package, Palette, Loader2, Download, CheckCircle2, XCircle, AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,14 +12,32 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { bookingApi, type Booking, type BookingModel, type BookingProperty } from "@/api/bookingApi";
+import { bookingApi, type Booking, type BookingModel, type BookingProperty, type PaymentStatus } from "@/api/bookingApi";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const statusConfig = {
-  confirmed: { label: "Dikonfirmasi", style: "bg-success/10 text-success border-success/20", icon: Check },
-  pending: { label: "Menunggu Konfirmasi", style: "bg-warning/10 text-warning border-warning/20", icon: Clock },
-  cancelled: { label: "Dibatalkan", style: "bg-destructive/10 text-destructive border-destructive/20", icon: X },
+// ── Status badge berdasarkan payment_status dari DB ──────────────────────────
+const paymentStatusConfig: Record<PaymentStatus, { label: string; style: string; icon: React.ElementType }> = {
+  PENDING: {
+    label: "Belum Bayar",
+    style: "bg-warning/10 text-warning border-warning/20",
+    icon: Clock,
+  },
+  WAITING_CONFIRMATION: {
+    label: "Menunggu Konfirmasi",
+    style: "bg-blue-50 text-blue-600 border-blue-200",
+    icon: AlertCircle,
+  },
+  CONFIRMED: {
+    label: "DP Dikonfirmasi",
+    style: "bg-success/10 text-success border-success/20",
+    icon: Check,
+  },
+  REJECTED: {
+    label: "Ditolak",
+    style: "bg-destructive/10 text-destructive border-destructive/20",
+    icon: X,
+  },
 };
 
 export default function BookingDetail() {
@@ -27,19 +45,18 @@ export default function BookingDetail() {
   const { id } = useParams<{ id: string }>();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const [adminNotes, setAdminNotes] = useState("");
 
   useEffect(() => {
-    if (id) {
-      fetchBookingDetail();
-    }
+    if (id) fetchBookingDetail();
   }, [id]);
 
   const fetchBookingDetail = async () => {
     try {
       setIsLoading(true);
       const response = await bookingApi.getBookingById(Number(id));
-      console.log('booking data:', response.data); 
       if (response.success) {
         setBooking(response.data);
         setAdminNotes(response.data.admin_notes || "");
@@ -55,9 +72,81 @@ export default function BookingDetail() {
     }
   };
 
+  // ── Konfirmasi Pembayaran ─────────────────────────────────────────────────
+  const handleConfirmPayment = async () => {
+    const result = await Swal.fire({
+      title: "Konfirmasi Pembayaran?",
+      html: `
+        <p>Booking <strong>${booking?.booking_code}</strong> akan dikonfirmasi.</p>
+        <p class="text-sm text-gray-500 mt-2">PDF detail booking akan dikirim ke WhatsApp customer.</p>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#22c55e",
+      confirmButtonText: "Ya, Konfirmasi!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setIsConfirming(true);
+      const response = await bookingApi.confirmPayment(Number(id));
+
+      if (response.success) {
+        await Swal.fire({
+          title: "Berhasil!",
+          html: `
+            Pembayaran dikonfirmasi.<br/>
+            <small>${response.data.whatsapp_sent ? "✅ Notifikasi WA terkirim ke customer." : "⚠️ WA gagal dikirim, tapi konfirmasi tetap tersimpan."}</small>
+          `,
+          icon: "success",
+        });
+        fetchBookingDetail(); // refresh data
+      }
+    } catch (error: unknown) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Gagal mengkonfirmasi pembayaran";
+      Swal.fire("Gagal!", message, "error");
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  // ── Tolak Pembayaran ──────────────────────────────────────────────────────
+  const handleRejectPayment = async () => {
+    const { value: reason, isConfirmed } = await Swal.fire({
+      title: "Tolak Pembayaran?",
+      input: "textarea",
+      inputLabel: "Alasan penolakan (opsional)",
+      inputPlaceholder: "Contoh: Bukti transfer tidak jelas, nominal tidak sesuai...",
+      inputAttributes: { rows: "3" },
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      confirmButtonText: "Ya, Tolak!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      setIsRejecting(true);
+      await bookingApi.rejectPayment(Number(id), reason || "");
+      Swal.fire("Ditolak", "Pembayaran telah ditolak", "info");
+      fetchBookingDetail();
+    } catch (error: unknown) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Gagal menolak pembayaran";
+      Swal.fire("Gagal!", message, "error");
+    } finally {
+      setIsRejecting(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!booking) return;
-
     const result = await Swal.fire({
       title: "Yakin hapus booking?",
       text: `Booking ${booking.booking_code} akan dihapus permanen!`,
@@ -65,7 +154,7 @@ export default function BookingDetail() {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal"
+      cancelButtonText: "Batal",
     });
 
     if (result.isConfirmed) {
@@ -82,25 +171,15 @@ export default function BookingDetail() {
     }
   };
 
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("id-ID", {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("id-ID", {
+      weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
-  };
 
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("id-ID", {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const formatDateTime = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("id-ID", {
+      day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
     });
-  };
 
   const totalPropertyCost = booking?.properties?.reduce(
     (sum, p) => sum + parseFloat(p.subtotal), 0
@@ -115,13 +194,14 @@ export default function BookingDetail() {
     );
   }
 
-  if (!booking) {
-    return null;
-  }
+  if (!booking) return null;
 
-  const hasPayment = !!booking.payment_proof_url;
-  const status = statusConfig[hasPayment ? 'confirmed' : 'pending'];
-  const StatusIcon = status.icon;
+  const paymentStatus = booking.payment_status || "PENDING";
+  const statusInfo = paymentStatusConfig[paymentStatus];
+  const StatusIcon = statusInfo.icon;
+
+  // Tampilkan tombol konfirmasi/tolak hanya saat WAITING_CONFIRMATION
+  const showConfirmActions = paymentStatus === "WAITING_CONFIRMATION";
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -138,11 +218,11 @@ export default function BookingDetail() {
 
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-foreground">{booking.booking_code}</h1>
-              <Badge className={status.style}>
+              <Badge className={statusInfo.style}>
                 <StatusIcon size={14} className="mr-1" />
-                {status.label}
+                {statusInfo.label}
               </Badge>
             </div>
             <p className="text-muted-foreground">
@@ -150,16 +230,13 @@ export default function BookingDetail() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(`/bookings/edit/${booking.id}`)}
-            >
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" onClick={() => navigate(`/bookings/edit/${booking.id}`)}>
               <Edit size={16} className="mr-2" />
               Edit
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="text-destructive border-destructive/30 hover:bg-destructive/10"
               onClick={handleDelete}
             >
@@ -168,6 +245,76 @@ export default function BookingDetail() {
             </Button>
           </div>
         </div>
+
+        {/* ── Banner Konfirmasi (muncul hanya saat WAITING_CONFIRMATION) ── */}
+        {showConfirmActions && (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="py-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="text-blue-500 mt-0.5 shrink-0" size={20} />
+                  <div>
+                    <p className="font-semibold text-blue-700">Bukti Pembayaran Diterima</p>
+                    <p className="text-sm text-blue-600">
+                      Customer telah mengupload bukti transfer. Silakan verifikasi dan konfirmasi atau tolak pembayaran ini.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    onClick={handleRejectPayment}
+                    disabled={isRejecting || isConfirming}
+                  >
+                    {isRejecting ? <Loader2 size={16} className="mr-2 animate-spin" /> : <XCircle size={16} className="mr-2" />}
+                    Tolak
+                  </Button>
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={handleConfirmPayment}
+                    disabled={isConfirming || isRejecting}
+                  >
+                    {isConfirming ? <Loader2 size={16} className="mr-2 animate-spin" /> : <CheckCircle2 size={16} className="mr-2" />}
+                    Konfirmasi
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Banner CONFIRMED */}
+        {paymentStatus === "CONFIRMED" && booking.confirmed_at && (
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="py-3">
+              <div className="flex items-center gap-3 text-green-700">
+                <CheckCircle2 size={18} />
+                <p className="text-sm">
+                  Dikonfirmasi pada <strong>{formatDateTime(booking.confirmed_at)}</strong>. 
+                  PDF telah dikirim ke WhatsApp customer.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Banner REJECTED */}
+        {paymentStatus === "REJECTED" && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="py-3">
+              <div className="flex items-center gap-3 text-red-700">
+                <XCircle size={18} />
+                <p className="text-sm">
+                  Pembayaran ditolak.
+                  {booking.rejection_reason && (
+                    <> Alasan: <strong>{booking.rejection_reason}</strong></>
+                  )}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -189,7 +336,7 @@ export default function BookingDetail() {
               </TabsTrigger>
             </TabsList>
 
-            {/* TAB 1: Informasi Pribadi & Acara */}
+            {/* TAB 1: Informasi */}
             <TabsContent value="info" className="space-y-4">
               <Card>
                 <CardHeader className="pb-4">
@@ -233,10 +380,7 @@ export default function BookingDetail() {
                           Warna Tema
                         </p>
                         <div className="flex items-center gap-2">
-                          <div 
-                            className="w-6 h-6 rounded border-2 border-border" 
-                            style={{ backgroundColor: booking.theme_color }}
-                          />
+                          <div className="w-6 h-6 rounded border-2 border-border" style={{ backgroundColor: booking.theme_color }} />
                           <span className="text-sm font-medium">{booking.theme_color}</span>
                         </div>
                       </div>
@@ -268,33 +412,60 @@ export default function BookingDetail() {
                     <CardTitle className="text-lg flex items-center gap-2">
                       <FileText size={18} className="text-primary" />
                       Bukti Pembayaran
+                      <Badge className={statusInfo.style + " ml-auto"}>
+                        <StatusIcon size={12} className="mr-1" />
+                        {statusInfo.label}
+                      </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                      <img 
-                        src={booking.payment_proof_full_url || booking.payment_proof_url} 
+                      <img
+                        src={booking.payment_proof_full_url || booking.payment_proof_url}
                         alt="Bukti Pembayaran"
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
-                      onClick={() => window.open(booking.payment_proof_full_url || booking.payment_proof_url, '_blank')}
+                      onClick={() => window.open(booking.payment_proof_full_url || booking.payment_proof_url, "_blank")}
                     >
                       <Download size={16} className="mr-2" />
                       Lihat Full Size
                     </Button>
-                    
+
                     {booking.bank_name && (
                       <div className="pt-3 border-t">
                         <p className="text-xs text-muted-foreground mb-2">Informasi Transfer</p>
                         <div className="space-y-1 text-sm">
-                          {booking.bank_name && <p><span className="text-muted-foreground">Bank:</span> {booking.bank_name}</p>}
+                          <p><span className="text-muted-foreground">Bank:</span> {booking.bank_name}</p>
                           {booking.account_name && <p><span className="text-muted-foreground">Atas Nama:</span> {booking.account_name}</p>}
                           {booking.account_number && <p><span className="text-muted-foreground">No. Rekening:</span> {booking.account_number}</p>}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Tombol konfirmasi/tolak inline di kartu bukti bayar */}
+                    {showConfirmActions && (
+                      <div className="pt-3 border-t flex gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                          onClick={handleRejectPayment}
+                          disabled={isRejecting || isConfirming}
+                        >
+                          <XCircle size={16} className="mr-2" />
+                          Tolak
+                        </Button>
+                        <Button
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                          onClick={handleConfirmPayment}
+                          disabled={isConfirming || isRejecting}
+                        >
+                          <CheckCircle2 size={16} className="mr-2" />
+                          Konfirmasi
+                        </Button>
                       </div>
                     )}
                   </CardContent>
@@ -322,36 +493,30 @@ export default function BookingDetail() {
                         <div className="flex gap-4">
                           {model.display_image && (
                             <img
-                                src={model.display_image}
-                                alt={model.project_title}
-                                className="w-28 h-20 rounded-lg object-cover border border-border"
+                              src={model.display_image}
+                              alt={model.project_title}
+                              className="w-28 h-20 rounded-lg object-cover border border-border"
                             />
-                            )}
+                          )}
                           <div className="flex-1 space-y-1">
                             {model.category?.name && (
-                              <Badge variant="outline" className="text-xs mb-1">
-                                {model.category.name}
-                              </Badge>
+                              <Badge variant="outline" className="text-xs mb-1">{model.category.name}</Badge>
                             )}
                             <h4 className="font-semibold text-foreground">{model.project_title}</h4>
                             {model.price && (
                               <p className="text-sm text-muted-foreground">
-                                Rp {parseFloat(model.price).toLocaleString('id-ID')}
+                                Rp {parseFloat(model.price).toLocaleString("id-ID")}
                               </p>
                             )}
                             {model.notes && (
-                              <p className="text-sm text-muted-foreground italic">
-                                "{model.notes}"
-                              </p>
+                              <p className="text-sm text-muted-foreground italic">"{model.notes}"</p>
                             )}
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-muted-foreground py-8">
-                      Tidak ada model dekorasi yang dipilih
-                    </p>
+                    <p className="text-center text-muted-foreground py-8">Tidak ada model dekorasi yang dipilih</p>
                   )}
                 </CardContent>
               </Card>
@@ -376,11 +541,11 @@ export default function BookingDetail() {
                         {booking.properties.map((prop: BookingProperty, index: number) => (
                           <div key={prop.id || index} className="flex items-center gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                             {prop.display_image && (
-                            <img
+                              <img
                                 src={prop.display_image}
                                 alt={prop.property_name}
                                 className="w-12 h-12 rounded-lg object-cover border border-border"
-                            />
+                              />
                             )}
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-foreground text-sm truncate">{prop.property_name}</p>
@@ -407,9 +572,7 @@ export default function BookingDetail() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-center text-muted-foreground py-8">
-                      Tidak ada properties tambahan
-                    </p>
+                    <p className="text-center text-muted-foreground py-8">Tidak ada properties tambahan</p>
                   )}
                 </CardContent>
               </Card>
@@ -433,19 +596,26 @@ export default function BookingDetail() {
               <SummaryRow label="Model Dekorasi" value={`${booking.models?.length || 0} model`} />
               <SummaryRow label="Properties" value={`${booking.properties?.length || 0} item`} />
               {booking.total_estimate && (
-                <SummaryRow 
-                  label="Estimasi Total" 
-                  value={`Rp ${parseFloat(booking.total_estimate).toLocaleString("id-ID")}`} 
-                  highlight 
+                <SummaryRow
+                  label="Estimasi Total"
+                  value={`Rp ${parseFloat(booking.total_estimate).toLocaleString("id-ID")}`}
+                  highlight
                 />
               )}
-              {totalPropertyCost > 0 && (
-                <SummaryRow 
-                  label="Total Properties" 
-                  value={`Rp ${totalPropertyCost.toLocaleString("id-ID")}`} 
-                  highlight 
+              {booking.dp_amount && (
+                <SummaryRow
+                  label="DP (10%)"
+                  value={`Rp ${parseFloat(booking.dp_amount).toLocaleString("id-ID")}`}
                 />
               )}
+              <Separator />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Status Pembayaran</span>
+                <Badge className={statusInfo.style + " text-xs"}>
+                  <StatusIcon size={11} className="mr-1" />
+                  {statusInfo.label}
+                </Badge>
+              </div>
             </CardContent>
           </Card>
 
@@ -474,11 +644,11 @@ export default function BookingDetail() {
           {/* Actions */}
           <Card>
             <CardContent className="pt-6 space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start" 
+              <Button
+                variant="outline"
+                className="w-full justify-start"
                 size="sm"
-                onClick={() => window.open(`https://wa.me/${booking.customer_phone.replace(/^0/, '62')}`, '_blank')}
+                onClick={() => window.open(`https://wa.me/${booking.customer_phone.replace(/^0/, "62")}`, "_blank")}
               >
                 <Send size={14} className="mr-2" />
                 Kirim via WhatsApp

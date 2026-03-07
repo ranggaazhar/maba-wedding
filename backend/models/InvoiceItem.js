@@ -5,19 +5,16 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class InvoiceItem extends Model {
     static associate(models) {
-      // InvoiceItem belongs to Invoice
       InvoiceItem.belongsTo(models.Invoice, {
         foreignKey: 'invoice_id',
         as: 'invoice'
       });
-      
-      // InvoiceItem belongs to Project
+
       InvoiceItem.belongsTo(models.Project, {
         foreignKey: 'project_id',
         as: 'project'
       });
-      
-      // InvoiceItem belongs to Property
+
       InvoiceItem.belongsTo(models.Property, {
         foreignKey: 'property_id',
         as: 'property'
@@ -34,11 +31,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     invoice_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: { model: 'invoices', key: 'id' }
     },
     item_name: {
       type: DataTypes.STRING(255),
       allowNull: false
+    },
+    item_type: {
+      type: DataTypes.ENUM('item', 'discount', 'penalty', 'adjustment'),
+      allowNull: false,
+      defaultValue: 'item',
+      comment: 'item=normal, discount=kurangi total, penalty=denda/kerusakan, adjustment=koreksi harga'
     },
     description: {
       type: DataTypes.TEXT,
@@ -46,6 +50,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     quantity: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       defaultValue: 1
     },
     unit_price: {
@@ -58,14 +63,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     project_id: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: { model: 'projects', key: 'id' }
     },
     property_id: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: { model: 'properties', key: 'id' }
     },
     display_order: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       defaultValue: 0
     }
   }, {

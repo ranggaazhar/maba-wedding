@@ -255,6 +255,41 @@ class BookingController {
       });
     }
   }
+  async confirmPayment(req, res) {
+    try {
+      const { id } = req.params;
+      const adminId = req.admin?.id || null;
+      const result = await bookingService.confirmPayment(id, adminId);
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Pembayaran berhasil dikonfirmasi',
+        data: {
+          booking: result.booking,
+          pdf_url: result.pdf_path ? `${baseUrl}/${result.pdf_path}` : null,
+          whatsapp_sent: result.whatsapp_sent,
+        },
+      });
+    } catch (error) {
+      const statusCode =
+        error.message === 'Booking not found' ? 404 :
+        error.message.includes('Belum ada') || error.message.includes('sudah pernah') ? 400 : 500;
+      return res.status(statusCode).json({ success: false, message: error.message });
+    }
+  }
+
+  async rejectPayment(req, res) {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      const booking = await bookingService.rejectPayment(id, reason);
+      return res.status(200).json({ success: true, message: 'Pembayaran ditolak', data: booking });
+    } catch (error) {
+      return res.status(error.message === 'Booking not found' ? 404 : 500)
+        .json({ success: false, message: error.message });
+    }
+  }
 }
 
 module.exports = new BookingController();

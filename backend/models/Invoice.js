@@ -5,22 +5,20 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Invoice extends Model {
     static associate(models) {
-      // Invoice belongs to Booking
       Invoice.belongsTo(models.Booking, {
         foreignKey: 'booking_id',
         as: 'booking'
       });
-      
-      // Invoice belongs to Admin
+
       Invoice.belongsTo(models.Admin, {
         foreignKey: 'created_by',
         as: 'creator'
       });
-      
-      // Invoice has many InvoiceItems
+
       Invoice.hasMany(models.InvoiceItem, {
         foreignKey: 'invoice_id',
-        as: 'items'
+        as: 'items',
+        onDelete: 'CASCADE'
       });
     }
   }
@@ -32,9 +30,16 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false
     },
+    invoice_number: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      unique: true,
+      comment: 'Format: INV2603001'
+    },
     booking_id: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: { model: 'bookings', key: 'id' }
     },
     customer_name: {
       type: DataTypes.STRING(100),
@@ -62,11 +67,23 @@ module.exports = (sequelize, DataTypes) => {
     },
     total: {
       type: DataTypes.DECIMAL(15, 2),
-      allowNull: false
+      allowNull: false,
+      defaultValue: 0
     },
     down_payment: {
       type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
       defaultValue: 0
+    },
+    status: {
+      type: DataTypes.ENUM('DRAFT', 'SENT', 'PAID', 'OVERDUE'),
+      allowNull: false,
+      defaultValue: 'DRAFT',
+      comment: 'DRAFT=belum dikirim, SENT=sudah dikirim ke customer, PAID=lunas, OVERDUE=lewat jatuh tempo'
+    },
+    paid_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     },
     issue_date: {
       type: DataTypes.DATEONLY,
@@ -74,19 +91,23 @@ module.exports = (sequelize, DataTypes) => {
     },
     due_date: {
       type: DataTypes.DATEONLY,
-      allowNull: false
+      allowNull: false,
+      comment: 'Batas waktu pelunasan'
     },
     notes: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      comment: 'Catatan untuk customer'
     },
     admin_notes: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      comment: 'Catatan internal admin'
     },
     payment_terms: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      comment: 'Syarat pembayaran'
     },
     pdf_url: {
       type: DataTypes.TEXT,
@@ -98,7 +119,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     created_by: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: { model: 'admins', key: 'id' }
     }
   }, {
     sequelize,
