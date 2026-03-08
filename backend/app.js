@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const connectDatabase = require('./config/db');
 const apiRoutes = require('./routes/api');
 const path = require('path');
+const reminderService = require('./services/reminderService');
 
 const app = express();
 
@@ -174,6 +175,7 @@ const PORT = process.env.PORT || 3000;
 const startServer = async () => {
   try {
     await connectDatabase();
+     reminderService.initCronJobs();
     const server = app.listen(PORT, () => {
       console.log(`\n🚀 Server running on http://localhost:${PORT}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);

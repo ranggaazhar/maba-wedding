@@ -63,6 +63,17 @@ const {
   validate: settingInvoiceValidate
 } = require('../validators/siteSettingValidator');
 
+router.post('/wa-webhook', (req, res) => {
+  console.log('📩 WA Webhook:', JSON.stringify(req.body, null, 2));
+  res.json({ status: 'ok' });
+});
+
+router.get('/test-reminder', async (req, res) => {
+  const reminderService = require('../services/reminderService');
+  await reminderService.sendReminder(5);
+  res.json({ success: true, message: 'Reminder dikirim' });
+});
+
 router.post('/auth/login', loginValidation, authValidate, authController.login);
 router.get('/auth/profile', authMiddleware, authController.getProfile);
 router.put('/auth/profile', authMiddleware, updateProfileValidation, authValidate, authController.updateProfile);
@@ -192,8 +203,7 @@ router.put('/site-settings/:id', authMiddleware, updateSiteSettingValidation, se
 router.put('/site-settings/key/:key', authMiddleware, siteSettingController.updateSettingByKey);
 router.delete('/site-settings/:id', authMiddleware, siteSettingController.deleteSetting);
 
-// ── INVOICE ROUTES ────────────────────────────────────────────────────────
-router.get('/invoices',                    authMiddleware, invoiceController.getAllInvoices);
+router.get('/invoices',authMiddleware, invoiceController.getAllInvoices);
 router.get('/invoices/statistics',         authMiddleware, invoiceController.getStatistics);
 router.get('/invoices/date-range',         authMiddleware, invoiceController.getInvoicesByDateRange);
 router.get('/invoices/:id',                authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.getInvoiceById);
@@ -206,6 +216,9 @@ router.patch('/invoices/:id/recalculate',  authMiddleware, invoiceIdValidation, 
 router.patch('/invoices/:id/mark-sent',    authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.markAsSent);
 router.patch('/invoices/:id/mark-paid',    authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.markAsPaid);
 router.patch('/invoices/:id/mark-overdue', authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.markAsOverdue);
+router.post('/invoices/:id/send-whatsapp', authMiddleware, invoiceIdValidation, settingInvoiceValidate, invoiceController.sendInvoiceWhatsapp);
+
+// ── INVOICE ITEM ROUTES (tetap sama, tapi sekarang pakai invoiceController) ──
 router.get('/invoices/:invoiceId/items',                  authMiddleware, invoiceController.getItemsByInvoice);
 router.get('/invoices/:invoiceId/items/calculate-total',  authMiddleware, invoiceController.calculateItemsTotal);
 router.get('/invoice-items/:id',                          authMiddleware, invoiceController.getItemById);

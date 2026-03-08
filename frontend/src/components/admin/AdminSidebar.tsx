@@ -10,7 +10,8 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
-  Layers
+  Layers,
+  FileText
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useState } from 'react';
@@ -20,14 +21,15 @@ import { useToast } from '../../hooks/use-toast';
 import LogoMaba from '../../assets/logomaba.svg';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: FolderOpen, label: 'Kategori', path: '/categories' },
-  { icon: Layers, label: 'Kategori Properti', path: '/property-categories' },
-  { icon: ImageIcon, label: 'Projects', path: '/projects' },
-  { icon: Package, label: 'Properties', path: '/properties' },
-  { icon: Calendar, label: 'Bookings', path: '/bookings' },
-  { icon: Star, label: 'Reviews', path: '/reviews' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
+  { icon: LayoutDashboard, label: 'Dashboard',         path: '/dashboard' },
+  { icon: FolderOpen,      label: 'Kategori',          path: '/categories' },
+  { icon: Layers,          label: 'Kategori Properti', path: '/property-categories' },
+  { icon: ImageIcon,       label: 'Projects',          path: '/projects' },
+  { icon: Package,         label: 'Properties',        path: '/properties' },
+  { icon: Calendar,        label: 'Bookings',          path: '/bookings' },
+  { icon: FileText,        label: 'Invoice',           path: '/invoices' },  // ← baru
+  { icon: Star,            label: 'Reviews',           path: '/reviews' },
+  { icon: Settings,        label: 'Settings',          path: '/settings' },
 ];
 
 export function AdminSidebar() {
@@ -59,16 +61,16 @@ export function AdminSidebar() {
     >
       {/* Header */}
       <div className={cn(
-  "flex h-16 items-center justify-between px-4",
-  "border-b border-white/20" 
-)}>
+        "flex h-16 items-center justify-between px-4",
+        "border-b border-white/20"
+      )}>
         {!collapsed && (
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center">
-              <img 
-                src={LogoMaba} 
-                alt="Logo Maba" 
-                className="h-12 w-12 object-contain brightness-0 invert" 
+              <img
+                src={LogoMaba}
+                alt="Logo Maba"
+                className="h-12 w-12 object-contain brightness-0 invert"
               />
             </div>
             <span className="font-bold text-white tracking-tight text-lg">ADMIN MABA</span>
@@ -86,7 +88,8 @@ export function AdminSidebar() {
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         <ul className="space-y-2">
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path ||
+              location.pathname.startsWith(item.path + '/');
             return (
               <li key={item.path}>
                 <NavLink

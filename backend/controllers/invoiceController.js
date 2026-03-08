@@ -226,6 +226,23 @@ class InvoiceController {
       return res.status(500).json({ success: false, message: error.message });
     }
   }
+
+  async sendInvoiceWhatsapp(req, res) {
+    try {
+      const { id } = req.params;
+      const result = await invoiceService.sendInvoiceWhatsapp(id);
+      return res.status(200).json({
+        success: true,
+        message: result.whatsapp_sent
+          ? 'Invoice berhasil dikirim ke WhatsApp customer'
+          : 'PDF dibuat tapi WA gagal dikirim',
+        data: result,
+      });
+    } catch (error) {
+      const statusCode = error.message.includes('tidak ditemukan') ? 404 : 500;
+      return res.status(statusCode).json({ success: false, message: error.message });
+    }
+  }
 }
 
 module.exports = new InvoiceController();

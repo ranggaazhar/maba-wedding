@@ -1,9 +1,14 @@
 // services/invoiceService.js
 const { Invoice, InvoiceItem, Booking, Admin, Project, Property } = require('../models');
+const invoicePdfService = require('./invoicePdfService');
+const whatsappService   = require('./whatsappService');
+const path = require('path');
 const { sequelize } = require('../models');
 const { Op } = require('sequelize');
+const reviewLinkService = require('./reviewLinkService');
 
 class InvoiceService {
+
   generateInvoiceNumber() {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
@@ -87,24 +92,37 @@ class InvoiceService {
   }
 
   async getStatistics() {
-    const total = await Invoice.count();
-    const draft   = await Invoice.count({ where: { status: 'DRAFT' } });
-    const sent    = await Invoice.count({ where: { status: 'SENT' } });
-    const paid    = await Invoice.count({ where: { status: 'PAID' } });
-    const overdue = await Invoice.count({ where: { status: 'OVERDUE' } });
-    const thisMonth = await Invoice.count({
-      where: { created_at: { [Op.gte]: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } }
-    });
-    const totalAmount      = parseFloat(await Invoice.sum('total') || 0);
-    const totalDownPayment = parseFloat(await Invoice.sum('down_payment') || 0);
+  const total = await Invoice.count();
+  const draft   = await Invoice.count({ where: { status: 'DRAFT' } });
+  const sent    = await Invoice.count({ where: { status: 'SENT' } });
+  const paid    = await Invoice.count({ where: { status: 'PAID' } });
+  const overdue = await Invoice.count({ where: { status: 'OVERDUE' } });
+  const thisMonth = await Invoice.count({
+    where: { created_at: { [Op.gte]: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } }
+  });
 
-    return {
-      total, draft, sent, paid, overdue, thisMonth,
-      totalAmount:      totalAmount.toFixed(2),
-      totalDownPayment: totalDownPayment.toFixed(2),
-      remainingAmount:  (totalAmount - totalDownPayment).toFixed(2)
-    };
-  }
+  const totalAmount      = parseFloat(await Invoice.sum('total') || 0);
+  const totalDownPayment = parseFloat(await Invoice.sum('down_payment') || 0);
+
+  // Hanya hitung sisa dari invoice yang BELUM lunas (bukan PAID)
+  const unpaidTotal = parseFloat(
+    await Invoice.sum('total', {
+      where: { status: { [Op.notIn]: ['PAID'] } }
+    }) || 0
+  );
+  const unpaidDP = parseFloat(
+    await Invoice.sum('down_payment', {
+      where: { status: { [Op.notIn]: ['PAID'] } }
+    }) || 0
+  );
+
+  return {
+    total, draft, sent, paid, overdue, thisMonth,
+    totalAmount:      totalAmount.toFixed(2),
+    totalDownPayment: totalDownPayment.toFixed(2),
+    remainingAmount:  Math.max(0, unpaidTotal - unpaidDP).toFixed(2)  // ← hanya unpaid
+  };
+}
 
   // ============================================================
   // INVOICE — CREATE / UPDATE / DELETE
@@ -281,10 +299,53 @@ class InvoiceService {
   }
 
   async markAsPaid(id) {
-    const invoice = await this.getInvoiceById(id, false);
-    await invoice.update({ status: 'PAID', paid_at: new Date() });
-    return await this.getInvoiceById(id);
+  const invoice = await this.getInvoiceById(id, false);
+  await invoice.update({ status: 'PAID', paid_at: new Date() });
+
+  // Auto generate & kirim review link kalau ada booking terkait
+  if (invoice.booking_id) {
+    try {
+      const booking = await Booking.findByPk(invoice.booking_id);
+      if (booking) {
+        // Cek apakah review link sudah ada (pakai service yang sudah ada)
+        let reviewLink;
+        try {
+          // createReviewLink sudah handle cek existing & generate token
+          reviewLink = await reviewLinkService.createReviewLink(
+            { booking_id: invoice.booking_id },
+            invoice.created_by
+          );
+        } catch (err) {
+          // Kalau sudah ada review link, skip saja
+          if (err.message.includes('already exists')) {
+            console.log('Review link sudah ada, skip generate.');
+          } else {
+            throw err;
+          }
+        }
+
+        // Kirim WA kalau review link berhasil dibuat
+        if (reviewLink) {
+          const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+          const reviewUrl = `${FRONTEND_URL}/review/${reviewLink.token}`;
+
+          await whatsappService.sendMessage(
+            booking.customer_phone,
+            `🎉 *Pembayaran Lunas!*\n\nTerima kasih *${booking.customer_name}* telah mempercayakan dekorasi kepada *Maba Wedding Decoration* 💍\n\nKami akan sangat senang jika Anda berkenan memberikan ulasan:\n${reviewUrl}\n\n_Link aktif selama 90 hari_`
+          );
+
+          // Update sent_at di review link
+          await reviewLinkService.markAsSent(reviewLink.id);
+        }
+      }
+    } catch (err) {
+      // Jangan sampai gagal kirim WA membatalkan proses lunas
+      console.error('Auto review link error:', err.message);
+    }
   }
+
+  return await this.getInvoiceById(id);
+}
 
   async markAsOverdue(id) {
     const invoice = await this.getInvoiceById(id, false);
@@ -425,6 +486,47 @@ class InvoiceService {
       total += item.item_type === 'discount' ? -subtotal : subtotal;
     }
     return { total: Math.max(0, total), itemCount: items.length, items };
+  }
+
+  // ============================================================
+  // SEND INVOICE VIA WHATSAPP
+  // ============================================================
+
+  async sendInvoiceWhatsapp(invoiceId) {
+    const invoice = await this.getInvoiceById(invoiceId);
+    if (!invoice) throw new Error('Invoice tidak ditemukan');
+    if (!invoice.customer_phone) throw new Error('Nomor telepon customer tidak ada');
+
+    // 1. Generate PDF
+    const pdfPath = await invoicePdfService.generateInvoicePdf(invoice);
+
+    // 2. Konversi absolute path → relative
+    const normalized = pdfPath.replace(/\\/g, '/'); // Normalisasi path Windows
+    const splitResult = normalized.split('/uploads/');
+    const pdfRelative = splitResult.length > 1 ? `uploads/${splitResult[1]}` : normalized;
+
+    // 3. Simpan pdf_url ke DB
+    await Invoice.update(
+      { pdf_url: pdfRelative, pdf_generated_at: new Date() },
+      { where: { id: invoiceId } }
+    );
+
+    // 4. Kirim WA
+    const waResult = await whatsappService.sendInvoice(invoice, pdfRelative);
+
+    // 5. Update status → SENT kalau masih DRAFT
+    if (invoice.status === 'DRAFT') {
+      await Invoice.update({ status: 'SENT' }, { where: { id: invoiceId } });
+    }
+
+    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+    return {
+      success: waResult.success,
+      message: waResult.message,
+      pdf_url: `${BASE_URL}/${pdfRelative}`,
+      whatsapp_sent: waResult.success,
+      status_updated: invoice.status === 'DRAFT',
+    };
   }
 }
 

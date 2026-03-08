@@ -14,9 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       // BookingLink has one Booking
       BookingLink.hasOne(models.Booking, {
         foreignKey: 'booking_link_id',
-        as: 'booking'
+        as: 'booking',
+        onDelete: 'SET NULL'
       });
-    }
+    } 
   }
 
   BookingLink.init({
