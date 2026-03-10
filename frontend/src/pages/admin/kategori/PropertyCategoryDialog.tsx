@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import type { PropertyCategory, CreatePropertyCategoryData } from '@/api/propertyCategoryApi';
+import type { PropertyCategory, CreatePropertyCategoryData } from '@/types/propertyCategory.types';
 
 interface PropertyCategoryDialogProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export function PropertyCategoryDialog({
     register,
     handleSubmit,
     reset,
-    control, // Dibutuhkan untuk useWatch
+    control, 
     setValue,
     formState: { errors },
   } = useForm<CreatePropertyCategoryData>({

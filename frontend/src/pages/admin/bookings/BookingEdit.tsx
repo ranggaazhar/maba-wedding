@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useBookingEdit } from "@/hooks/Admin/bookings/useBookingEdit"; 
 import { 
   ArrowLeft, Save, Loader2, User, Package, ShoppingCart,
   Plus, Trash2, AlertCircle
@@ -19,249 +18,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { bookingApi, type Booking, type BookingModel, type BookingProperty } from "@/api/bookingApi";
-import { projectApi, type Project } from "@/api/projectApi";
-import { categoryApi, type Category } from "@/api/categoryApi";
-import { propertyApi, type Property } from "@/api/propertyApi";
-import { propertyCategoryApi, type PropertyCategory } from "@/api/propertyCategoryApi";
-import Swal from "sweetalert2";
-import axios from "axios";
 
 export default function BookingEdit() {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("info");
+  const {
+    isLoading, isSaving, activeTab, setActiveTab,
+    categories, propertyCategories,
+    formData, setFormData,
+    selectedModels, selectedProperties,
+    modelCategoryFilter, setModelCategoryFilter,
+    propertyCategoryFilter, setPropertyCategoryFilter,
+    filteredProjects, filteredProperties,
+    navigate,
+    handleAddModel, handleRemoveModel, handleUpdateModelNotes,
+    handleAddProperty, handleUpdatePropertyQuantity, handleRemoveProperty,
+    calculateTotal, handleSave,
+    getProjectImage, getPropertyImage,
+  } = useBookingEdit();
 
-  // Data master
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [propertyCategories, setPropertyCategories] = useState<PropertyCategory[]>([]);
-
-  // Form data
-  const [formData, setFormData] = useState({
-    customer_name: "",
-    customer_phone: "",
-    full_address: "",
-    event_venue: "",
-    event_date: "",
-    event_type: "",
-    referral_source: "",
-    theme_color: "",
-    customer_notes: "",
-    total_estimate: "0",
-  });
-
-  const [selectedModels, setSelectedModels] = useState<BookingModel[]>([]);
-  const [selectedProperties, setSelectedProperties] = useState<BookingProperty[]>([]);
-
-  // Filters
-  const [modelCategoryFilter, setModelCategoryFilter] = useState<string>("all");
-  const [propertyCategoryFilter, setPropertyCategoryFilter] = useState<string>("all");
-
-  useEffect(() => {
-    if (id) {
-      fetchBookingData();
-      fetchMasterData();
-    }
-  }, [id]);
-
-  const fetchBookingData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await bookingApi.getBookingById(Number(id));
-      
-      if (response.success) {
-        const booking: Booking = response.data;
-        
-        setFormData({
-          customer_name: booking.customer_name,
-          customer_phone: booking.customer_phone,
-          full_address: booking.full_address,
-          event_venue: booking.event_venue,
-          event_date: booking.event_date,
-          event_type: booking.event_type,
-          referral_source: booking.referral_source || "",
-          theme_color: booking.theme_color || "",
-          customer_notes: booking.customer_notes || "",
-          total_estimate: booking.total_estimate || "0",
-        });
-
-        setSelectedModels(booking.models || []);
-        setSelectedProperties(booking.properties || []);
-      }
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message
-        : "Gagal memuat data booking";
-      Swal.fire("Error", message, "error");
-      navigate("/bookings");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchMasterData = async () => {
-    try {
-      const [projectsRes, categoriesRes, propertiesRes, propCategoriesRes] = await Promise.all([
-        projectApi.getAllProjects({ is_published: true, include_photos: true }),
-        categoryApi.getAllCategories({ is_active: true }),
-        propertyApi.getAllProperties({ is_available: true, include_images: true }),
-        propertyCategoryApi.getAllPropertyCategories({ is_active: true }),
-      ]);
-
-      if (projectsRes.success) setProjects(projectsRes.data);
-      if (categoriesRes.success) setCategories(categoriesRes.data);
-      if (propertiesRes.success) setProperties(propertiesRes.data);
-      if (propCategoriesRes.success) setPropertyCategories(propCategoriesRes.data);
-    } catch (error) {
-      console.error("Error fetching master data:", error);
-    }
-  };
-
-  const handleAddModel = (project: Project) => {
-    const exists = selectedModels.find(m => m.project_id === project.id);
-    if (exists) {
-      Swal.fire("Info", "Model sudah ditambahkan", "info");
-      return;
-    }
-
-    const newModel: BookingModel = {
-      category_id: project.category_id,
-      project_id: project.id,
-      project_title: project.title,
-      price: project.price || "0",
-      notes: "",
-      display_order: selectedModels.length,
-    };
-
-    setSelectedModels([...selectedModels, newModel]);
-  };
-
-  const handleRemoveModel = (index: number) => {
-    setSelectedModels(selectedModels.filter((_, i) => i !== index));
-  };
-
-  const handleUpdateModelNotes = (index: number, notes: string) => {
-    const updated = [...selectedModels];
-    updated[index].notes = notes;
-    setSelectedModels(updated);
-  };
-
-  const handleAddProperty = (property: Property) => {
-    const exists = selectedProperties.find(p => p.property_id === property.id);
-    if (exists) {
-      handleUpdatePropertyQuantity(selectedProperties.indexOf(exists), exists.quantity + 1);
-      return;
-    }
-
-    const newProperty: BookingProperty = {
-      property_id: property.id,
-      property_name: property.name,
-      property_category: property.category?.name || "Uncategorized",
-      quantity: 1,
-      price: property.price,
-      subtotal: property.price,
-    };
-
-    setSelectedProperties([...selectedProperties, newProperty]);
-  };
-
-  const handleUpdatePropertyQuantity = (index: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-
-    const updated = [...selectedProperties];
-    updated[index].quantity = newQuantity;
-    updated[index].subtotal = String(Number(updated[index].price) * newQuantity);
-    setSelectedProperties(updated);
-  };
-
-  const handleRemoveProperty = (index: number) => {
-    setSelectedProperties(selectedProperties.filter((_, i) => i !== index));
-  };
-
-  const calculateTotal = () => {
-    let total = 0;
-    
-    selectedModels.forEach(model => {
-      total += Number(model.price || 0);
-    });
-    
-    selectedProperties.forEach(prop => {
-      total += Number(prop.subtotal || 0);
-    });
-    
-    return total;
-  };
-
-  const handleSave = async () => {
-    try {
-      setIsSaving(true);
-
-      // Validasi
-      if (!formData.customer_name || !formData.customer_phone || !formData.event_date) {
-        Swal.fire("Error", "Data customer tidak lengkap", "error");
-        setActiveTab("info");
-        return;
-      }
-
-      if (selectedModels.length === 0) {
-        Swal.fire("Error", "Pilih minimal 1 model dekorasi", "error");
-        setActiveTab("models");
-        return;
-      }
-
-      const totalEstimate = calculateTotal();
-
-      const updateData = {
-        ...formData,
-        total_estimate: String(totalEstimate),
-        models: selectedModels,
-        properties: selectedProperties,
-      };
-
-      const response = await bookingApi.updateBooking(Number(id), updateData);
-
-      if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: "Booking berhasil diupdate",
-          confirmButtonText: "OK"
-        }).then(() => {
-          navigate(`/bookings/${id}`);
-        });
-      }
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message
-        : "Gagal menyimpan perubahan";
-      Swal.fire("Error", message, "error");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const filteredProjects = modelCategoryFilter === "all"
-    ? projects
-    : projects.filter(p => String(p.category_id) === modelCategoryFilter);
-
-  const filteredProperties = propertyCategoryFilter === "all"
-    ? properties
-    : properties.filter(p => String(p.category_id) === propertyCategoryFilter);
-
-  const getProjectImage = (project: Project) => {
-    const heroPhoto = project.photos?.find(p => p.is_hero);
-    return heroPhoto?.url || project.photos?.[0]?.url || "";
-  };
-
-  const getPropertyImage = (property: Property) => {
-    const primaryImg = property.images?.find(img => img.is_primary);
-    return primaryImg?.url || property.images?.[0]?.url || "";
-  };
+  // ambil id dari hook navigate (atau bisa pakai useParams di sini juga)
+  const id = window.location.pathname.split("/").at(-2); // atau tetap useParams
 
   if (isLoading) {
     return (

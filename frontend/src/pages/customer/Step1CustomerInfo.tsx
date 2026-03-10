@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CreateBookingData } from "@/api/bookingApi";
+import type { CreateBookingData } from "@/types/booking.types";
 import Swal from "sweetalert2";
 
 interface Step1Props {

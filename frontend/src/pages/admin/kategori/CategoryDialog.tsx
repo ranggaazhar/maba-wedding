@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import type { Category, CreateCategoryData } from '@/api/categoryApi';
+import type { Category, CreateCategoryData } from '@/types/category.types';
 
 interface CategoryDialogProps {
   isOpen: boolean;
@@ -158,8 +158,6 @@ export function CategoryDialog({
               <p className="text-sm text-destructive mt-1">{errors.slug.message}</p>
             )}
           </div>
-
-          {/* Description */}
           <div>
             <Label htmlFor="description">Deskripsi</Label>
             <Textarea

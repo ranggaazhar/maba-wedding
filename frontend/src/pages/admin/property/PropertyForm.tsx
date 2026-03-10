@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { usePropertyForm } from "@/hooks/usePropertyForm";
+import { usePropertyForm } from "@/hooks/Admin/property/usePropertyForm";
 
 export default function PropertyForm() {
   const {

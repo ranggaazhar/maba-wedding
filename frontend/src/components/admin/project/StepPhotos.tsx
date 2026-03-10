@@ -1,3 +1,4 @@
+// src/components/admin/project/StepPhotos.tsx
 import { useState, useEffect } from 'react';
 import { Upload, X, Star, Edit2, Trash2, Plus, Palette, Flower, MoreVertical } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -5,31 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { projectApi } from '@/api/projectApi';
 import type {
   CreateCompleteProjectData,
@@ -37,7 +17,7 @@ import type {
   PhotoWithMetadata,
   ProjectPhotoColor,
   ProjectPhotoFlower,
-} from '@/api/projectApi';
+} from '@/types/project.types';
 import Swal from 'sweetalert2';
 
 interface StepPhotosProps {
@@ -55,13 +35,8 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
   const [editingPhoto, setEditingPhoto] = useState<ProjectPhoto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newPhotoFile, setNewPhotoFile] = useState<File | null>(null);
-  const [editFormData, setEditFormData] = useState({
-    caption: '',
-    position: 'center' as PhotoPosition,
-    is_hero: false,
-  });
+  const [editFormData, setEditFormData] = useState({ caption: '', position: 'center' as PhotoPosition, is_hero: false });
 
-  // For color/flower inputs in edit dialog
   const [newColorName, setNewColorName] = useState('');
   const [newColorHex, setNewColorHex] = useState('');
   const [newColorDesc, setNewColorDesc] = useState('');
@@ -76,13 +51,12 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
 
     const newPreviews: string[] = [];
     let loadedCount = 0;
-
     photos.forEach((photoData) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         newPreviews.push(reader.result as string);
         loadedCount++;
-        if (loadedCount === photos.length) setPreviews(newPreviews);
+        if (loadedCount === photos.length) setPreviews([...newPreviews]);
       };
       reader.readAsDataURL(photoData.file);
     });
@@ -91,27 +65,19 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-
     const currentPhotos = formData.photos || [];
-    const startIndex = currentPhotos.length;
-
     const newPhotos: PhotoWithMetadata[] = files.map((file, index) => ({
-      file,
-      caption: '',
-      position: 'center' as const,
-      display_order: startIndex + index,
-      colors: [],
-      flowers: [],
+      file, caption: '', position: 'center' as const,
+      display_order: currentPhotos.length + index,
+      colors: [], flowers: [],
     }));
-
     updateFormData({ photos: [...currentPhotos, ...newPhotos] });
   };
 
   const removeNewPhoto = (index: number) => {
     const newPhotos = [...(formData.photos || [])];
     newPhotos.splice(index, 1);
-    const reorderedPhotos = newPhotos.map((photo, idx) => ({ ...photo, display_order: idx }));
-    updateFormData({ photos: reorderedPhotos });
+    updateFormData({ photos: newPhotos.map((p, idx) => ({ ...p, display_order: idx })) });
     if (formData.hero_photo_index === existingPhotos.length + index) {
       updateFormData({ hero_photo_index: 0 });
     }
@@ -125,52 +91,36 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
     updateFormData({ photos: newPhotos });
   };
 
-  // ── Color helpers for new photos ──
   const addColorToNewPhoto = (photoIndex: number) => {
-    const photos = [...(formData.photos || [])];
-    const photo = photos[photoIndex];
-    const colors = photo.colors || [];
     if (!newColorName.trim()) return;
-    const newColor: ProjectPhotoColor = {
-      color_name: newColorName.trim(),
-      color_hex: newColorHex || undefined,
-      description: newColorDesc || undefined,
-      display_order: colors.length,
-    };
-    updatePhotoMetadata(photoIndex, { colors: [...colors, newColor] });
+    const colors = formData.photos![photoIndex].colors || [];
+    updatePhotoMetadata(photoIndex, {
+      colors: [...colors, { color_name: newColorName.trim(), color_hex: newColorHex || undefined, description: newColorDesc || undefined, display_order: colors.length }],
+    });
     setNewColorName(''); setNewColorHex(''); setNewColorDesc('');
   };
 
   const removeColorFromNewPhoto = (photoIndex: number, colorIndex: number) => {
-    const photos = [...(formData.photos || [])];
-    const colors = [...(photos[photoIndex].colors || [])];
+    const colors = [...(formData.photos![photoIndex].colors || [])];
     colors.splice(colorIndex, 1);
     updatePhotoMetadata(photoIndex, { colors: colors.map((c, i) => ({ ...c, display_order: i })) });
   };
 
-  // ── Flower helpers for new photos ──
   const addFlowerToNewPhoto = (photoIndex: number) => {
-    const photos = [...(formData.photos || [])];
-    const photo = photos[photoIndex];
-    const flowers = photo.flowers || [];
     if (!newFlowerName.trim()) return;
-    const newFlower: ProjectPhotoFlower = {
-      flower_name: newFlowerName.trim(),
-      description: newFlowerDesc || undefined,
-      display_order: flowers.length,
-    };
-    updatePhotoMetadata(photoIndex, { flowers: [...flowers, newFlower] });
+    const flowers = formData.photos![photoIndex].flowers || [];
+    updatePhotoMetadata(photoIndex, {
+      flowers: [...flowers, { flower_name: newFlowerName.trim(), description: newFlowerDesc || undefined, display_order: flowers.length }],
+    });
     setNewFlowerName(''); setNewFlowerDesc('');
   };
 
   const removeFlowerFromNewPhoto = (photoIndex: number, flowerIndex: number) => {
-    const photos = [...(formData.photos || [])];
-    const flowers = [...(photos[photoIndex].flowers || [])];
+    const flowers = [...(formData.photos![photoIndex].flowers || [])];
     flowers.splice(flowerIndex, 1);
     updatePhotoMetadata(photoIndex, { flowers: flowers.map((f, i) => ({ ...f, display_order: i })) });
   };
 
-  // ── Edit existing photo dialog ──
   const openEditDialog = (photo: ProjectPhoto) => {
     setEditingPhoto(photo);
     setEditFormData({ caption: photo.caption || '', position: photo.position as PhotoPosition, is_hero: photo.is_hero });
@@ -180,11 +130,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
     setNewColorName(''); setNewColorHex(''); setNewColorDesc('');
     setNewFlowerName(''); setNewFlowerDesc('');
     setEditDialogOpen(true);
-  };
-
-  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setNewPhotoFile(file);
   };
 
   const addColorToEdit = () => {
@@ -208,8 +153,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
   };
 
   const handleSaveEdit = async () => {
-    if (!editingPhoto) return;
-    if (!projectId) {
+    if (!editingPhoto || !projectId) {
       Swal.fire({ icon: 'error', title: 'Error', text: 'Project ID tidak ditemukan' });
       return;
     }
@@ -222,7 +166,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
         flowers: editFlowers,
         file: newPhotoFile ?? undefined,
       });
-
       if (result.success) {
         await Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Foto berhasil diupdate', timer: 1500, showConfirmButton: false });
         setEditDialogOpen(false);
@@ -238,9 +181,9 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
   const handleDeleteExistingPhoto = async (photoId: number) => {
     const confirm = await Swal.fire({
       title: 'Hapus foto?', text: 'Foto akan dihapus permanen!', icon: 'warning',
-      showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
+      showCancelButton: true, confirmButtonColor: '#ef4444',
+      confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
     });
-
     if (confirm.isConfirmed) {
       try {
         if (!projectId) throw new Error('Project ID tidak ditemukan');
@@ -280,8 +223,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                       <div className="aspect-square">
                         <img src={photo.url} alt={photo.caption || 'Existing'} className="w-full h-full object-cover" />
                       </div>
-
-                      {/* Color/Flower badges */}
                       {((photo.colors?.length ?? 0) > 0 || (photo.flowers?.length ?? 0) > 0) && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1.5 flex gap-1 flex-wrap">
                           {(photo.colors?.length ?? 0) > 0 && (
@@ -296,22 +237,15 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                           )}
                         </div>
                       )}
-
-                      {/* Hero badge */}
                       {isHero && (
                         <Badge className="absolute top-2 left-2 bg-amber-500 text-white text-[10px]">
                           <Star size={9} className="mr-1 fill-current" />Hero
                         </Badge>
                       )}
-
-                      {/* Three-dot dropdown menu */}
                       <div className="absolute top-2 right-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button
-                              type="button"
-                              className="w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
-                            >
+                            <button type="button" className="w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-colors">
                               <MoreVertical size={14} />
                             </button>
                           </DropdownMenuTrigger>
@@ -321,15 +255,10 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                               {isHero ? 'Hapus Hero' : 'Jadikan Hero'}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditDialog(photo)} className="gap-2 cursor-pointer">
-                              <Edit2 size={13} />
-                              Edit Foto
+                              <Edit2 size={13} /> Edit Foto
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteExistingPhoto(photo.id)}
-                              className="gap-2 cursor-pointer text-destructive focus:text-destructive"
-                            >
-                              <Trash2 size={13} />
-                              Hapus Foto
+                            <DropdownMenuItem onClick={() => handleDeleteExistingPhoto(photo.id)} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                              <Trash2 size={13} /> Hapus Foto
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -354,7 +283,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
             </label>
           </div>
 
-          {/* New Photos with color/flower inputs */}
+          {/* New Photos */}
           {previews.length > 0 && (
             <div className="space-y-3">
               <Label className="text-blue-600 flex items-center gap-2">✨ Foto Baru ({previews.length})</Label>
@@ -366,7 +295,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
 
                   return (
                     <div key={index} className="border rounded-xl p-4 bg-card space-y-4">
-                      {/* Top row: preview + basic metadata */}
                       <div className="flex gap-4">
                         <div className="relative w-32 h-32 shrink-0 rounded-lg overflow-hidden border-2 border-blue-200">
                           <img src={preview} alt="New" className="w-full h-full object-cover" />
@@ -407,7 +335,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                         </div>
                       </div>
 
-                      {/* Colors & Flowers accordion */}
                       <Accordion type="multiple" className="border rounded-lg overflow-hidden">
                         {/* Warna */}
                         <AccordionItem value="colors" className="border-b last:border-0">
@@ -418,14 +345,11 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                             </span>
                           </AccordionTrigger>
                           <AccordionContent className="px-4 pb-4 space-y-3">
-                            {/* Color list */}
                             {photoData.colors && photoData.colors.length > 0 && (
                               <div className="space-y-2">
                                 {photoData.colors.map((color, colorIdx) => (
                                   <div key={colorIdx} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                                    {color.color_hex && (
-                                      <div className="w-6 h-6 rounded-full border shrink-0" style={{ backgroundColor: color.color_hex }} />
-                                    )}
+                                    {color.color_hex && <div className="w-6 h-6 rounded-full border shrink-0" style={{ backgroundColor: color.color_hex }} />}
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-medium truncate">{color.color_name}</p>
                                       {color.description && <p className="text-xs text-muted-foreground truncate">{color.description}</p>}
@@ -437,7 +361,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                                 ))}
                               </div>
                             )}
-                            {/* Add color form */}
                             <div className="space-y-2 pt-1">
                               <div className="grid grid-cols-2 gap-2">
                                 <Input value={newColorName} onChange={(e) => setNewColorName(e.target.value)} placeholder="Nama warna *" className="text-sm h-9" />
@@ -502,7 +425,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
         </div>
       </div>
 
-      {/* Edit Existing Photo Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -510,7 +433,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-            {/* Preview */}
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Preview</Label>
               <div className="relative w-full aspect-square rounded-xl overflow-hidden border bg-muted/30">
@@ -521,12 +443,10 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                 ) : null}
               </div>
             </div>
-
-            {/* Form */}
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium">Ganti Foto (Opsional)</Label>
-                <Input type="file" accept="image/*" onChange={handleEditFileChange} className="mt-1.5" />
+                <Input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) setNewPhotoFile(f); }} className="mt-1.5" />
               </div>
               <div>
                 <Label className="text-sm font-medium">Posisi Tampilan</Label>
@@ -546,9 +466,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
             </div>
           </div>
 
-          {/* Colors & Flowers in edit dialog */}
           <Accordion type="multiple" className="border rounded-lg overflow-hidden mt-2">
-            {/* Warna */}
             <AccordionItem value="colors" className="border-b">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
                 <span className="flex items-center gap-2">
@@ -589,7 +507,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
               </AccordionContent>
             </AccordionItem>
 
-            {/* Bunga */}
             <AccordionItem value="flowers">
               <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
                 <span className="flex items-center gap-2">

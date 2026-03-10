@@ -22,13 +22,13 @@ interface Step4Props {
     account_number: string;
     account_name: string;
   }) => void;
-  totalEstimate: number; // Total dari model + property
+  totalEstimate: number; 
   onBack: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
 }
 
-const DP_PERCENTAGE = 0.1; // 10%
+const DP_PERCENTAGE = 0.1; 
 
 export default function Step4Payment({
   paymentFile,

@@ -1,132 +1,22 @@
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+// src/pages/admin/projects/ProjectDetailPage.tsx
 import {
-  ArrowLeft,
-  Edit,
-  Trash2,
-  Eye,
-  Calendar,
-  Palette,
-  Flower2,
-  Star,
-  Share2,
-  Check,
-  ImageIcon,
-  Loader2,
-  EyeOff,
-  ChevronLeft,
-  ChevronRight,
+  ArrowLeft, Edit, Trash2, Eye, EyeOff, Calendar, Palette,
+  Flower2, Star, Share2, Check, ImageIcon, Loader2,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { projectApi, type Project, type ProjectPhoto } from "@/api/projectApi";
-import Swal from "sweetalert2";
-import axios from "axios";
+import { useProjectDetail } from "@/hooks/Admin/project/useProjectDetail";
 
 export default function ProjectDetailPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const {
+    project, isLoading, activeIndex, setActiveIndex,
+    navigate, 
+    handleDelete, handleTogglePublish, handleToggleFeatured, formatPrice,
+  } = useProjectDetail();
 
-  const [project, setProject] = useState<Project | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const fetchProjectDetail = useCallback(async () => {
-    if (!id) return;
-    try {
-      setIsLoading(true);
-      const response = await projectApi.getProjectById(Number(id));
-      if (response.success) {
-        setProject(response.data);
-        const heroIndex = response.data.photos?.findIndex((p: ProjectPhoto) => p.is_hero) ?? 0;
-        setActiveIndex(heroIndex >= 0 ? heroIndex : 0);
-      }
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message
-        : "Terjadi kesalahan saat memuat data";
-      Swal.fire({ icon: "error", title: "Gagal Memuat Data", text: message }).then(() =>
-        navigate("/projects")
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [id, navigate]);
-
-  useEffect(() => {
-    fetchProjectDetail();
-  }, [fetchProjectDetail]);
-
-  const handleDelete = async () => {
-    if (!project) return;
-    const result = await Swal.fire({
-      title: "Yakin hapus project ini?",
-      html: `Project <strong>"${project.title}"</strong> akan dihapus permanen!<br/>Semua foto dan data terkait akan ikut terhapus.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
-      reverseButtons: true,
-    });
-    if (result.isConfirmed) {
-      try {
-        const response = await projectApi.deleteProject(project.id);
-        if (response.success) {
-          await Swal.fire({ icon: "success", title: "Terhapus!", text: "Project berhasil dihapus.", timer: 1500, showConfirmButton: false });
-          navigate("/projects");
-        }
-      } catch (error: unknown) {
-        const message = axios.isAxiosError(error) ? error.response?.data?.message : "Gagal menghapus project";
-        Swal.fire({ icon: "error", title: "Gagal!", text: message });
-      }
-    }
-  };
-
-  const handleTogglePublish = async () => {
-    if (!project) return;
-    try {
-      const response = await projectApi.togglePublishStatus(project.id);
-      if (response.success) {
-        Swal.fire({ icon: "success", title: "Berhasil!", text: "Status diubah", timer: 1500, showConfirmButton: false });
-        fetchProjectDetail();
-      }
-    } catch {
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Tidak bisa mengubah status publish." });
-    }
-  };
-
-  const handleToggleFeatured = async () => {
-    if (!project) return;
-    try {
-      const response = await projectApi.toggleFeaturedStatus(project.id);
-      if (response.success) {
-        Swal.fire({ icon: "success", title: "Berhasil!", text: "Status featured diperbarui", timer: 1500, showConfirmButton: false });
-        fetchProjectDetail();
-      }
-    } catch {
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Tidak bisa mengubah status featured." });
-    }
-  };
-
-  const formatPrice = (price: string | null | undefined): string => {
-    if (!price || price === "0") return "Hubungi Admin";
-    try {
-      return new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(Number(price));
-    } catch {
-      return "Hubungi Admin";
-    }
-  };
-
-  // Loading
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
@@ -136,7 +26,6 @@ export default function ProjectDetailPage() {
     );
   }
 
-  // Not found
   if (!project) {
     return (
       <Card className="max-w-md mx-auto mt-8">
@@ -159,7 +48,6 @@ export default function ProjectDetailPage() {
   const prevPhoto = () => setActiveIndex((i) => (i - 1 + totalPhotos) % totalPhotos);
   const nextPhoto = () => setActiveIndex((i) => (i + 1) % totalPhotos);
 
-  // Kumpulkan semua warna & bunga unik dari seluruh foto
   const allColors = project.photos?.flatMap((p) => p.colors || []) || [];
   const uniqueColors = allColors.filter(
     (color, index, self) => index === self.findIndex((c) => c.color_name === color.color_name)
@@ -180,9 +68,7 @@ export default function ProjectDetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-2xl font-bold text-foreground">{project.title}</h1>
-              {project.is_featured && (
-                <Badge className="bg-warning text-warning-foreground">Featured</Badge>
-              )}
+              {project.is_featured && <Badge className="bg-warning text-warning-foreground">Featured</Badge>}
               {!project.is_published && <Badge variant="secondary">Draft</Badge>}
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -200,7 +86,7 @@ export default function ProjectDetailPage() {
           <Button variant="outline" size="icon" onClick={handleTogglePublish} title={project.is_published ? "Unpublish" : "Publish"}>
             {project.is_published ? <EyeOff size={18} /> : <Eye size={18} />}
           </Button>
-          <Button variant="outline" size="icon" onClick={handleToggleFeatured} title={project.is_featured ? "Unfeature" : "Feature"}>
+          <Button variant="outline" size="icon" onClick={handleToggleFeatured}>
             <Star size={18} className={project.is_featured ? "fill-amber-500 text-amber-500" : ""} />
           </Button>
           <Button variant="outline" size="icon">
@@ -221,107 +107,86 @@ export default function ProjectDetailPage() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* Carousel */}
-          <div className="space-y-3">
-            <div className="relative rounded-xl overflow-hidden aspect-video shadow-elegant bg-muted group">
-              {activePhoto ? (
-                <>
-                  <img
-                    key={activePhoto.id}
-                    src={activePhoto.url}
-                    alt={activePhoto.caption || project.title}
-                    className="w-full h-full object-cover transition-opacity duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent" />
+          <div className="relative rounded-xl overflow-hidden aspect-video shadow-elegant bg-muted group">
+            {activePhoto ? (
+              <>
+                <img
+                  key={activePhoto.id}
+                  src={activePhoto.url}
+                  alt={activePhoto.caption || project.title}
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent" />
 
-                  {/* Caption + color/flower badges */}
-                  <div className="absolute bottom-10 left-4 right-4 flex items-end justify-between">
-                    <p className="text-white text-sm opacity-90 drop-shadow">
-                      {activePhoto.caption || ""}
-                    </p>
-                    <div className="flex gap-1.5">
-                      {(activePhoto.colors?.length ?? 0) > 0 && (
-                        <span className="text-[10px] bg-black/50 text-purple-200 px-2 py-0.5 rounded-full">
-                          🎨 {activePhoto.colors!.length}
-                        </span>
-                      )}
-                      {(activePhoto.flowers?.length ?? 0) > 0 && (
-                        <span className="text-[10px] bg-black/50 text-pink-200 px-2 py-0.5 rounded-full">
-                          🌸 {activePhoto.flowers!.length}
-                        </span>
-                      )}
-                    </div>
+                <div className="absolute bottom-10 left-4 right-4 flex items-end justify-between">
+                  <p className="text-white text-sm opacity-90 drop-shadow">{activePhoto.caption || ""}</p>
+                  <div className="flex gap-1.5">
+                    {(activePhoto.colors?.length ?? 0) > 0 && (
+                      <span className="text-[10px] bg-black/50 text-purple-200 px-2 py-0.5 rounded-full">
+                        🎨 {activePhoto.colors!.length}
+                      </span>
+                    )}
+                    {(activePhoto.flowers?.length ?? 0) > 0 && (
+                      <span className="text-[10px] bg-black/50 text-pink-200 px-2 py-0.5 rounded-full">
+                        🌸 {activePhoto.flowers!.length}
+                      </span>
+                    )}
                   </div>
-
-                  {/* Dots indicator */}
-                  {totalPhotos > 1 && (
-                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-                      {photos.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setActiveIndex(i)}
-                          className={`rounded-full transition-all duration-300 ${
-                            i === activeIndex
-                              ? "w-5 h-2 bg-white"
-                              : "w-2 h-2 bg-white/50 hover:bg-white/80"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Arrow buttons */}
-                  {totalPhotos > 1 && (
-                    <>
-                      <button
-                        onClick={prevPhoto}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
-                      >
-                        <ChevronLeft size={20} />
-                      </button>
-                      <button
-                        onClick={nextPhoto}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
-                      >
-                        <ChevronRight size={20} />
-                      </button>
-                    </>
-                  )}
-
-                  {/* Hero badge */}
-                  {activePhoto.is_hero && (
-                    <div className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Star size={10} className="fill-current" /> Hero
-                    </div>
-                  )}
-
-                  {/* Counter */}
-                  {totalPhotos > 1 && (
-                    <div className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm">
-                      {activeIndex + 1} / {totalPhotos}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-2">
-                  <ImageIcon size={48} className="text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Tidak ada gambar</p>
                 </div>
-              )}
-            </div>
+
+                {totalPhotos > 1 && (
+                  <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                    {photos.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveIndex(i)}
+                        className={`rounded-full transition-all duration-300 ${
+                          i === activeIndex ? "w-5 h-2 bg-white" : "w-2 h-2 bg-white/50 hover:bg-white/80"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {totalPhotos > 1 && (
+                  <>
+                    <button onClick={prevPhoto} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm">
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button onClick={nextPhoto} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm">
+                      <ChevronRight size={20} />
+                    </button>
+                  </>
+                )}
+
+                {activePhoto.is_hero && (
+                  <div className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Star size={10} className="fill-current" /> Hero
+                  </div>
+                )}
+
+                {totalPhotos > 1 && (
+                  <div className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm">
+                    {activeIndex + 1} / {totalPhotos}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2">
+                <ImageIcon size={48} className="text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Tidak ada gambar</p>
+              </div>
+            )}
           </div>
 
-          {/* Detail warna & bunga foto aktif */}
+          {/* Warna & Bunga foto aktif */}
           {activePhoto && ((activePhoto.colors?.length ?? 0) > 0 || (activePhoto.flowers?.length ?? 0) > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {activePhoto.colors && activePhoto.colors.length > 0 && (
-                <Card className="shadow-soft">
+                <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Palette size={18} className="text-primary" />
-                      Palet Warna
-                      {activePhoto.caption && (
-                        <span className="text-xs text-muted-foreground font-normal">— {activePhoto.caption}</span>
-                      )}
+                      <Palette size={18} className="text-primary" /> Palet Warna
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -342,14 +207,10 @@ export default function ProjectDetailPage() {
                 </Card>
               )}
               {activePhoto.flowers && activePhoto.flowers.length > 0 && (
-                <Card className="shadow-soft">
+                <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Flower2 size={18} className="text-primary" />
-                      Jenis Bunga
-                      {activePhoto.caption && (
-                        <span className="text-xs text-muted-foreground font-normal">— {activePhoto.caption}</span>
-                      )}
+                      <Flower2 size={18} className="text-primary" /> Jenis Bunga
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -358,9 +219,7 @@ export default function ProjectDetailPage() {
                         <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
                           <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0" />
                           <span>{flower.flower_name}</span>
-                          {flower.description && (
-                            <span className="text-xs opacity-60">— {flower.description}</span>
-                          )}
+                          {flower.description && <span className="text-xs opacity-60">— {flower.description}</span>}
                         </li>
                       ))}
                     </ul>
@@ -370,8 +229,8 @@ export default function ProjectDetailPage() {
             </div>
           )}
 
-          {/* Description */}
-          <Card className="shadow-soft">
+          {/* Deskripsi */}
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">Deskripsi</CardTitle>
             </CardHeader>
@@ -380,7 +239,7 @@ export default function ProjectDetailPage() {
                 {project.description || "Tidak ada deskripsi."}
               </p>
               {project.atmosphere_description && (
-                <div className="pt-4 border-t border-border">
+                <div className="pt-4 border-t">
                   <h4 className="font-semibold text-foreground mb-2">Suasana & Atmosfer</h4>
                   <p className="text-muted-foreground leading-relaxed">{project.atmosphere_description}</p>
                 </div>
@@ -388,14 +247,14 @@ export default function ProjectDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Summary semua warna & bunga dari seluruh foto */}
+          {/* Summary semua warna & bunga */}
           {(uniqueColors.length > 0 || uniqueFlowers.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {uniqueColors.length > 0 && (
-                <Card className="shadow-soft">
+                <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Palette size={18} className="text-primary" /> Palet Warna
+                      <Palette size={18} className="text-primary" /> Semua Warna
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -415,12 +274,11 @@ export default function ProjectDetailPage() {
                   </CardContent>
                 </Card>
               )}
-
               {uniqueFlowers.length > 0 && (
-                <Card className="shadow-soft">
+                <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Flower2 size={18} className="text-primary" /> Jenis Bunga
+                      <Flower2 size={18} className="text-primary" /> Semua Bunga
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -429,9 +287,7 @@ export default function ProjectDetailPage() {
                         <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
                           <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0" />
                           <span>{flower.flower_name}</span>
-                          {flower.description && (
-                            <span className="text-xs opacity-60">— {flower.description}</span>
-                          )}
+                          {flower.description && <span className="text-xs opacity-60">— {flower.description}</span>}
                         </li>
                       ))}
                     </ul>
@@ -444,8 +300,8 @@ export default function ProjectDetailPage() {
 
         {/* Right Column */}
         <div className="space-y-6">
-          {/* Price Card */}
-          <Card className="shadow-elegant border-primary/20 bg-gradient-to-br from-card to-primary/5">
+          {/* Price */}
+          <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-1">Harga Mulai Dari</p>
               {project.price && project.price !== "0" ? (
@@ -454,14 +310,12 @@ export default function ProjectDetailPage() {
                 <p className="text-xl font-semibold text-muted-foreground">Hubungi Admin</p>
               )}
               <Separator className="my-4" />
-              <Button className="w-full gradient-ocean text-primary-foreground">
-                Buat Booking Link
-              </Button>
+              <Button className="w-full gradient-ocean text-primary-foreground">Buat Booking Link</Button>
             </CardContent>
           </Card>
 
-          {/* Info Card */}
-          <Card className="shadow-soft">
+          {/* Info */}
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">Informasi</CardTitle>
             </CardHeader>
@@ -472,29 +326,25 @@ export default function ProjectDetailPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Dibuat</p>
-                  <p className="font-medium text-foreground">
-                    {new Date(project.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-                  </p>
+                  <p className="font-medium">{new Date(project.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</p>
                 </div>
               </div>
-
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Palette size={18} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Tema</p>
-                  <p className="font-medium text-foreground">{project.theme || "-"}</p>
+                  <p className="font-medium">{project.theme || "-"}</p>
                 </div>
               </div>
-
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Star size={18} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Kategori</p>
-                  <p className="font-medium text-foreground">{project.category?.name || "-"}</p>
+                  <p className="font-medium">{project.category?.name || "-"}</p>
                 </div>
               </div>
             </CardContent>
@@ -502,11 +352,10 @@ export default function ProjectDetailPage() {
 
           {/* Includes */}
           {project.includes && project.includes.length > 0 && (
-            <Card className="shadow-soft">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Check size={18} className="text-success" />
-                  Yang Termasuk
+                  <Check size={18} className="text-success" /> Yang Termasuk
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -525,19 +374,15 @@ export default function ProjectDetailPage() {
           )}
 
           {/* Stats */}
-          <Card className="shadow-soft">
+          <Card>
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {(project.view_count || 0).toLocaleString("id-ID")}
-                  </p>
+                  <p className="text-2xl font-bold">{(project.view_count || 0).toLocaleString("id-ID")}</p>
                   <p className="text-sm text-muted-foreground">Total Views</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {project.photos?.length || 0}
-                  </p>
+                  <p className="text-2xl font-bold">{project.photos?.length || 0}</p>
                   <p className="text-sm text-muted-foreground">Foto</p>
                 </div>
               </div>

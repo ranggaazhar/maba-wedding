@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
+import { useStep2Models } from "@/hooks/Customer/useStep2Models"; // sesuaikan path
 import { ArrowLeft, ArrowRight, Plus, Trash2, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { projectApi, type Project } from "@/api/projectApi";
-import { categoryApi, type Category } from "@/api/categoryApi";
-import type { BookingModel } from "@/api/bookingApi";
+import type { BookingModel } from "@/types/booking.types";
 import Swal from "sweetalert2";
 
 interface Step2Props {
@@ -18,80 +16,12 @@ interface Step2Props {
 }
 
 export default function Step2Models({ models, setModels, onNext, onBack }: Step2Props) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        setError("");
-        
-        const [projectsRes, categoriesRes] = await Promise.all([
-          projectApi.getAllProjects({ is_published: true, include_photos: true }),
-          categoryApi.getAllCategories({ is_active: true }),
-        ]);
-
-        console.log("Projects Response:", projectsRes);
-        console.log("Categories Response:", categoriesRes);
-
-        if (projectsRes.success && projectsRes.data) {
-          setProjects(projectsRes.data);
-          console.log("Total Projects:", projectsRes.data.length);
-        } else {
-          setError("Gagal memuat data project");
-        }
-
-        if (categoriesRes.success && categoriesRes.data) {
-          setCategories(categoriesRes.data);
-          console.log("Total Categories:", categoriesRes.data.length);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Terjadi kesalahan saat memuat data. Silakan refresh halaman.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredProjects = selectedCategory === "all"
-    ? projects
-    : projects.filter(p => String(p.category_id) === selectedCategory);
-
-  const handleAddModel = (project: Project) => {
-    const exists = models.find(m => m.project_id === project.id);
-    if (exists) {
-      Swal.fire("Info", "Model sudah ditambahkan", "info");
-      return;
-    }
-
-    const newModel: BookingModel = {
-      category_id: project.category_id,
-      project_id: project.id,
-      project_title: project.title,
-      price: project.price || "0",
-      notes: "",
-      display_order: models.length,
-    };
-
-    setModels([...models, newModel]);
-  };
-
-  const handleRemoveModel = (index: number) => {
-    setModels(models.filter((_, i) => i !== index));
-  };
-
-  const handleUpdateNotes = (index: number, notes: string) => {
-    const updated = [...models];
-    updated[index].notes = notes;
-    setModels(updated);
-  };
+  const {
+    projects, categories, isLoading, error,
+    selectedCategory, setSelectedCategory,
+    filteredProjects,
+    handleAddModel, handleRemoveModel, handleUpdateNotes, getHeroImage,
+  } = useStep2Models(models, setModels);
 
   const handleNext = () => {
     if (models.length === 0) {
@@ -99,11 +29,6 @@ export default function Step2Models({ models, setModels, onNext, onBack }: Step2
       return;
     }
     onNext();
-  };
-
-  const getHeroImage = (project: Project) => {
-    const heroPhoto = project.photos?.find(p => p.is_hero);
-    return heroPhoto?.url || project.photos?.[0]?.url || "";
   };
 
   if (isLoading) {

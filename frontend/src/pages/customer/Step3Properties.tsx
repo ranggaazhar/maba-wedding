@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
+import { useStep3Properties } from "@/hooks/Customer/useStep3Properties"; // sesuaikan path
 import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { propertyApi, type Property } from "@/api/propertyApi";
-import { propertyCategoryApi, type PropertyCategory } from "@/api/propertyCategoryApi";
-import type { BookingProperty } from "@/api/bookingApi";
+import type { BookingProperty } from "@/types/booking.types";
 
 interface Step3Props {
   properties: BookingProperty[];
@@ -16,76 +14,13 @@ interface Step3Props {
 }
 
 export default function Step3Properties({ properties, setProperties, onNext, onBack }: Step3Props) {
-  const [availableProperties, setAvailableProperties] = useState<Property[]>([]);
-  const [categories, setCategories] = useState<PropertyCategory[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [propertiesRes, categoriesRes] = await Promise.all([
-          propertyApi.getAllProperties({ is_available: true, include_images: true }),
-          propertyCategoryApi.getAllPropertyCategories({ is_active: true }),
-        ]);
-
-        if (propertiesRes.success) setAvailableProperties(propertiesRes.data);
-        if (categoriesRes.success) setCategories(categoriesRes.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredProperties = selectedCategory === "all"
-    ? availableProperties
-    : availableProperties.filter(p => String(p.category_id) === selectedCategory);
-
-  const handleAddProperty = (property: Property) => {
-    const exists = properties.find(p => p.property_id === property.id);
-    if (exists) {
-      handleUpdateQuantity(properties.indexOf(exists), exists.quantity + 1);
-      return;
-    }
-
-    const newProperty: BookingProperty = {
-      property_id: property.id,
-      property_name: property.name,
-      property_category: property.category?.name || "Uncategorized",
-      quantity: 1,
-      price: property.price,
-      subtotal: property.price,
-    };
-
-    setProperties([...properties, newProperty]);
-  };
-
-  const handleUpdateQuantity = (index: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-
-    const updated = [...properties];
-    updated[index].quantity = newQuantity;
-    updated[index].subtotal = String(Number(updated[index].price) * newQuantity);
-    setProperties(updated);
-  };
-
-  const handleRemoveProperty = (index: number) => {
-    setProperties(properties.filter((_, i) => i !== index));
-  };
-
-  const calculateTotal = () => {
-    return properties.reduce((sum, prop) => sum + Number(prop.subtotal), 0);
-  };
-
-  const getPrimaryImage = (property: Property) => {
-    const primaryImg = property.images?.find(img => img.is_primary);
-    return primaryImg?.url || property.images?.[0]?.url || "";
-  };
+  const {
+    categories, isLoading,
+    selectedCategory, setSelectedCategory,
+    filteredProperties,
+    handleAddProperty, handleUpdateQuantity, handleRemoveProperty,
+    getPrimaryImage, calculateTotal,
+  } = useStep3Properties(properties, setProperties);
 
   if (isLoading) {
     return (

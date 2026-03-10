@@ -12,14 +12,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import type { CreateCompleteProjectData, ProjectDetail, ProjectDetailItem } from '@/api/projectApi';
+import type { CreateCompleteProjectData, ProjectDetail, ProjectDetailItem } from '@/types/project.types';
 
 interface StepDetailsProps {
   formData: CreateCompleteProjectData;
   updateFormData: (data: Partial<CreateCompleteProjectData>) => void;
 }
 
-// Definisikan tipe literal untuk detail_type agar tidak pakai 'any'
 type DetailType = 'color_palette' | 'flowers' | 'other';
 
 interface NewDetailState {
@@ -29,10 +28,10 @@ interface NewDetailState {
 }
 
 export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
-  const [newDetail, setNewDetail] = useState<NewDetailState>({ 
-    detail_type: 'color_palette', 
-    title: '', 
-    item: '' 
+  const [newDetail, setNewDetail] = useState<NewDetailState>({
+    detail_type: 'color_palette',
+    title: '',
+    item: '',
   });
 
   const addDetail = () => {
@@ -46,11 +45,11 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
       const existingDetail = updatedDetails[existingDetailIndex];
       const newItem: ProjectDetailItem = {
         content: newDetail.item,
-        display_order: existingDetail.items.length
+        display_order: existingDetail.items.length,
       };
       updatedDetails[existingDetailIndex] = {
         ...existingDetail,
-        items: [...existingDetail.items, newItem]
+        items: [...existingDetail.items, newItem],
       };
       updateFormData({ details: updatedDetails });
     } else {
@@ -58,10 +57,7 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
         detail_type: newDetail.detail_type,
         title: newDetail.title,
         display_order: details.length,
-        items: [{
-          content: newDetail.item,
-          display_order: 0
-        }]
+        items: [{ content: newDetail.item, display_order: 0 }],
       };
       updateFormData({ details: [...details, newDetailGroup] });
     }
@@ -73,23 +69,18 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
     const details = [...(formData.details || [])];
     const detail = details[detailIndex];
     if (!detail) return;
-    
+
     const newItems = detail.items.filter((_, i) => i !== itemIndex);
-    
+
     if (newItems.length > 0) {
-      const reorderedItems = newItems.map((item, idx) => ({
-        ...item,
-        display_order: idx
-      }));
-      details[detailIndex] = { ...detail, items: reorderedItems };
+      details[detailIndex] = {
+        ...detail,
+        items: newItems.map((item, idx) => ({ ...item, display_order: idx })),
+      };
       updateFormData({ details });
     } else {
       details.splice(detailIndex, 1);
-      const reorderedDetails = details.map((d, idx) => ({
-        ...d,
-        display_order: idx
-      }));
-      updateFormData({ details: reorderedDetails });
+      updateFormData({ details: details.map((d, idx) => ({ ...d, display_order: idx })) });
     }
   };
 
@@ -102,48 +93,30 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
 
   const updateItemContent = (detailIndex: number, itemIndex: number, content: string) => {
     const details = [...(formData.details || [])];
-    if (!details[detailIndex] || !details[detailIndex].items[itemIndex]) return;
-    
-    details[detailIndex].items[itemIndex] = {
-      ...details[detailIndex].items[itemIndex],
-      content
-    };
+    if (!details[detailIndex]?.items[itemIndex]) return;
+    details[detailIndex].items[itemIndex] = { ...details[detailIndex].items[itemIndex], content };
     updateFormData({ details });
   };
 
   const moveDetail = (fromIndex: number, direction: 'up' | 'down') => {
     const details = [...(formData.details || [])];
     const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
-
     if (toIndex < 0 || toIndex >= details.length) return;
-
     [details[fromIndex], details[toIndex]] = [details[toIndex], details[fromIndex]];
-
-    const reordered = details.map((detail, idx) => ({
-      ...detail,
-      display_order: idx
-    }));
-
-    updateFormData({ details: reordered });
+    updateFormData({ details: details.map((d, idx) => ({ ...d, display_order: idx })) });
   };
 
   const moveItem = (detailIndex: number, itemIndex: number, direction: 'up' | 'down') => {
     const details = [...(formData.details || [])];
     if (!details[detailIndex]) return;
-    
     const items = [...details[detailIndex].items];
     const toIndex = direction === 'up' ? itemIndex - 1 : itemIndex + 1;
-
     if (toIndex < 0 || toIndex >= items.length) return;
-
     [items[itemIndex], items[toIndex]] = [items[toIndex], items[itemIndex]];
-
-    const reordered = items.map((item, idx) => ({
-      ...item,
-      display_order: idx
-    }));
-
-    details[detailIndex] = { ...details[detailIndex], items: reordered };
+    details[detailIndex] = {
+      ...details[detailIndex],
+      items: items.map((item, idx) => ({ ...item, display_order: idx })),
+    };
     updateFormData({ details });
   };
 
@@ -159,7 +132,6 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
               <Label>Tipe Detail</Label>
               <Select
                 value={newDetail.detail_type}
-                // PERBAIKAN: Gunakan tipe literal DetailType, bukan any
                 onValueChange={(v: DetailType) => setNewDetail({ ...newDetail, detail_type: v })}
               >
                 <SelectTrigger className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm">
@@ -194,10 +166,12 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addDetail())}
                 />
               </div>
-              <Button onClick={addDetail} 
-              size="icon" 
-              type="button"
-              className="mt-6 bg-[hsl(var(--ocean-deep))] text-white hover:bg-[hsl(var(--ocean-soft))] transition-all">
+              <Button
+                onClick={addDetail}
+                size="icon"
+                type="button"
+                className="mt-6 bg-[hsl(var(--ocean-deep))] text-white hover:bg-[hsl(var(--ocean-soft))] transition-all"
+              >
                 <Plus size={18} />
               </Button>
             </div>
@@ -212,24 +186,10 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-3 flex-1">
                     <div className="flex flex-col gap-1 pt-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 w-7 p-0"
-                        onClick={() => moveDetail(detailIndex, 'up')}
-                        disabled={detailIndex === 0}
-                        type="button"
-                      >
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => moveDetail(detailIndex, 'up')} disabled={detailIndex === 0} type="button">
                         <GripVertical size={14} />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 w-7 p-0"
-                        onClick={() => moveDetail(detailIndex, 'down')}
-                        disabled={detailIndex === (formData.details?.length || 0) - 1}
-                        type="button"
-                      >
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => moveDetail(detailIndex, 'down')} disabled={detailIndex === (formData.details?.length || 0) - 1} type="button">
                         <GripVertical size={14} className="rotate-180" />
                       </Button>
                     </div>
@@ -244,44 +204,17 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
 
                       <div className="space-y-2">
                         {detail.items.map((item, itemIndex) => (
-                          <div
-                            key={`item-${detailIndex}-${itemIndex}`}
-                            className="flex items-center gap-2 group"
-                          >
+                          <div key={`item-${detailIndex}-${itemIndex}`} className="flex items-center gap-2 group">
                             <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
-                                onClick={() => moveItem(detailIndex, itemIndex, 'up')}
-                                disabled={itemIndex === 0}
-                                type="button"
-                              >
-                                ↑
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
-                                onClick={() => moveItem(detailIndex, itemIndex, 'down')}
-                                disabled={itemIndex === detail.items.length - 1}
-                                type="button"
-                              >
-                                ↓
-                              </Button>
+                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100" onClick={() => moveItem(detailIndex, itemIndex, 'up')} disabled={itemIndex === 0} type="button">↑</Button>
+                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100" onClick={() => moveItem(detailIndex, itemIndex, 'down')} disabled={itemIndex === detail.items.length - 1} type="button">↓</Button>
                             </div>
-
                             <Input
                               value={item.content}
                               onChange={(e) => updateItemContent(detailIndex, itemIndex, e.target.value)}
                               className="h-8 text-sm flex-1"
                             />
-
-                            <button
-                              type="button"
-                              onClick={() => removeItem(detailIndex, itemIndex)}
-                              className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                            >
+                            <button type="button" onClick={() => removeItem(detailIndex, itemIndex)} className="text-muted-foreground hover:text-destructive transition-colors p-1">
                               <X size={16} />
                             </button>
                           </div>
@@ -292,9 +225,7 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
 
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="sm" variant="ghost" type="button">
-                        <Edit2 size={14} />
-                      </Button>
+                      <Button size="sm" variant="ghost" type="button"><Edit2 size={14} /></Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
@@ -303,21 +234,12 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
                       <div className="space-y-4 pt-4">
                         <div>
                           <Label>Judul</Label>
-                          <Input
-                            value={detail.title}
-                            onChange={(e) => updateDetailMetadata(detailIndex, { title: e.target.value })}
-                          />
+                          <Input value={detail.title} onChange={(e) => updateDetailMetadata(detailIndex, { title: e.target.value })} />
                         </div>
                         <div>
                           <Label>Tipe</Label>
-                          <Select
-                            value={detail.detail_type}
-                            // PERBAIKAN: Gunakan tipe literal DetailType
-                            onValueChange={(v: DetailType) => updateDetailMetadata(detailIndex, { detail_type: v })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
+                          <Select value={detail.detail_type} onValueChange={(v: DetailType) => updateDetailMetadata(detailIndex, { detail_type: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="color_palette">Palet Warna</SelectItem>
                               <SelectItem value="flowers">Bunga</SelectItem>
@@ -349,7 +271,7 @@ export function StepDetails({ formData, updateFormData }: StepDetailsProps) {
 
       <div className="table-container p-4 bg-ocean-light/10 border-l-4 border-primary">
         <p className="text-sm text-foreground">
-          <strong>💡 Tips:</strong> Detail dikelompokkan berdasarkan judul. Gunakan tombol ↑↓ untuk mengatur urutan. Display Order otomatis diupdate.
+          <strong>💡 Tips:</strong> Detail dikelompokkan berdasarkan judul. Gunakan tombol ↑↓ untuk mengatur urutan.
         </p>
       </div>
     </div>

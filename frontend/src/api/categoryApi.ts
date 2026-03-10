@@ -1,33 +1,8 @@
 import axios from 'axios';
+import type { ApiResponse } from '@/types/common.types';
+import type { Category, CreateCategoryData, UpdateCategoryData } from '@/types/category.types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-}
-
-export interface Category {
-  id: number;
-  slug: string;
-  name: string;
-  description?: string;
-  is_active: boolean;
-  projects?: unknown[]; 
-  bookingModels?: unknown[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateCategoryData {
-  slug: string;
-  name: string;
-  description?: string;
-  is_active?: boolean;
-}
-
-export type UpdateCategoryData = Partial<CreateCategoryData>;
 
 class CategoryApi {
   private getAuthHeaders() {

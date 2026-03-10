@@ -1,13 +1,15 @@
+// src/pages/admin/projects/ProjectForm.tsx
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { StepBasicInfo } from '@/pages/admin/projects/project/StepBasicInfo';
-import { StepPhotos } from '@/pages/admin/projects/project/StepPhotos';
-import { StepIncludes } from '@/pages/admin/projects/project/StepIncludes';
-import { StepReview } from '@/pages/admin/projects/project/StepReview';
-import { projectApi, type CreateCompleteProjectData, type ProjectPhoto, type ProjectInclude } from '@/api/projectApi';
+import { StepBasicInfo } from '../../../components/admin/project/StepBasicInfo';
+import { StepPhotos } from '../../../components/admin/project/StepPhotos';
+import { StepIncludes } from '../../../components/admin/project/StepIncludes';
+import { StepReview } from '../../../components/admin/project/StepReview';
+import { projectApi } from '@/api/projectApi';
+import type { CreateCompleteProjectData, ProjectPhoto, ProjectInclude } from '@/types/project.types';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
@@ -29,18 +31,10 @@ export default function ProjectForm() {
   const [existingPhotos, setExistingPhotos] = useState<ProjectPhoto[]>([]);
 
   const [formData, setFormData] = useState<CreateCompleteProjectData>({
-    title: '',
-    slug: '',
-    category_id: 0,
-    price: '',
-    theme: '',
-    description: '',
-    atmosphere_description: '',
-    is_featured: false,
-    is_published: true,
-    photos: [],
-    hero_photo_index: 0,
-    includes: [],
+    title: '', slug: '', category_id: 0,
+    price: '', theme: '', description: '', atmosphere_description: '',
+    is_featured: false, is_published: true,
+    photos: [], hero_photo_index: 0, includes: [],
   });
 
   const fetchProjectData = useCallback(async () => {
@@ -50,25 +44,16 @@ export default function ProjectForm() {
       const response = await projectApi.getProjectById(Number(id));
       if (response.success) {
         const p = response.data;
-
         setFormData({
-          title: p.title ?? '',
-          slug: p.slug ?? '',
-          category_id: p.category_id ?? 0,
-          price: p.price ?? '',
-          theme: p.theme ?? '',
-          description: p.description ?? '',
+          title: p.title ?? '', slug: p.slug ?? '',
+          category_id: p.category_id ?? 0, price: p.price ?? '',
+          theme: p.theme ?? '', description: p.description ?? '',
           atmosphere_description: p.atmosphere_description ?? '',
-          is_featured: p.is_featured ?? false,
-          is_published: p.is_published ?? false,
+          is_featured: p.is_featured ?? false, is_published: p.is_published ?? false,
           photos: [],
           hero_photo_index: (p.photos ?? []).findIndex((img: ProjectPhoto) => img.is_hero) ?? 0,
-          includes: (p.includes ?? []).map((i: ProjectInclude) => ({
-            item: i.item,
-            display_order: i.display_order,
-          })),
+          includes: (p.includes ?? []).map((i: ProjectInclude) => ({ item: i.item, display_order: i.display_order })),
         });
-
         setExistingPhotos(p.photos ?? []);
       }
     } catch (error: unknown) {
@@ -112,36 +97,24 @@ export default function ProjectForm() {
   const handleSubmit = async () => {
     try {
       setSaving(true);
-
       if (!formData.title || !formData.category_id) {
-        Swal.fire({ icon: 'warning', title: 'Oops!', text: 'Lengkapi info dasar dulu bang.' });
+        Swal.fire({ icon: 'warning', title: 'Oops!', text: 'Lengkapi info dasar dulu.' });
         goToStep(1);
         return;
       }
 
       let response;
-
       if (isEdit && id) {
         const updatePayload: Partial<CreateCompleteProjectData> = {
-          title: formData.title,
-          slug: formData.slug,
-          category_id: formData.category_id,
-          price: formData.price,
-          theme: formData.theme,
-          description: formData.description,
+          title: formData.title, slug: formData.slug,
+          category_id: formData.category_id, price: formData.price,
+          theme: formData.theme, description: formData.description,
           atmosphere_description: formData.atmosphere_description,
-          is_featured: formData.is_featured,
-          is_published: formData.is_published,
+          is_featured: formData.is_featured, is_published: formData.is_published,
           includes: formData.includes,
         };
-
-        if (formData.photos && formData.photos.length > 0) {
-          updatePayload.photos = formData.photos;
-        }
-
-        if (formData.hero_photo_index !== undefined) {
-          updatePayload.hero_photo_index = formData.hero_photo_index;
-        }
+        if (formData.photos?.length > 0) updatePayload.photos = formData.photos;
+        if (formData.hero_photo_index !== undefined) updatePayload.hero_photo_index = formData.hero_photo_index;
 
         response = await projectApi.updateCompleteProject(Number(id), updatePayload, existingPhotos);
       } else {
@@ -149,13 +122,7 @@ export default function ProjectForm() {
       }
 
       if (response.success) {
-        await Swal.fire({
-          icon: 'success',
-          title: 'Mantap!',
-          text: `Project berhasil ${isEdit ? 'diperbarui' : 'disimpan'}`,
-          timer: 2000,
-          showConfirmButton: false,
-        });
+        await Swal.fire({ icon: 'success', title: 'Mantap!', text: `Project berhasil ${isEdit ? 'diperbarui' : 'disimpan'}`, timer: 2000, showConfirmButton: false });
         navigate('/projects');
       }
     } catch (error: unknown) {
@@ -177,6 +144,7 @@ export default function ProjectForm() {
 
   return (
     <div className="space-y-6 w-full md:px-2 lg:px-8">
+      {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/projects')} disabled={saving}>
           <ArrowLeft size={20} />
@@ -191,6 +159,7 @@ export default function ProjectForm() {
         </div>
       </div>
 
+      {/* Progress */}
       <div className="space-y-4">
         <Progress value={(currentStep / steps.length) * 100} className="h-2 transition-all duration-500" />
         <div className="grid grid-cols-4 gap-1 md:gap-2">
@@ -198,12 +167,13 @@ export default function ProjectForm() {
             <button
               key={step.id}
               onClick={() => goToStep(step.id)}
-              className={`flex flex-col items-center gap-1 group ${currentStep < step.id ? 'cursor-default' : 'cursor-pointer'}`}
+              className={`flex flex-col items-center gap-1 ${currentStep < step.id ? 'cursor-default' : 'cursor-pointer'}`}
               disabled={saving}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
                 currentStep === step.id ? 'border-primary bg-primary text-white scale-110' :
-                currentStep > step.id ? 'border-green-500 bg-green-500 text-white' : 'border-muted text-muted-foreground'
+                currentStep > step.id ? 'border-green-500 bg-green-500 text-white' :
+                'border-muted text-muted-foreground'
               }`}>
                 {currentStep > step.id ? <Check size={16} strokeWidth={3} /> : step.id}
               </div>
@@ -215,7 +185,7 @@ export default function ProjectForm() {
         </div>
       </div>
 
-      <div className="bg-card border rounded-xl shadow-sm overflow-hidden min-h-[400px] w-full">
+      <div className="bg-card border rounded-xl shadow-sm overflow-hidden min-h-[400px]">
         {currentStep === 1 && (
           <StepBasicInfo formData={formData} updateFormData={updateFormData} onNext={nextStep} />
         )}
@@ -236,17 +206,17 @@ export default function ProjectForm() {
         )}
       </div>
 
-      <div className="flex items-center justify-between py-6 border-t w-full">
+      {/* Navigation */}
+      <div className="flex items-center justify-between py-6 border-t">
         <Button variant="outline" onClick={prevStep} disabled={currentStep === 1 || saving}>
           <ArrowLeft size={18} className="mr-2" /> Kembali
         </Button>
-
         {currentStep < steps.length ? (
-          <Button onClick={nextStep} className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
+          <Button onClick={nextStep} className="px-8 bg-[hsl(var(--ocean-deep))] text-white hover:bg-[hsl(var(--ocean-soft))]">
             Lanjut <ArrowRight size={18} className="ml-2" />
           </Button>
         ) : (
-          <Button onClick={handleSubmit} disabled={saving} className="px-8 flex items-center justify-center gap-2 bg-[hsl(var(--ocean-deep))] text-white py-2.5 rounded-lg hover:bg-[hsl(var(--ocean-soft))] transition-all font-semibold text-sm shadow-md">
+          <Button onClick={handleSubmit} disabled={saving} className="px-8 bg-[hsl(var(--ocean-deep))] text-white hover:bg-[hsl(var(--ocean-soft))]">
             {saving ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
             ) : (

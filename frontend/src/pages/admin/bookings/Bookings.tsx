@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useBookings } from "@/hooks/Admin/bookings/useBooking"; 
 import { 
   Search, Eye, Trash2, Calendar, Loader2, 
   CheckCircle2, XCircle, Filter, 
@@ -10,33 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { bookingApi, bookingLinkApi, type Booking, type BookingLink } from "@/api/bookingApi";
-import Swal from "sweetalert2";
-import axios from "axios";
-
-interface BookingFilters {
-  search?: string;
-  has_payment?: boolean;
-}
-
-interface BookingStats {
-  total: number;
-  withPayment: number;
-  withoutPayment: number;
-  thisMonth: number;
-}
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const statusStyles = {
   paid: "bg-success/10 text-success border-success/20",
@@ -44,208 +19,14 @@ const statusStyles = {
 };
 
 export default function Bookings() {
-  const navigate = useNavigate();
-  
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [bookingLinks, setBookingLinks] = useState<BookingLink[]>([]);
-  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
-  const [isLoadingLinks, setIsLoadingLinks] = useState(true);
-  
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [paymentFilter, setPaymentFilter] = useState<string>("all");
-  
-  const [linkSearchQuery, setLinkSearchQuery] = useState("");
-  const [debouncedLinkSearch, setDebouncedLinkSearch] = useState("");
-  
-  const [bookingStats, setBookingStats] = useState<BookingStats>({ 
-    total: 0, 
-    withPayment: 0, 
-    withoutPayment: 0, 
-    thisMonth: 0 
-  });
-
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedLinkSearch(linkSearchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [linkSearchQuery]);
-
-  const fetchBookings = useCallback(async () => {
-    try {
-      setIsLoadingBookings(true);
-      const filters: BookingFilters = {};
-      
-      if (debouncedSearch.trim()) {
-        filters.search = debouncedSearch;
-      }
-      
-      if (paymentFilter !== "all") {
-        filters.has_payment = paymentFilter === "with_payment";
-      }
-
-      const response = await bookingApi.getAllBookings(filters);
-      
-      if (response.success) {
-        setBookings(response.data);
-      }
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error) 
-        ? error.response?.data?.message 
-        : "Gagal memuat bookings";
-      console.error(message);
-    } finally {
-      setIsLoadingBookings(false);
-    }
-  }, [debouncedSearch, paymentFilter]);
-
-  const fetchBookingLinks = useCallback(async () => {
-    try {
-      setIsLoadingLinks(true);
-      const response = await bookingLinkApi.getAllBookingLinks({ 
-        search: debouncedLinkSearch 
-      });
-      
-      if (response.success) {
-        setBookingLinks(response.data);
-      }
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error) 
-        ? error.response?.data?.message 
-        : "Gagal memuat booking links";
-      console.error(message);
-    } finally {
-      setIsLoadingLinks(false);
-    }
-  }, [debouncedLinkSearch]);
-
-  const fetchBookingStatistics = useCallback(async () => {
-    try {
-      const response = await bookingApi.getStatistics();
-      if (response.success) {
-        setBookingStats(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch booking statistics", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchBookings();
-    fetchBookingStatistics();
-  }, [fetchBookings, fetchBookingStatistics]);
-
-  useEffect(() => {
-    fetchBookingLinks();
-  }, [fetchBookingLinks]);
-
-  const handleDeleteBooking = async (id: number, bookingCode: string) => {
-    const result = await Swal.fire({
-      title: "Yakin hapus booking?",
-      text: `Booking ${bookingCode} akan dihapus permanen!`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal"
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await bookingApi.deleteBooking(id);
-        Swal.fire("Terhapus!", "Booking berhasil dihapus", "success");
-        fetchBookings();
-        fetchBookingStatistics();
-      } catch (error: unknown) {
-        const message = axios.isAxiosError(error) 
-          ? error.response?.data?.message 
-          : "Gagal menghapus";
-        Swal.fire("Gagal!", message, "error");
-      }
-    }
-  };
-
-  const handleCopyLink = (token: string) => {
-    const link = `${window.location.origin}/booking/${token}`;
-    navigator.clipboard.writeText(link);
-    Swal.fire({
-      icon: "success",
-      title: "Tersalin!",
-      text: "Link berhasil disalin ke clipboard",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-
-  const handleRegenerateToken = async (id: number) => {
-    const result = await Swal.fire({
-      title: "Generate ulang token?",
-      text: "Link lama tidak akan bisa digunakan lagi",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Ya, Generate!",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await bookingLinkApi.regenerateToken(id);
-        Swal.fire("Berhasil!", "Token berhasil di-generate ulang", "success");
-        fetchBookingLinks();
-      } catch (error: unknown) {
-        const message = axios.isAxiosError(error) 
-          ? error.response?.data?.message 
-          : "Gagal generate token";
-        Swal.fire("Gagal!", message, "error");
-      }
-    }
-  };
-
-  const handleDeleteLink = async (id: number) => {
-    const result = await Swal.fire({
-      title: "Yakin hapus link?",
-      text: "Link akan dihapus permanen!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      confirmButtonText: "Ya, Hapus!",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await bookingLinkApi.deleteBookingLink(id);
-        Swal.fire("Terhapus!", "Link berhasil dihapus", "success");
-        fetchBookingLinks();
-      } catch (error: unknown) {
-        const message = axios.isAxiosError(error) 
-          ? error.response?.data?.message 
-          : "Gagal menghapus";
-        Swal.fire("Gagal!", message, "error");
-      }
-    }
-  };
-
-  const isExpired = (expiresAt: string | undefined) => {
-    if (!expiresAt) return false;
-    return new Date(expiresAt) < new Date();
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("id-ID", { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
-    });
-  };
+  const {
+    bookings, bookingLinks, isLoadingBookings, isLoadingLinks,
+    searchQuery, setSearchQuery, paymentFilter, setPaymentFilter,
+    linkSearchQuery, setLinkSearchQuery, bookingStats,
+    navigate,
+    handleDeleteBooking, handleCopyLink, handleRegenerateToken, handleDeleteLink,
+    isExpired, formatDate,
+  } = useBookings();
 
   return (
     <div className="space-y-6">

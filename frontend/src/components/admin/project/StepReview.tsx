@@ -1,7 +1,8 @@
+// src/components/admin/project/StepReview.tsx
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit2, CheckCircle, Image as ImageIcon, Star, MapPin, Palette, Flower } from 'lucide-react';
-import type { CreateCompleteProjectData, ProjectPhoto } from '@/api/projectApi';
+import type { CreateCompleteProjectData, ProjectPhoto } from '@/types/project.types';
 
 interface StepReviewProps {
   formData: CreateCompleteProjectData;
@@ -22,7 +23,6 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
         </p>
 
         <div className="space-y-8">
-
           {/* 1. Basic Info */}
           <div className="flex items-start justify-between pb-6 border-b border-border">
             <div className="flex-1">
@@ -83,14 +83,13 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
             </Button>
           </div>
 
-          {/* 2. Photos with colors & flowers */}
+          {/* 2. Photos */}
           <div className="flex items-start justify-between pb-6 border-b border-border">
             <div className="flex-1">
               <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
                 <ImageIcon size={18} /> Foto Project
               </h3>
 
-              {/* Existing photos summary */}
               {existingPhotos.length > 0 && (
                 <div className="mb-4">
                   <p className="text-xs text-muted-foreground mb-2">Foto existing: {existingPhotos.length} foto</p>
@@ -115,7 +114,6 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
                 </div>
               )}
 
-              {/* New photos */}
               {formData.photos && formData.photos.length > 0 ? (
                 <div className="space-y-4">
                   <p className="text-sm">
@@ -125,7 +123,7 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
                     )}
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Array.from(formData.photos).map((photoData, index) => {
+                    {formData.photos.map((photoData, index) => {
                       const isHero = formData.hero_photo_index === (existingPhotos.length + index);
                       return (
                         <div key={index} className="border rounded-xl overflow-hidden bg-card">
@@ -156,7 +154,6 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
                             </div>
                           </div>
 
-                          {/* Colors */}
                           {photoData.colors && photoData.colors.length > 0 && (
                             <div className="px-3 pb-2 border-t pt-2">
                               <p className="text-[10px] font-semibold text-purple-600 flex items-center gap-1 mb-1.5">
@@ -165,9 +162,7 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
                               <div className="flex flex-wrap gap-1.5">
                                 {photoData.colors.map((color, ci) => (
                                   <div key={ci} className="flex items-center gap-1 bg-purple-50 border border-purple-100 rounded-full px-2 py-0.5">
-                                    {color.color_hex && (
-                                      <div className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: color.color_hex }} />
-                                    )}
+                                    {color.color_hex && <div className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: color.color_hex }} />}
                                     <span className="text-[10px] text-purple-700">{color.color_name}</span>
                                   </div>
                                 ))}
@@ -175,7 +170,6 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
                             </div>
                           )}
 
-                          {/* Flowers */}
                           {photoData.flowers && photoData.flowers.length > 0 && (
                             <div className="px-3 pb-2 border-t pt-2">
                               <p className="text-[10px] font-semibold text-pink-600 flex items-center gap-1 mb-1.5">

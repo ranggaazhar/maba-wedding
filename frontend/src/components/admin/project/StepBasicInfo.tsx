@@ -11,8 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { categoryApi, type Category } from '@/api/categoryApi';
-import type { CreateCompleteProjectData } from '@/api/projectApi';
+import type { CreateCompleteProjectData} from '@/types/project.types';
+import { categoryApi } from '@/api/categoryApi';
+import type { Category } from '@/types/category.types';
 
 interface StepBasicInfoProps {
   formData: CreateCompleteProjectData;

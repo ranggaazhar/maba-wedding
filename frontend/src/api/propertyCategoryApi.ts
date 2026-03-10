@@ -1,32 +1,13 @@
 // src/api/propertyCategoryApi.ts
 import axios from 'axios';
+import type { ApiResponse } from '@/types/common.types';
+import type {
+  PropertyCategory,
+  CreatePropertyCategoryData,
+  UpdatePropertyCategoryData,
+} from '@/types/propertyCategory.types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-export interface PropertyItem {
-  id: number;
-  name: string;
-}
-
-export interface PropertyCategory {
-  id: number;
-  slug: string;
-  name: string;
-  description?: string;
-  is_active: boolean;
-  properties?: PropertyItem[]; 
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreatePropertyCategoryData {
-  slug: string;
-  name: string;
-  description?: string;
-  is_active?: boolean;
-}
-
-export type UpdatePropertyCategoryData = Partial<CreatePropertyCategoryData>;
 
 class PropertyCategoryApi {
   private getAuthHeaders() {
@@ -43,7 +24,7 @@ class PropertyCategoryApi {
     is_active?: boolean;
     search?: string;
     include_properties?: boolean;
-  }) {
+  }): Promise<ApiResponse<PropertyCategory[]>> {
     const params = new URLSearchParams();
     if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active));
     if (filters?.search) params.append('search', filters.search);
@@ -56,7 +37,7 @@ class PropertyCategoryApi {
     return response.data;
   }
 
-  async getPropertyCategoryById(id: number, includeRelations = false) {
+  async getPropertyCategoryById(id: number, includeRelations = false): Promise<ApiResponse<PropertyCategory>> {
     const params = includeRelations ? '?include_relations=true' : '';
     const response = await axios.get(
       `${API_URL}/property-categories/${id}${params}`,
@@ -65,7 +46,7 @@ class PropertyCategoryApi {
     return response.data;
   }
 
-  async getPropertyCategoryBySlug(slug: string, includeRelations = false) {
+  async getPropertyCategoryBySlug(slug: string, includeRelations = false): Promise<ApiResponse<PropertyCategory>> {
     const params = includeRelations ? '?include_relations=true' : '';
     const response = await axios.get(
       `${API_URL}/property-categories/slug/${slug}${params}`,
@@ -74,7 +55,7 @@ class PropertyCategoryApi {
     return response.data;
   }
 
-  async createPropertyCategory(data: CreatePropertyCategoryData) {
+  async createPropertyCategory(data: CreatePropertyCategoryData): Promise<ApiResponse<PropertyCategory>> {
     const response = await axios.post(
       `${API_URL}/property-categories`,
       data,
@@ -83,7 +64,7 @@ class PropertyCategoryApi {
     return response.data;
   }
 
-  async updatePropertyCategory(id: number, data: UpdatePropertyCategoryData) {
+  async updatePropertyCategory(id: number, data: UpdatePropertyCategoryData): Promise<ApiResponse<PropertyCategory>> {
     const response = await axios.put(
       `${API_URL}/property-categories/${id}`,
       data,
@@ -92,7 +73,7 @@ class PropertyCategoryApi {
     return response.data;
   }
 
-  async deletePropertyCategory(id: number) {
+  async deletePropertyCategory(id: number): Promise<ApiResponse<null>> {
     const response = await axios.delete(
       `${API_URL}/property-categories/${id}`,
       this.getAuthHeaders()
@@ -100,7 +81,7 @@ class PropertyCategoryApi {
     return response.data;
   }
 
-  async togglePropertyCategoryStatus(id: number) {
+  async togglePropertyCategoryStatus(id: number): Promise<ApiResponse<PropertyCategory>> {
     const response = await axios.patch(
       `${API_URL}/property-categories/${id}/toggle-status`,
       {},
