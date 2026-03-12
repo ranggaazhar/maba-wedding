@@ -1,89 +1,35 @@
-// src/pages/admin/Invoices.tsx
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { Plus, Search, Eye, Edit, Trash2, FileText, Filter, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
-} from "@/components/ui/dialog";
-import Swal from "sweetalert2";
-import { invoiceApi, type Invoice, type InvoiceStatus, type InvoiceStatistics } from "@/api/InvoiceApi";
-
-// ── Helpers ──────────────────────────────────────────────────
+import { useInvoices } from '@/hooks/Admin/invoices/useInvoices';
+import { Plus, Search, Eye, Edit, Trash2, FileText, Filter, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import type { InvoiceStatus } from '@/types/invoice.types';
 
 const formatCurrency = (val: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(val);
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 
 const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
 const statusConfig: Record<InvoiceStatus, { label: string; className: string }> = {
-  DRAFT:   { label: "Draft",    className: "bg-muted text-muted-foreground border-border" },
-  SENT:    { label: "Terkirim", className: "bg-blue-100 text-blue-700 border-blue-200" },
-  PAID:    { label: "Lunas",    className: "bg-green-100 text-green-700 border-green-200" },
-  OVERDUE: { label: "Terlambat", className: "bg-red-100 text-red-700 border-red-200" },
+  DRAFT:   { label: 'Draft',     className: 'bg-muted text-muted-foreground border-border' },
+  SENT:    { label: 'Terkirim',  className: 'bg-blue-100 text-blue-700 border-blue-200' },
+  PAID:    { label: 'Lunas',     className: 'bg-green-100 text-green-700 border-green-200' },
+  OVERDUE: { label: 'Terlambat', className: 'bg-red-100 text-red-700 border-red-200' },
 };
 
-// ── Component ────────────────────────────────────────────────
-
 export default function Invoices() {
-  const navigate = useNavigate();
+  const {
+    invoices, stats, isLoading,
+    search, setSearch,
+    statusFilter, setStatusFilter,
+    deleteId, setDeleteId,
+    isDeleting, navigate,
+    handleDelete,
+  } = useInvoices();
 
-  const [invoices, setInvoices]     = useState<Invoice[]>([]);
-  const [stats, setStats]           = useState<InvoiceStatistics | null>(null);
-  const [isLoading, setIsLoading]   = useState(true);
-  const [search, setSearch]         = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [deleteId, setDeleteId]     = useState<number | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const [invRes, statsRes] = await Promise.all([
-        invoiceApi.getAllInvoices({
-          search: search || undefined,
-          status: statusFilter !== "all" ? statusFilter as InvoiceStatus : undefined,
-          include_booking: true,
-        }),
-        invoiceApi.getStatistics(),
-      ]);
-      if (invRes.success) setInvoices(invRes.data);
-      if (statsRes.success) setStats(statsRes.data);
-    } catch {
-      Swal.fire("Error", "Gagal memuat data invoice", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [search, statusFilter]);
-
-  useEffect(() => {
-    const timer = setTimeout(fetchData, 300);
-    return () => clearTimeout(timer);
-  }, [fetchData]);
-
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    try {
-      setIsDeleting(true);
-      const res = await invoiceApi.deleteInvoice(deleteId);
-      if (res.success) {
-        Swal.fire({ icon: "success", title: "Berhasil", text: "Invoice berhasil dihapus", timer: 1500, showConfirmButton: false });
-        setDeleteId(null);
-        fetchData();
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal menghapus invoice";
-      Swal.fire("Error", msg, "error");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   return (
     <div className="space-y-6">

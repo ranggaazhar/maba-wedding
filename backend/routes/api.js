@@ -15,11 +15,13 @@ const reviewLinkController = require('../controllers/reviewLinkController');
 const reviewController = require('../controllers/reviewController');
 const siteSettingController = require('../controllers/siteSettingController');
 const invoiceController = require('../controllers/invoiceController');
+const dashboardController = require('../controllers/dashboardController');
 
 // Import middlewares
 const authMiddleware = require('../middleware/auth');
 const upload = require('../config/multer');
 const { processImage, processMultipleImages } = require('../middleware/imageProcessor');
+
 
 const { registerValidation, loginValidation, updateProfileValidation,changePasswordValidation,validate: authValidate } = require('../validators/authValidator');
 const {createCategoryValidation,updateCategoryValidation,categoryIdValidation,validate: categoryValidate} = require('../validators/categoryValidator');
@@ -227,5 +229,9 @@ router.post('/invoices/:invoiceId/items/bulk',            authMiddleware, invoic
 router.post('/invoices/:invoiceId/items/reorder',         authMiddleware, invoiceController.reorderItems);
 router.put('/invoice-items/:id',                          authMiddleware, invoiceController.updateItem);
 router.delete('/invoice-items/:id',                       authMiddleware, invoiceController.deleteItem);
+
+router.get('/dashboard/stats',           authMiddleware, dashboardController.getStats);
+router.get('/dashboard/recent-bookings', authMiddleware, dashboardController.getRecentBookings);
+router.get('/dashboard/recent-reviews',  authMiddleware, dashboardController.getRecentReviews);
 
 module.exports = router;

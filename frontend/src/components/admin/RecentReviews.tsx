@@ -1,90 +1,55 @@
-import { Star, Check, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+// src/components/admin/RecentReviews.tsx
+import { Star } from 'lucide-react';
+import type { DashboardRecentReview } from '@/types/dashboard.types';
 
-const reviews = [
-  {
-    id: 1,
-    customer: "Dewi & Andi",
-    rating: 5,
-    text: "Dekorasi wedding kami sangat indah! Tim sangat profesional dan responsif. Semua tamu kagum dengan dekorasinya.",
-    date: "3 hari lalu",
-    approved: false,
-  },
-  {
-    id: 2,
-    customer: "Rina & Fajar",
-    rating: 5,
-    text: "Pelayanan luar biasa dari awal konsultasi sampai hari H. Sangat merekomendasikan!",
-    date: "5 hari lalu",
-    approved: false,
-  },
-  {
-    id: 3,
-    customer: "Siti & Ahmad",
-    rating: 4,
-    text: "Dekorasi sesuai ekspektasi, hanya ada sedikit keterlambatan pengerjaan tapi hasil akhir memuaskan.",
-    date: "1 minggu lalu",
-    approved: true,
-  },
-];
-
-function RatingStars({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          size={14}
-          className={cn(
-            star <= rating ? "fill-warning text-warning" : "text-muted-foreground/30"
-          )}
-        />
-      ))}
-    </div>
-  );
+interface Props {
+  reviews: DashboardRecentReview[];
+  isLoading: boolean;
+  formatDate: (s: string) => string;
 }
 
-export function RecentReviews() {
-  return (
-    <div className="table-container animate-fade-in">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-foreground">Review Terbaru</h3>
-            <p className="text-sm text-muted-foreground">Menunggu moderasi</p>
-          </div>
-          <Button variant="outline" size="sm">
-            Lihat Semua
-          </Button>
+export function RecentReviews({ reviews, isLoading, formatDate }: Props) {
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-xl border border-border p-6">
+        <div className="h-5 w-32 bg-muted animate-pulse rounded mb-4" />
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-16 bg-muted animate-pulse rounded" />
+          ))}
         </div>
       </div>
-      <div className="divide-y divide-border">
-        {reviews.map((review) => (
-          <div key={review.id} className="p-4 hover:bg-muted/30 transition-colors">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <p className="font-medium text-foreground">{review.customer}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <RatingStars rating={review.rating} />
-                  <span className="text-xs text-muted-foreground">{review.date}</span>
+    );
+  }
+
+  return (
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h3 className="text-lg font-bold text-foreground mb-4">Review Terbaru</h3>
+
+      {reviews.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8">Belum ada review</p>
+      ) : (
+        <div className="space-y-4">
+          {reviews.map(review => (
+            <div key={review.id} className="p-3 rounded-lg bg-muted/30 border border-border/50">
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-medium text-sm text-foreground">{review.customer_name}</p>
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      size={12}
+                      className={i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}
+                    />
+                  ))}
                 </div>
               </div>
-              {!review.approved && (
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-success hover:bg-success/10">
-                    <Check size={16} />
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10">
-                    <X size={16} />
-                  </Button>
-                </div>
-              )}
+              <p className="text-xs text-muted-foreground line-clamp-2">{review.review_text}</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">{formatDate(review.submitted_at)}</p>
             </div>
-            <p className="text-sm text-muted-foreground line-clamp-2">{review.text}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

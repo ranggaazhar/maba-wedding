@@ -1,69 +1,45 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/admin/InvoiceDetail.tsx
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Edit, Download, Send, FileText, CheckCircle, AlertTriangle, Loader2, Clock, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import Swal from "sweetalert2";
-import { invoiceApi, type Invoice, type InvoiceStatus, type InvoiceItem } from "@/api/InvoiceApi";
-
-// ── Helpers ──────────────────────────────────────────────────
+import { useInvoiceDetail } from '@/hooks/Admin/invoices/useInvoiceDetail';
+import {
+  ArrowLeft, Edit, Download, Send, FileText, CheckCircle,
+  AlertTriangle, Loader2, Clock, MessageCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import type { InvoiceStatus, InvoiceItem } from '@/types/invoice.types';
 
 const formatCurrency = (val: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(val);
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 
 const formatDate = (dateStr?: string) => {
-  if (!dateStr) return "-";
-  return new Date(dateStr).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 };
 
 const statusConfig: Record<InvoiceStatus, { label: string; className: string; icon: React.ReactNode }> = {
-  DRAFT:   { label: "Draft",     className: "bg-muted text-muted-foreground border-border",         icon: <Clock size={14} /> },
-  SENT:    { label: "Terkirim",  className: "bg-blue-100 text-blue-700 border-blue-200",            icon: <Send size={14} /> },
-  PAID:    { label: "Lunas",     className: "bg-green-100 text-green-700 border-green-200",         icon: <CheckCircle size={14} /> },
-  OVERDUE: { label: "Terlambat", className: "bg-red-100 text-red-700 border-red-200",              icon: <AlertTriangle size={14} /> },
+  DRAFT:   { label: 'Draft',     className: 'bg-muted text-muted-foreground border-border',    icon: <Clock size={14} /> },
+  SENT:    { label: 'Terkirim',  className: 'bg-blue-100 text-blue-700 border-blue-200',       icon: <Send size={14} /> },
+  PAID:    { label: 'Lunas',     className: 'bg-green-100 text-green-700 border-green-200',    icon: <CheckCircle size={14} /> },
+  OVERDUE: { label: 'Terlambat', className: 'bg-red-100 text-red-700 border-red-200',          icon: <AlertTriangle size={14} /> },
 };
 
 const itemTypeLabel: Record<string, { label: string; className: string }> = {
-  item:       { label: "Item",       className: "text-foreground" },
-  discount:   { label: "Diskon",     className: "text-green-600" },
-  penalty:    { label: "Denda",      className: "text-red-600" },
-  adjustment: { label: "Koreksi",   className: "text-orange-500" },
+  item:       { label: 'Item',    className: 'text-foreground' },
+  discount:   { label: 'Diskon',  className: 'text-green-600' },
+  penalty:    { label: 'Denda',   className: 'text-red-600' },
+  adjustment: { label: 'Koreksi', className: 'text-orange-500' },
 };
 
-// ── Component ────────────────────────────────────────────────
-
 export default function InvoiceDetail() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-
-  const [invoice, setInvoice]       = useState<Invoice | null>(null);
-  const [isLoading, setIsLoading]   = useState(true);
-  const [adminNotes, setAdminNotes] = useState("");
-  const [isSavingNotes, setIsSavingNotes] = useState(false);
-  const [isActionLoading, setIsActionLoading] = useState(false);
-
-  const fetchInvoice = useCallback(async () => {
-    if (!id) return;
-    try {
-      setIsLoading(true);
-      const res = await invoiceApi.getInvoiceById(Number(id));
-      if (res.success) {
-        setInvoice(res.data);
-        setAdminNotes(res.data.admin_notes || "");
-      }
-    } catch {
-      Swal.fire("Error", "Gagal memuat data invoice", "error");
-      navigate("/invoices");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [id, navigate]);
-
-  useEffect(() => { fetchInvoice(); }, [fetchInvoice]);
+  const {
+    id, invoice, isLoading,
+    adminNotes, setAdminNotes,
+    isSavingNotes, isActionLoading,
+    calculatedTotal, navigate,
+    handleSendWhatsapp, handleMarkAsPaid,
+    handleMarkAsOverdue, handleSaveNotes,
+  } = useInvoiceDetail();
 
   if (isLoading) {
     return (
@@ -78,112 +54,11 @@ export default function InvoiceDetail() {
   const remaining = invoice.total - invoice.down_payment;
   const cfg = statusConfig[invoice.status];
 
-  // Hitung total dengan memperhitungkan item_type
-  const calculatedTotal = invoice.items?.reduce((sum, item) => {
-    const sub = parseFloat(String(item.subtotal));
-    return item.item_type === "discount" ? sum - sub : sum + sub;
-  }, 0) ?? invoice.total;
-
-  // ── Action handlers ──────────────────────────────────────────
-
-  const handleSendWhatsapp = async () => {
-    const confirm = await Swal.fire({
-      title: "Kirim Invoice via WhatsApp?",
-      html: `
-        <p>Invoice akan dikirim ke:</p>
-        <p class="font-bold text-lg mt-1">${invoice.customer_name}</p>
-        <p class="text-muted-foreground">${invoice.customer_phone}</p>
-        <p class="mt-2 text-sm">PDF invoice akan digenerate otomatis dan link-nya dikirim via WA.</p>
-        ${invoice.status === 'DRAFT' ? '<p class="text-blue-600 text-sm mt-1">Status invoice akan otomatis berubah ke <b>Terkirim</b>.</p>' : ''}
-      `,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Ya, Kirim WA",
-      cancelButtonText: "Batal",
-      confirmButtonColor: "#25D366",
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      setIsActionLoading(true);
-      const res = await invoiceApi.sendInvoiceWhatsapp(invoice.id);
-      if (res.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Invoice Terkirim!",
-          html: `
-            <p>Invoice berhasil dikirim ke WhatsApp customer.</p>
-            ${res.data?.pdf_url ? `<p class="mt-2"><a href="${res.data.pdf_url}" target="_blank" class="text-blue-600 underline">Lihat PDF Invoice</a></p>` : ''}
-          `,
-          timer: 3000,
-          showConfirmButton: false,
-        });
-        fetchInvoice();
-      } else {
-        Swal.fire("Peringatan", res.message || "PDF dibuat tapi WA gagal dikirim", "warning");
-        fetchInvoice();
-      }
-    }  catch (err: any) {
-      Swal.fire("Error", err?.response?.data?.message || err.message || "Gagal mengirim invoice", "error");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleMarkAsPaid = async () => {
-    const confirm = await Swal.fire({
-      title: "Tandai Lunas?",
-      text: "Konfirmasi bahwa customer sudah melakukan pelunasan.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Ya, Tandai Lunas",
-      cancelButtonText: "Batal",
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      setIsActionLoading(true);
-      const res = await invoiceApi.markAsPaid(invoice.id);
-      if (res.success) {
-        Swal.fire({ icon: "success", title: "Invoice Lunas!", timer: 1500, showConfirmButton: false });
-        fetchInvoice();
-      }
-    } catch {
-      Swal.fire("Error", "Gagal menandai invoice sebagai lunas", "error");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleMarkAsOverdue = async () => {
-    try {
-      setIsActionLoading(true);
-      await invoiceApi.markAsOverdue(invoice.id);
-      Swal.fire({ icon: "warning", title: "Ditandai Terlambat", timer: 1500, showConfirmButton: false });
-      fetchInvoice();
-    } catch {
-      Swal.fire("Error", "Gagal mengubah status", "error");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleSaveNotes = async () => {
-    try {
-      setIsSavingNotes(true);
-      await invoiceApi.updateInvoice(invoice.id, { admin_notes: adminNotes });
-      Swal.fire({ icon: "success", title: "Catatan tersimpan", timer: 1200, showConfirmButton: false });
-    } catch {
-      Swal.fire("Error", "Gagal menyimpan catatan", "error");
-    } finally {
-      setIsSavingNotes(false);
-    }
-  };
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/invoices")}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/invoices')}>
           <ArrowLeft size={20} />
         </Button>
         <div className="flex-1">
@@ -200,11 +75,8 @@ export default function InvoiceDetail() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {invoice.status !== "PAID" && (
-            <Button
-              variant="outline" size="sm"
-              onClick={() => navigate(`/invoices/${id}/edit`)}
-            >
+          {invoice.status !== 'PAID' && (
+            <Button variant="outline" size="sm" onClick={() => navigate(`/invoices/${id}/edit`)}>
               <Edit size={16} className="mr-2" />
               Edit
             </Button>
@@ -217,8 +89,7 @@ export default function InvoiceDetail() {
               </a>
             </Button>
           )}
-          {/* Tombol kirim WA — muncul di DRAFT & SENT */}
-          {(invoice.status === "DRAFT" || invoice.status === "SENT") && (
+          {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
             <Button
               size="sm"
               className="bg-[#25D366] hover:bg-[#128C7E] text-white"
@@ -229,7 +100,7 @@ export default function InvoiceDetail() {
                 ? <Loader2 size={16} className="animate-spin mr-2" />
                 : <MessageCircle size={16} className="mr-2" />
               }
-              {invoice.status === "DRAFT" ? "Kirim ke Customer" : "Kirim Ulang WA"}
+              {invoice.status === 'DRAFT' ? 'Kirim ke Customer' : 'Kirim Ulang WA'}
             </Button>
           )}
         </div>
@@ -254,9 +125,7 @@ export default function InvoiceDetail() {
               <div className="text-right">
                 <h2 className="text-2xl font-bold text-foreground">INVOICE</h2>
                 <p className="font-mono text-muted-foreground">{invoice.invoice_number}</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Tgl: {formatDate(invoice.issue_date)}
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">Tgl: {formatDate(invoice.issue_date)}</p>
               </div>
             </div>
 
@@ -274,7 +143,7 @@ export default function InvoiceDetail() {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Detail Acara</p>
-                <p className="font-semibold text-foreground">{invoice.event_type || "-"}</p>
+                <p className="font-semibold text-foreground">{invoice.event_type || '-'}</p>
                 <p className="text-sm text-muted-foreground">{invoice.event_venue}</p>
                 <p className="text-sm text-muted-foreground">Tanggal: {formatDate(invoice.event_date)}</p>
               </div>
@@ -296,7 +165,7 @@ export default function InvoiceDetail() {
                 <tbody>
                   {invoice.items?.map((item: InvoiceItem, idx: number) => {
                     const typeInfo = itemTypeLabel[item.item_type] ?? itemTypeLabel.item;
-                    const isDiscount = item.item_type === "discount";
+                    const isDiscount = item.item_type === 'discount';
                     return (
                       <tr key={item.id} className="border-t border-border">
                         <td className="p-3 text-sm text-muted-foreground">{idx + 1}</td>
@@ -315,8 +184,8 @@ export default function InvoiceDetail() {
                         <td className="p-3 text-right text-sm text-muted-foreground">
                           {formatCurrency(item.unit_price)}
                         </td>
-                        <td className={`p-3 text-right text-sm font-medium ${isDiscount ? "text-green-600" : "text-foreground"}`}>
-                          {isDiscount ? "- " : ""}{formatCurrency(item.subtotal)}
+                        <td className={`p-3 text-right text-sm font-medium ${isDiscount ? 'text-green-600' : 'text-foreground'}`}>
+                          {isDiscount ? '- ' : ''}{formatCurrency(item.subtotal)}
                         </td>
                       </tr>
                     );
@@ -339,8 +208,8 @@ export default function InvoiceDetail() {
                 <Separator />
                 <div className="flex justify-between font-bold text-lg">
                   <span className="text-foreground">Sisa Pembayaran</span>
-                  <span className={invoice.status === "PAID" ? "text-green-600" : "text-foreground"}>
-                    {invoice.status === "PAID" ? "Lunas" : formatCurrency(remaining)}
+                  <span className={invoice.status === 'PAID' ? 'text-green-600' : 'text-foreground'}>
+                    {invoice.status === 'PAID' ? 'Lunas' : formatCurrency(remaining)}
                   </span>
                 </div>
               </div>
@@ -353,7 +222,6 @@ export default function InvoiceDetail() {
                 <p className="text-sm text-foreground">{invoice.notes}</p>
               </div>
             )}
-
             {invoice.payment_terms && (
               <div className="mt-4 p-4 bg-muted/30 rounded-lg">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Syarat Pembayaran</p>
@@ -380,38 +248,30 @@ export default function InvoiceDetail() {
               <Separator />
               <div className="flex justify-between">
                 <span className="font-medium text-foreground">Sisa</span>
-                <span className={`font-bold text-lg ${invoice.status === "PAID" ? "text-green-600" : "text-destructive"}`}>
-                  {invoice.status === "PAID" ? "✓ Lunas" : formatCurrency(remaining)}
+                <span className={`font-bold text-lg ${invoice.status === 'PAID' ? 'text-green-600' : 'text-destructive'}`}>
+                  {invoice.status === 'PAID' ? '✓ Lunas' : formatCurrency(remaining)}
                 </span>
               </div>
             </div>
 
-            {/* Action buttons sesuai status */}
-            {invoice.status === "SENT" && (
+            {(invoice.status === 'SENT' || invoice.status === 'OVERDUE') && (
               <Button
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
                 size="sm"
                 onClick={handleMarkAsPaid}
                 disabled={isActionLoading}
               >
-                {isActionLoading ? <Loader2 size={16} className="animate-spin mr-2" /> : <CheckCircle size={16} className="mr-2" />}
+                {isActionLoading
+                  ? <Loader2 size={16} className="animate-spin mr-2" />
+                  : <CheckCircle size={16} className="mr-2" />
+                }
                 Tandai Lunas
               </Button>
             )}
-            {invoice.status === "OVERDUE" && (
+            {invoice.status === 'SENT' && (
               <Button
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                size="sm"
-                onClick={handleMarkAsPaid}
-                disabled={isActionLoading}
-              >
-                <CheckCircle size={16} className="mr-2" />
-                Tandai Lunas
-              </Button>
-            )}
-            {invoice.status === "SENT" && (
-              <Button
-                variant="outline" size="sm" className="w-full text-destructive hover:bg-destructive/10"
+                variant="outline" size="sm"
+                className="w-full text-destructive hover:bg-destructive/10"
                 onClick={handleMarkAsOverdue}
                 disabled={isActionLoading}
               >
@@ -421,7 +281,7 @@ export default function InvoiceDetail() {
             )}
           </div>
 
-          {/* Booking Link */}
+          {/* Booking Terkait */}
           {invoice.booking && (
             <div className="bg-card rounded-xl border border-border p-6 shadow-card space-y-4">
               <h3 className="font-semibold text-foreground">Booking Terkait</h3>
@@ -449,7 +309,7 @@ export default function InvoiceDetail() {
               onClick={handleSaveNotes}
               disabled={isSavingNotes}
             >
-              {isSavingNotes ? <Loader2 size={14} className="animate-spin mr-2" /> : null}
+              {isSavingNotes && <Loader2 size={14} className="animate-spin mr-2" />}
               Simpan Catatan
             </Button>
           </div>
