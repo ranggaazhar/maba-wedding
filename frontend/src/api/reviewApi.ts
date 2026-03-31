@@ -209,6 +209,7 @@ class ReviewApi {
   }
 
   // ── Review Links ───────────────────────────────────────────
+  // ✅ Semua /review-links → /reviews/links (ikut struktur route baru)
 
   async getAllReviewLinks(filters?: {
     is_used?: boolean;
@@ -223,25 +224,25 @@ class ReviewApi {
     if (filters?.include_review) params.append('include_review', 'true');
 
     const response = await axios.get(
-      `${API_URL}/review-links?${params.toString()}`,
+      `${API_URL}/reviews/links?${params.toString()}`,
       this.getAuthHeaders()
     );
     return response.data;
   }
 
   async getReviewLinkByToken(token: string) {
-    const response = await axios.get(`${API_URL}/review-links/token/${token}`);
+    const response = await axios.get(`${API_URL}/reviews/links/token/${token}`);
     return response.data;
   }
 
   async validateReviewLink(token: string) {
-    const response = await axios.post(`${API_URL}/review-links/validate/${token}`);
+    const response = await axios.post(`${API_URL}/reviews/links/validate/${token}`);
     return response.data;
   }
 
   async createReviewLink(bookingId: number) {
     const response = await axios.post(
-      `${API_URL}/review-links`,
+      `${API_URL}/reviews/links`,
       { booking_id: bookingId },
       this.getAuthHeaders()
     );
@@ -249,13 +250,13 @@ class ReviewApi {
   }
 
   async deleteReviewLink(id: number) {
-    const response = await axios.delete(`${API_URL}/review-links/${id}`, this.getAuthHeaders());
+    const response = await axios.delete(`${API_URL}/reviews/links/${id}`, this.getAuthHeaders());
     return response.data;
   }
 
   async regenerateToken(id: number) {
     const response = await axios.patch(
-      `${API_URL}/review-links/${id}/regenerate-token`,
+      `${API_URL}/reviews/links/${id}/regenerate-token`,
       {},
       this.getAuthHeaders()
     );
@@ -263,7 +264,7 @@ class ReviewApi {
   }
 
   async getReviewLinkStatistics() {
-    const response = await axios.get(`${API_URL}/review-links/statistics`, this.getAuthHeaders());
+    const response = await axios.get(`${API_URL}/reviews/links/statistics`, this.getAuthHeaders());
     return response.data;
   }
 }

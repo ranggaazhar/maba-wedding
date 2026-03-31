@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit');
 const connectDatabase = require('./config/db');
 const apiRoutes = require('./routes/api');
 const path = require('path');
-const reminderService = require('./services/reminderService');
+const reminderService = require('./services/admin/reminderService');
 
 const app = express();
 

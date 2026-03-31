@@ -20,37 +20,39 @@ class BookingLinkApi {
     if (filters?.is_used !== undefined) params.append('is_used', String(filters.is_used));
     if (filters?.is_expired !== undefined) params.append('is_expired', String(filters.is_expired));
     if (filters?.search) params.append('search', filters.search);
-    const response = await axios.get(`${API_URL}/booking-links?${params.toString()}`, this.getAuthHeaders());
+    // ✅ /booking-links → /bookings/links
+    const response = await axios.get(`${API_URL}/bookings/links?${params.toString()}`, this.getAuthHeaders());
     return response.data;
   }
 
   async getBookingLinkByToken(token: string): Promise<ApiResponse<BookingLink>> {
-    const response = await axios.get(`${API_URL}/booking-links/token/${token}`);
+    // ✅ /booking-links/token → /bookings/links/token
+    const response = await axios.get(`${API_URL}/bookings/links/token/${token}`);
     return response.data;
   }
 
   async validateBookingLink(token: string): Promise<ApiResponse<BookingLink>> {
-    const response = await axios.post(`${API_URL}/booking-links/validate/${token}`);
+    const response = await axios.post(`${API_URL}/bookings/links/validate/${token}`);
     return response.data;
   }
 
   async createBookingLink(data: Partial<BookingLink>): Promise<ApiResponse<BookingLink>> {
-    const response = await axios.post(`${API_URL}/booking-links`, data, this.getAuthHeaders());
+    const response = await axios.post(`${API_URL}/bookings/links`, data, this.getAuthHeaders());
     return response.data;
   }
 
   async updateBookingLink(id: number, data: Partial<BookingLink>): Promise<ApiResponse<BookingLink>> {
-    const response = await axios.put(`${API_URL}/booking-links/${id}`, data, this.getAuthHeaders());
+    const response = await axios.put(`${API_URL}/bookings/links/${id}`, data, this.getAuthHeaders());
     return response.data;
   }
 
   async deleteBookingLink(id: number): Promise<ApiResponse<null>> {
-    const response = await axios.delete(`${API_URL}/booking-links/${id}`, this.getAuthHeaders());
+    const response = await axios.delete(`${API_URL}/bookings/links/${id}`, this.getAuthHeaders());
     return response.data;
   }
 
   async regenerateToken(id: number): Promise<ApiResponse<BookingLink>> {
-    const response = await axios.patch(`${API_URL}/booking-links/${id}/regenerate-token`, {}, this.getAuthHeaders());
+    const response = await axios.patch(`${API_URL}/bookings/links/${id}/regenerate-token`, {}, this.getAuthHeaders());
     return response.data;
   }
 }

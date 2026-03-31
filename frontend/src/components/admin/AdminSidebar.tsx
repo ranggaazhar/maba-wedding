@@ -21,15 +21,15 @@ import { useToast } from '../../hooks/use-toast';
 import LogoMaba from '../../assets/logomaba.svg';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard',         path: '/dashboard' },
-  { icon: FolderOpen,      label: 'Kategori',          path: '/categories' },
-  { icon: Layers,          label: 'Kategori Properti', path: '/property-categories' },
-  { icon: ImageIcon,       label: 'Projects',          path: '/projects' },
-  { icon: Package,         label: 'Properties',        path: '/properties' },
-  { icon: Calendar,        label: 'Bookings',          path: '/bookings' },
-  { icon: FileText,        label: 'Invoice',           path: '/invoices' },  // ← baru
-  { icon: Star,            label: 'Reviews',           path: '/reviews' },
-  { icon: Settings,        label: 'Settings',          path: '/settings' },
+  { icon: LayoutDashboard, label: 'Dashboard',         path: '/admin/dashboard' },
+  { icon: FolderOpen,      label: 'Kategori',          path: '/admin/categories' },
+  { icon: Layers,          label: 'Kategori Properti', path: '/admin/property-categories' },
+  { icon: ImageIcon,       label: 'Projects',          path: '/admin/projects' },
+  { icon: Package,         label: 'Properties',        path: '/admin/properties' },
+  { icon: Calendar,        label: 'Bookings',          path: '/admin/bookings' },
+  { icon: FileText,        label: 'Invoice',           path: '/admin/invoices' },
+  { icon: Star,            label: 'Reviews',           path: '/admin/reviews' },
+  { icon: Settings,        label: 'Settings',          path: '/admin/settings' },
 ];
 
 export function AdminSidebar() {
@@ -88,7 +88,8 @@ export function AdminSidebar() {
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         <ul className="space-y-2">
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path ||
+            const isActive =
+              location.pathname === item.path ||
               location.pathname.startsWith(item.path + '/');
             return (
               <li key={item.path}>

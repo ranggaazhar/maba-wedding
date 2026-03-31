@@ -22,7 +22,7 @@ export function Navbar() {
               <Heart className="w-5 h-5 text-white fill-white" />
             </div>
             <span className="font-['Playfair_Display'] text-[#1D3557]" style={{ fontSize: '1.5rem', fontWeight: 600 }}>
-              Ethereal Moments
+              Maba Dekorasi
             </span>
           </Link>
           
