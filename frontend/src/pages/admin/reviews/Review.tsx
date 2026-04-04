@@ -241,10 +241,6 @@ export default function Reviews() {
               <span className="text-sm font-medium text-warning">{pendingReviews.length} menunggu moderasi</span>
             </div>
           )}
-          <Button variant="outline" size="sm" onClick={() => { fetchReviews(); fetchReviewLinks(); }} disabled={isLoading}>
-            <RefreshCw size={14} className={cn("mr-2", isLoading && "animate-spin")} />
-            Refresh
-          </Button>
         </div>
       </div>
 

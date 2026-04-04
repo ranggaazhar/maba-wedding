@@ -171,23 +171,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Booking Status Breakdown */}
-      {!isLoadingStats && stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: 'Pending', value: stats.bookings.byStatus.pending, color: 'bg-gray-100 text-gray-700 border-gray-200' },
-            { label: 'Menunggu Konfirmasi', value: stats.bookings.byStatus.waitingConfirmation, color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-            { label: 'Dikonfirmasi', value: stats.bookings.byStatus.confirmed, color: 'bg-green-50 text-green-700 border-green-200' },
-            { label: 'Ditolak', value: stats.bookings.byStatus.rejected, color: 'bg-red-50 text-red-700 border-red-200' },
-          ].map(item => (
-            <div key={item.label} className={`p-4 rounded-xl border ${item.color}`}>
-              <p className="text-2xl font-bold">{item.value}</p>
-              <p className="text-xs mt-0.5 opacity-80">{item.label}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Tables Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">

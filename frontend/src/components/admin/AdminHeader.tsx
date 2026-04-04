@@ -70,7 +70,7 @@ export function AdminHeader() {
             <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
               <div className="p-2">
                 <button
-                  onClick={() => navigate('/profile')}
+                  onClick={() => navigate('/admin/profile')}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm text-foreground"
                 >
                   <User size={16} />

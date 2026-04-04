@@ -13,6 +13,7 @@ import { useAuthStore } from './store/useAuthStore';
 import { Home } from './pages/public/Home';
 import { OurProjects } from './pages/public/OurProjects';
 import { Properties as PublicProperties } from './pages/public/Properties';
+import { ProjectDetail as PublicProjectDetail } from './pages/public/ProjectDetail';
 
 // ── Admin pages ────────────────────────────────────────────────
 import Dashboard from './pages/admin/Dashboard';
@@ -65,9 +66,10 @@ function App() {
 
           {/* ── Public Website (Navbar + Footer) ──────────────── */}
           <Route element={<PublicLayout />}>
-            <Route path="/"           element={<Home />} />
-            <Route path="/projects"   element={<OurProjects />} />
-            <Route path="/properties" element={<PublicProperties />} />
+            <Route path="/"              element={<Home />} />
+            <Route path="/projects"      element={<OurProjects />} />
+            <Route path="/projects/:id"  element={<PublicProjectDetail />} />
+            <Route path="/properties"    element={<PublicProperties />} />
           </Route>
 
           {/* ── Auth ──────────────────────────────────────────── */}

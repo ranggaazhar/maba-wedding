@@ -6,7 +6,7 @@ import {
   Package,
   Calendar,
   Star,
-  Settings,
+  // Settings,
   LogOut,
   ChevronLeft,
   Menu,
@@ -14,7 +14,6 @@ import {
   FileText
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useState } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { authApi } from '../../api/Authapi';
 import { useToast } from '../../hooks/use-toast';
@@ -29,11 +28,15 @@ const menuItems = [
   { icon: Calendar,        label: 'Bookings',          path: '/admin/bookings' },
   { icon: FileText,        label: 'Invoice',           path: '/admin/invoices' },
   { icon: Star,            label: 'Reviews',           path: '/admin/reviews' },
-  { icon: Settings,        label: 'Settings',          path: '/admin/settings' },
+  // { icon: Settings,        label: 'Settings',          path: '/admin/settings' },
 ];
 
-export function AdminSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+interface AdminSidebarProps {
+  collapsed: boolean;
+  onCollapse: (val: boolean) => void;
+}
+
+export function AdminSidebar({ collapsed, onCollapse }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { clearAuth } = useAuthStore();
@@ -77,7 +80,7 @@ export function AdminSidebar() {
           </div>
         )}
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => onCollapse(!collapsed)}
           className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/80 hover:text-white"
         >
           {collapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}

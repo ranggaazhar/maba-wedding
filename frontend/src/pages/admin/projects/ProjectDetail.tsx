@@ -1,7 +1,7 @@
 // src/pages/admin/projects/ProjectDetailPage.tsx
 import {
   ArrowLeft, Edit, Trash2, Eye, EyeOff, Calendar, Palette,
-  Flower2, Star, Share2, Check, ImageIcon, Loader2,
+  Flower2, Star, Check, ImageIcon, Loader2,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export default function ProjectDetailPage() {
           <div className="flex flex-col items-center justify-center gap-4 py-8">
             <ImageIcon className="h-16 w-16 text-muted-foreground" />
             <p className="text-muted-foreground text-center">Project tidak ditemukan</p>
-            <Button onClick={() => navigate("/projects")}>
+            <Button onClick={() => navigate("/admin/projects")}>
               <ArrowLeft size={16} className="mr-2" /> Kembali ke Projects
             </Button>
           </div>
@@ -62,7 +62,7 @@ export default function ProjectDetailPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate("/projects")}>
+          <Button variant="outline" size="icon" onClick={() => navigate("/admin/projects")}>
             <ArrowLeft size={18} />
           </Button>
           <div>
@@ -89,10 +89,7 @@ export default function ProjectDetailPage() {
           <Button variant="outline" size="icon" onClick={handleToggleFeatured}>
             <Star size={18} className={project.is_featured ? "fill-amber-500 text-amber-500" : ""} />
           </Button>
-          <Button variant="outline" size="icon">
-            <Share2 size={18} />
-          </Button>
-          <Button variant="outline" className="gap-2" onClick={() => navigate(`/projects/edit/${project.id}`)}>
+          <Button variant="outline" className="gap-2" onClick={() => navigate(`/admin/projects/edit/${project.id}`)}>
             <Edit size={16} /> Edit
           </Button>
           <Button variant="destructive" size="icon" onClick={handleDelete}>

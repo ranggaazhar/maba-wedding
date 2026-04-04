@@ -31,7 +31,7 @@ export default function Projects() {
           <h1 className="page-title text-2xl font-bold">Projects</h1>
           <p className="page-subtitle text-muted-foreground">Kelola portfolio dekorasi Anda</p>
         </div>
-        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/projects/new")}>
+        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/admin/projects/new")}>
           <Plus size={18} className="mr-2" /> Tambah Project
         </Button>
       </div>
@@ -83,7 +83,7 @@ export default function Projects() {
         <div className="border rounded-lg p-12 text-center bg-card">
           <ImageIcon size={48} className="mx-auto text-muted-foreground mb-4" />
           <h3 className="font-semibold mb-1">Belum ada project</h3>
-          <Button variant="outline" onClick={() => navigate("/projects/new")} className="mt-2">
+          <Button variant="outline" onClick={() => navigate("/admin/projects/new")} className="mt-2">
             Mulai Tambah Project
           </Button>
         </div>
@@ -113,10 +113,10 @@ export default function Projects() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/projects/${project.id}`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/admin/projects/${project.id}`)}>
                         <Eye size={14} className="mr-2" /> Preview
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/projects/edit/${project.id}`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/admin/projects/edit/${project.id}`)}>
                         <Edit size={14} className="mr-2" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleToggleFeatured(project.id)}>

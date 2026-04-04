@@ -59,7 +59,7 @@ export default function ProjectForm() {
     } catch (error: unknown) {
       const msg = axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal memuat data';
       Swal.fire({ icon: 'error', title: 'Error', text: msg });
-      navigate('/projects');
+      navigate('/admin/projects');
     } finally {
       setIsLoadingData(false);
     }
@@ -123,7 +123,7 @@ export default function ProjectForm() {
 
       if (response.success) {
         await Swal.fire({ icon: 'success', title: 'Mantap!', text: `Project berhasil ${isEdit ? 'diperbarui' : 'disimpan'}`, timer: 2000, showConfirmButton: false });
-        navigate('/projects');
+        navigate('/admin/projects');
       }
     } catch (error: unknown) {
       const msg = axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menyimpan';
@@ -146,7 +146,7 @@ export default function ProjectForm() {
     <div className="space-y-6 w-full md:px-2 lg:px-8">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/projects')} disabled={saving}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/projects')} disabled={saving}>
           <ArrowLeft size={20} />
         </Button>
         <div>
