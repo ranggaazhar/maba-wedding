@@ -53,7 +53,7 @@ export default function PropertyForm() {
           type="button"
           variant="outline" 
           size="icon" 
-          onClick={() => navigate("/properties")}
+          onClick={() => navigate("/admin/properties")}
         >
           <ArrowLeft size={20} />
         </Button>

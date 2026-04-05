@@ -31,7 +31,7 @@ export default function PropertyDetail() {
           <div className="flex flex-col items-center justify-center gap-4 py-8">
             <Package className="h-16 w-16 text-muted-foreground" />
             <p className="text-muted-foreground text-center">Property tidak ditemukan</p>
-            <Button onClick={() => navigate('/properties')}>
+            <Button onClick={() => navigate('/admin/properties')}>
               <ArrowLeft size={16} className="mr-2" /> Kembali ke Properties
             </Button>
           </div>
@@ -47,7 +47,7 @@ export default function PropertyDetail() {
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex items-start gap-4">
-              <Button variant="outline" size="icon" onClick={() => navigate('/properties')}>
+              <Button variant="outline" size="icon" onClick={() => navigate('/admin/properties')}>
                 <ArrowLeft size={20} />
               </Button>
               <div className="flex-1">
@@ -80,7 +80,7 @@ export default function PropertyDetail() {
                   : <><Eye size={16} className="mr-2" />Set Tersedia</>
                 }
               </Button>
-              <Button variant="default" size="sm" onClick={() => navigate(`/properties/edit/${property.id}`)}>
+              <Button variant="default" size="sm" onClick={() => navigate(`/admin/properties/edit/${property.id}`)}>
                 <Edit size={16} className="mr-2" /> Edit
               </Button>
               <Button variant="destructive" size="sm" onClick={handleDelete}>

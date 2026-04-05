@@ -1,16 +1,19 @@
-// src/hooks/customer/useOurProjects.ts
-import { useState, useEffect, useMemo } from 'react';
+// src/hooks/Customer/useOurProjects.ts
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { projectApi } from '@/api/projectApi';
 import { categoryApi } from '@/api/categoryApi';
 import type { Project } from '@/types/project.types';
 import type { Category } from '@/types/category.types';
 
+const PAGE_SIZE = 9;
+
 export function useOurProjects() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -24,7 +27,7 @@ export function useOurProjects() {
       if (cancelled) return;
 
       if (projectsResult.status === 'fulfilled' && projectsResult.value.success) {
-        setProjects(projectsResult.value.data);
+        setAllProjects(projectsResult.value.data);
       }
       if (categoriesResult.status === 'fulfilled' && categoriesResult.value.success) {
         setCategories(categoriesResult.value.data);
@@ -36,8 +39,19 @@ export function useOurProjects() {
     return () => { cancelled = true; };
   }, []);
 
+  // Wrapper setters — reset page ke 1 saat filter/search berubah
+  const handleSetSearchQuery = useCallback((q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(1);
+  }, []);
+
+  const handleSetSelectedCategory = useCallback((cat: string) => {
+    setSelectedCategory(cat);
+    setCurrentPage(1);
+  }, []);
+
   const filteredProjects = useMemo(() => {
-    return projects.filter(p => {
+    return allProjects.filter(p => {
       const matchSearch =
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (p.theme ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -46,7 +60,14 @@ export function useOurProjects() {
         selectedCategory === 'All' || p.category?.name === selectedCategory;
       return matchSearch && matchCategory;
     });
-  }, [projects, searchQuery, selectedCategory]);
+  }, [allProjects, searchQuery, selectedCategory]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / PAGE_SIZE));
+
+  const paginatedProjects = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredProjects.slice(start, start + PAGE_SIZE);
+  }, [filteredProjects, currentPage]);
 
   const getHeroImage = (project: Project): string => {
     const hero = project.photos?.find(p => p.is_hero) ?? project.photos?.[0];
@@ -61,13 +82,17 @@ export function useOurProjects() {
   };
 
   return {
-    projects: filteredProjects,
+    projects: paginatedProjects,
+    totalProjects: filteredProjects.length,
     categories,
     isLoading,
     searchQuery,
-    setSearchQuery,
+    setSearchQuery: handleSetSearchQuery,
     selectedCategory,
-    setSelectedCategory,
+    setSelectedCategory: handleSetSelectedCategory,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     getHeroImage,
     formatPrice,
   };

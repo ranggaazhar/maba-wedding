@@ -119,7 +119,6 @@ export function ProjectDetail() {
       {/* Photos — alternating layout */}
       {otherPhotos.length > 0 ? (
         <>
-          {/* Photo 1 — left: heroPhoto, right: caption/colors/flowers dari otherPhotos[0] */}
           {otherPhotos[0] ? (
             <section className="py-16 bg-[#F8F9FA]">
               <div className="max-w-7xl mx-auto px-6">

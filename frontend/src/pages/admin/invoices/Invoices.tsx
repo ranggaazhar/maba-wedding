@@ -39,7 +39,7 @@ export default function Invoices() {
           <h1 className="page-title">Invoice</h1>
           <p className="page-subtitle">Kelola invoice dan tagihan pelanggan</p>
         </div>
-        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/invoices/new")}>
+        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/admin/invoices/new")}>
           <Plus size={18} className="mr-2" />
           Buat Invoice
         </Button>
@@ -109,7 +109,7 @@ export default function Invoices() {
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <FileText size={40} className="text-muted-foreground" />
             <p className="text-muted-foreground">Belum ada invoice</p>
-            <Button variant="outline" onClick={() => navigate("/invoices/new")}>
+            <Button variant="outline" onClick={() => navigate("/admin/invoices/new")}>
               <Plus size={16} className="mr-2" /> Buat Invoice
             </Button>
           </div>
@@ -177,14 +177,14 @@ export default function Invoices() {
                           <Button
                             variant="ghost" size="icon" className="h-8 w-8"
                             title="Lihat Detail"
-                            onClick={() => navigate(`/invoices/${inv.id}`)}
+                            onClick={() => navigate(`/admin/invoices/${inv.id}`)}
                           >
                             <Eye size={16} />
                           </Button>
                           <Button
                             variant="ghost" size="icon" className="h-8 w-8"
                             title="Edit"
-                            onClick={() => navigate(`/invoices/${inv.id}/edit`)}
+                            onClick={() => navigate(`/admin/invoices/${inv.id}/edit`)}
                             disabled={inv.status === "PAID"}
                           >
                             <Edit size={16} />

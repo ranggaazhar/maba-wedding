@@ -31,18 +31,18 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-white mb-4" style={{ fontSize: '1.125rem' }}>Quick Links</h4>
+            <h4 className="!text-white mb-4" style={{ fontSize: '1.125rem' }}>Quick Links</h4>
             <ul className="space-y-2">
-              <li><Link to="/" className="text-[#A8DADC] hover:text-white transition-colors">Beranda</Link></li>
-              <li><Link to="/projects" className="text-[#A8DADC] hover:text-white transition-colors">Our Projects</Link></li>
-              <li><Link to="/properties" className="text-[#A8DADC] hover:text-white transition-colors">Properties</Link></li>
+              <li><Link to="/" className="!text-[#A8DADC] hover:text-white transition-colors">Beranda</Link></li>
+              <li><Link to="/projects" className="!text-[#A8DADC] hover:text-white transition-colors">Our Projects</Link></li>
+              <li><Link to="/properties" className="!text-[#A8DADC] hover:text-white transition-colors">Properties</Link></li>
             </ul>
           </div>
 
           {/* Services */}
           <div>
-            <h4 className="text-white mb-4" style={{ fontSize: '1.125rem' }}>Layanan</h4>
-            <ul className="space-y-2 text-[#A8DADC] text-sm">
+            <h4 className="!text-white mb-4" style={{ fontSize: '1.125rem' }}>Layanan</h4>
+            <ul className="space-y-2 !text-[#A8DADC] text-sm">
               <li>Dekorasi Lamaran</li>
               <li>Dekorasi Wedding</li>
               <li>Welcome Gate</li>
@@ -53,8 +53,8 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-white mb-4" style={{ fontSize: '1.125rem' }}>Hubungi Kami</h4>
-            <ul className="space-y-3 text-[#A8DADC] text-sm">
+            <h4 className="!text-white mb-4" style={{ fontSize: '1.125rem' }}>Hubungi Kami</h4>
+            <ul className="space-y-3 !text-[#A8DADC] text-sm">
               <li className="flex items-start gap-2">
                 <Phone className="w-4 h-4 mt-1 flex-shrink-0" />
                 <span>+62 812-3456-7890</span>

@@ -15,7 +15,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],  // untuk admin
+        raleway: ['Raleway', 'system-ui', 'sans-serif'],            // untuk customer body
+        serif: ['Lora', 'Georgia', 'serif'],                        // untuk customer heading
       },
       colors: {
         border: "hsl(var(--border))",

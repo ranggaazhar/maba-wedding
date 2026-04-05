@@ -42,7 +42,7 @@ export default function BookingDetail() {
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex flex-col gap-4">
-        <Button variant="ghost" className="w-fit -ml-2 text-muted-foreground hover:text-foreground" onClick={() => navigate('/bookings')}>
+        <Button variant="ghost" className="w-fit -ml-2 text-muted-foreground hover:text-foreground" onClick={() => navigate('/admin/bookings')}>
           <ArrowLeft size={18} className="mr-2" />
           Kembali ke Bookings
         </Button>

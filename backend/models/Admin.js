@@ -45,11 +45,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'moderatedReviews'
       });
       
-      // // Admin has many SiteSettings
-      // Admin.hasMany(models.SiteSetting, {
-      //   foreignKey: 'updated_by',
-      //   as: 'updatedSettings'
-      // });
+      // Admin has many SiteSettings
+      Admin.hasMany(models.SiteSetting, {
+        foreignKey: 'updated_by',
+        as: 'updatedSettings'
+      });
     }
   }
 

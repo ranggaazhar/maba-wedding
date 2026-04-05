@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import LogoMaba from '../../assets/logomaba.svg';
 
 export function Navbar() {
   const location = useLocation();
@@ -18,15 +18,17 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="bg-gradient-to-br from-[#A8DADC] to-[#457B9D] p-2 rounded-full group-hover:scale-110 transition-transform">
-              <Heart className="w-5 h-5 text-white fill-white" />
+            <div className="bg-gradient-to-br from-[#A8DADC] to-[#457B9D] rounded-full group-hover:scale-110 transition-transform">
+              <img
+                src={LogoMaba}
+                alt="Logo Maba"
+                className="h-12 w-12 object-contain brightness-0 invert"
+              />
             </div>
-            <span className="font-['Playfair_Display'] text-[#1D3557]" style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+            <span className="font-['Playfair_Display'] text-[#1D3557]" style={{ fontSize: '1.3rem', fontWeight: 600 }}>
               Maba Dekorasi
             </span>
           </Link>
-          
-          {/* Navigation Links */}
           <div className="flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
@@ -46,7 +48,7 @@ export function Navbar() {
             ))}
             <Link
               to="/projects"
-              className="px-6 py-2.5 bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white rounded-full hover:shadow-lg transition-all hover:scale-105"
+              className="px-6 py-2.5 bg-gradient-to-r from-[#457B9D] to-[#1D3557] !text-white rounded-full hover:shadow-lg transition-all hover:scale-105"
             >
               Konsultasi
             </Link>

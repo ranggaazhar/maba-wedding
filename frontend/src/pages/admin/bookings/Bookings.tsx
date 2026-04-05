@@ -36,7 +36,7 @@ export default function Bookings() {
           <h1 className="page-title">Bookings</h1>
           <p className="page-subtitle">Kelola booking dan link booking</p>
         </div>
-        <Button onClick={() => navigate("/booking-links/new")} className="gradient-ocean text-primary-foreground">
+        <Button onClick={() => navigate("/admin/booking-links/new")} className="gradient-ocean text-primary-foreground">
           <Link2 size={18} className="mr-2" />
           Buat Link Booking
         </Button>
@@ -189,7 +189,7 @@ export default function Bookings() {
                               variant="ghost" 
                               size="icon" 
                               className="h-8 w-8"
-                              onClick={() => navigate(`/bookings/${booking.id}`)}
+                              onClick={() => navigate(`/admin/bookings/${booking.id}`)}
                             >
                               <Eye size={16} />
                             </Button>
@@ -237,7 +237,7 @@ export default function Bookings() {
               <CardContent className="py-20 text-center">
                 <Link2 size={48} className="mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-semibold mb-1">Belum ada booking link</h3>
-                <Button variant="outline" onClick={() => navigate("/booking-links/new")} className="mt-4">
+                <Button variant="outline" onClick={() => navigate("/admin/booking-links/new")} className="mt-4">
                   Buat Link Pertama
                 </Button>
               </CardContent>

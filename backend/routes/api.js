@@ -11,6 +11,7 @@ const propertyRoutes       = require('./propertyRoutes');
 const propertyImageRoutes  = require('./propertyImageRoutes');
 const bookingRoutes        = require('./bookingRoutes');
 const reviewRoutes         = require('./reviewRoutes');
+const siteSettingRoutes    = require('./siteSettingRoutes');
 const invoiceRoutes        = require('./invoiceRoutes');
 const invoiceItemRoutes    = require('./invoiceItemRoutes');
 const dashboardRoutes      = require('./dashboardRoutes');
@@ -38,6 +39,7 @@ router.use('/bookings',           bookingRoutes);
 router.use('/reviews',            reviewRoutes);
 router.use('/invoices',           invoiceRoutes);
 router.use('/invoice-items',      invoiceItemRoutes);
+router.use('/site-settings',      siteSettingRoutes);
 router.use('/dashboard',          dashboardRoutes);
 
 module.exports = router;

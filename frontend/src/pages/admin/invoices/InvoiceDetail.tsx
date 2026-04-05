@@ -58,7 +58,7 @@ export default function InvoiceDetail() {
     <div className="space-y-6 max-w-5xl">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/invoices')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/invoices')}>
           <ArrowLeft size={20} />
         </Button>
         <div className="flex-1">
@@ -76,7 +76,7 @@ export default function InvoiceDetail() {
         </div>
         <div className="flex gap-2 flex-wrap">
           {invoice.status !== 'PAID' && (
-            <Button variant="outline" size="sm" onClick={() => navigate(`/invoices/${id}/edit`)}>
+            <Button variant="outline" size="sm" onClick={() => navigate(`/admin/invoices/${id}/edit`)}>
               <Edit size={16} className="mr-2" />
               Edit
             </Button>
@@ -287,7 +287,7 @@ export default function InvoiceDetail() {
               <h3 className="font-semibold text-foreground">Booking Terkait</h3>
               <Button
                 variant="outline" className="w-full justify-start"
-                onClick={() => navigate(`/bookings/${invoice.booking!.id}`)}
+                onClick={() => navigate(`/admin/bookings/${invoice.booking!.id}`)}
               >
                 <FileText size={16} className="mr-2" />
                 {invoice.booking.booking_code}

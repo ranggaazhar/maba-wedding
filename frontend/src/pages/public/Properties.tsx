@@ -1,6 +1,6 @@
 // src/pages/Properties.tsx
 import { ImageWithFallback } from '@/components/fallbackimage/ImageWithFallback';
-import { Search, ShoppingCart } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useProperties } from '@/hooks/Customer/useProperties';
 
 function SkeletonPropertyCard() {
@@ -21,18 +21,39 @@ export function Properties() {
 
   return (
     <div className="min-h-screen pt-20">
-      {/* Header */}
-      <section className="bg-gradient-to-br from-[#1D3557] to-[#0F1F35] text-white py-24">
-        <div className="max-w-7xl mx-auto px-6 text-center space-y-6">
-          <h1 className="text-white">Properties Catalog</h1>
-          <p className="text-[#A8DADC] text-xl max-w-3xl mx-auto leading-relaxed">
-            Koleksi lengkap properti dekorasi premium kami. Setiap item dipilih dengan cermat untuk menciptakan momen sempurna Anda.
-          </p>
+       <section className="relative bg-gradient-to-br from-[#1D3557] via-[#2A4A6C] to-[#457B9D] text-white pt-32 pb-40 overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute top-20 left-10 w-80 h-80 bg-[#A8DADC]/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 right-20 w-96 h-96 bg-[#457B9D]/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/4 w-32 h-32 border-2 border-white/10 rounded-full"></div>
+        <div className="absolute bottom-24 left-1/3 w-20 h-20 border-2 border-[#A8DADC]/20 rounded-full"></div>
+        
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="max-w-3xl space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-1 bg-gradient-to-r from-[#A8DADC] to-transparent rounded-full"></div>
+              <span className="text-[#A8DADC] text-sm tracking-[0.3em] uppercase">Catalog</span>
+            </div>
+            
+            <h1 className="!text-white leading-tight">
+              Properties Catalog
+            </h1>
+            
+            <p className="!text-[#A8DADC]/90 text-xl leading-relaxed max-w-2xl">
+              Koleksi lengkap properti dekorasi premium kami. Setiap item dipilih dengan cermat untuk menciptakan momen sempurna Anda.
+            </p>
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0">
+         {/* Wave bottom */}
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+            <path d="M0 0C240 80 480 120 720 100C960 80 1200 40 1440 0V120H0V0Z" fill="#FFFFFF" />
+          </svg>
         </div>
       </section>
 
-      {/* Search */}
-      <section className="bg-white border-b border-[#E5E7EB] py-8">
+      {/* Search Section */}
+      <section className="bg-white border-b border-[#E5E7EB] py-8 -mt-16 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="relative max-w-xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B7280]" />
@@ -40,7 +61,7 @@ export function Properties() {
               type="text"
               placeholder="Cari properti atau kategori..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border-2 border-[#A8DADC]/30 rounded-full focus:outline-none focus:border-[#457B9D] transition-colors"
             />
           </div>

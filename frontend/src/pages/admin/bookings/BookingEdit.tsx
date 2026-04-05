@@ -54,7 +54,7 @@ export default function BookingEdit() {
         <Button
           variant="ghost"
           className="w-fit -ml-2"
-          onClick={() => navigate(`/bookings/${id}`)}
+          onClick={() => navigate(`/admin/bookings/${id}`)}
         >
           <ArrowLeft size={18} className="mr-2" />
           Kembali ke Detail

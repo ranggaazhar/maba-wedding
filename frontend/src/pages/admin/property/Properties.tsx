@@ -29,7 +29,7 @@ export default function Properties() {
           <h1 className="page-title text-2xl font-bold">Properties</h1>
           <p className="page-subtitle text-muted-foreground">Katalog properti untuk disewakan</p>
         </div>
-        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate('/properties/new')}>
+        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate('/admin/properties/new')}>
           <Plus size={18} className="mr-2" /> Tambah Property
         </Button>
       </div>
@@ -81,7 +81,7 @@ export default function Properties() {
         <div className="border rounded-lg p-12 text-center bg-card">
           <Package size={48} className="mx-auto text-muted-foreground mb-4" />
           <h3 className="font-semibold mb-1">Belum ada property</h3>
-          <Button variant="outline" onClick={() => navigate('/properties/new')} className="mt-2">
+          <Button variant="outline" onClick={() => navigate('/admin/properties/new')} className="mt-2">
             Mulai Tambah Property
           </Button>
         </div>
@@ -110,10 +110,10 @@ export default function Properties() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/properties/${property.id}`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/admin/properties/${property.id}`)}>
                         <Eye size={14} className="mr-2" /> Detail
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/properties/edit/${property.id}`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/adminproperties/edit/${property.id}`)}>
                         <Edit size={14} className="mr-2" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleToggleAvailability(property.id)}>

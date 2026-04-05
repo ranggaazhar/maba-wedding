@@ -308,7 +308,7 @@ export default function Reviews() {
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="icon" className="h-9 w-9"
-                        onClick={() => navigate(`/reviews/${review.id}`)}>
+                        onClick={() => navigate(`/admin/reviews/${review.id}`)}>
                         <Eye size={16} />
                       </Button>
                       <Button className="bg-success hover:bg-success/90 text-success-foreground"
@@ -400,7 +400,7 @@ export default function Reviews() {
                       )}
                     </div>
                     <Button variant="outline" size="icon" className="h-9 w-9"
-                      onClick={() => navigate(`/reviews/${review.id}`)}>
+                      onClick={() => navigate(`/admin/reviews/${review.id}`)}>
                       <Eye size={16} />
                     </Button>
                   </div>

@@ -44,7 +44,7 @@ export default function CreateBookingLink() {
           confirmButtonText: "OK",
         }).then(() => {
           // Redirect ke halaman bookings setelah user klik OK
-          navigate("/bookings");
+          navigate("/admin/bookings");
         });
       }
     } catch (error: unknown) {
@@ -71,7 +71,7 @@ export default function CreateBookingLink() {
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Page Header */}
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigate("/bookings")}>
+        <Button variant="outline" size="icon" onClick={() => navigate("/admin/bookings")}>
           <ArrowLeft size={20} />
         </Button>
         <div className="page-header mb-0">
