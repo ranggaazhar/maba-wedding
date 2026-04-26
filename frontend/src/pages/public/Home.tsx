@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useHome } from '@/hooks/Customer/useHome';
 import { ImageWithFallback } from '@/components/fallbackimage/ImageWithFallback';
 import Gedung from '../../assets/gedung.png';
-import hero1 from '../../assets/hero3.png';
+import hero1 from '../../assets/foto1.jpg';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Testimonial {

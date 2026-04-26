@@ -99,7 +99,7 @@ export function useInvoiceForm() {
         }
       } catch {
         Swal.fire('Error', 'Gagal memuat data invoice', 'error');
-        navigate('/invoices');
+        navigate('/admin/invoices');
       } finally {
         setIsLoading(false);
       }
@@ -233,7 +233,7 @@ export function useInvoiceForm() {
         : await invoiceApi.createInvoice(payload);
       if (res.success) {
         Swal.fire({ icon: 'success', title: isEdit ? 'Invoice diperbarui!' : 'Invoice berhasil dibuat!', timer: 1500, showConfirmButton: false });
-        navigate(`/invoices/${res.data.id}`);
+        navigate(`/admin/invoices/${res.data.id}`);
       }
     } catch (err: unknown) {
       Swal.fire('Error', err instanceof Error ? err.message : 'Gagal menyimpan invoice', 'error');

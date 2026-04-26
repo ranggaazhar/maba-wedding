@@ -18,8 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useParams } from "react-router-dom";
 
 export default function BookingEdit() {
+  const { id } = useParams<{ id: string }>();
+
   const {
     isLoading, isSaving, activeTab, setActiveTab,
     categories, propertyCategories,
@@ -35,9 +38,6 @@ export default function BookingEdit() {
     getProjectImage, getPropertyImage,
   } = useBookingEdit();
 
-  // ambil id dari hook navigate (atau bisa pakai useParams di sini juga)
-  const id = window.location.pathname.split("/").at(-2); // atau tetap useParams
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -52,6 +52,7 @@ export default function BookingEdit() {
       {/* Header */}
       <div className="flex flex-col gap-4">
         <Button
+          type="button"
           variant="ghost"
           className="w-fit -ml-2"
           onClick={() => navigate(`/admin/bookings/${id}`)}
@@ -63,12 +64,11 @@ export default function BookingEdit() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Edit Booking</h1>
-            <p className="text-muted-foreground">
-              Update informasi booking customer
-            </p>
+            <p className="text-muted-foreground">Update informasi booking customer</p>
           </div>
         </div>
       </div>
+
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-muted/50">
@@ -102,7 +102,6 @@ export default function BookingEdit() {
                     id="event_venue"
                     value={formData.event_venue}
                     onChange={(e) => setFormData(prev => ({ ...prev, event_venue: e.target.value }))}
-                    required
                   />
                 </div>
 
@@ -115,7 +114,6 @@ export default function BookingEdit() {
                     type="date"
                     value={formData.event_date}
                     onChange={(e) => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
-                    required
                   />
                 </div>
               </div>
@@ -168,7 +166,6 @@ export default function BookingEdit() {
 
         {/* TAB 2: MODEL DEKORASI */}
         <TabsContent value="models" className="space-y-6">
-          {/* Selected Models */}
           {selectedModels.length > 0 && (
             <Card className="bg-primary/5">
               <CardHeader>
@@ -191,6 +188,7 @@ export default function BookingEdit() {
                       />
                     </div>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveModel(index)}
@@ -203,12 +201,12 @@ export default function BookingEdit() {
             </Card>
           )}
 
-          {/* Available Models */}
           <Card>
             <CardHeader>
               <CardTitle>Tambah Model Dekorasi</CardTitle>
               <div className="flex flex-wrap gap-2 mt-4">
                 <Button
+                  type="button"
                   variant={modelCategoryFilter === "all" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setModelCategoryFilter("all")}
@@ -218,6 +216,7 @@ export default function BookingEdit() {
                 {categories.map(cat => (
                   <Button
                     key={cat.id}
+                    type="button"
                     variant={modelCategoryFilter === String(cat.id) ? "default" : "outline"}
                     size="sm"
                     onClick={() => setModelCategoryFilter(String(cat.id))}
@@ -237,16 +236,11 @@ export default function BookingEdit() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredProjects.map(project => {
                     const isSelected = selectedModels.find(m => m.project_id === project.id);
-                    
                     return (
                       <Card key={project.id} className={isSelected ? "ring-2 ring-primary" : ""}>
                         <div className="aspect-video overflow-hidden rounded-t-lg">
                           {getProjectImage(project) ? (
-                            <img
-                              src={getProjectImage(project)}
-                              alt={project.title}
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={getProjectImage(project)} alt={project.title} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full bg-muted flex items-center justify-center">
                               <span className="text-muted-foreground text-sm">No Image</span>
@@ -255,16 +249,14 @@ export default function BookingEdit() {
                         </div>
                         <CardContent className="p-4">
                           <h4 className="font-semibold line-clamp-2 mb-2">{project.title}</h4>
-                          <Badge variant="outline" className="mb-2">
-                            {project.category?.name}
-                          </Badge>
+                          <Badge variant="outline" className="mb-2">{project.category?.name}</Badge>
                           <p className="text-sm font-bold text-primary mb-3">
-                            {project.price && project.price !== "0" 
+                            {project.price && project.price !== "0"
                               ? `Rp ${Number(project.price).toLocaleString("id-ID")}`
-                              : "Hubungi Admin"
-                            }
+                              : "Hubungi Admin"}
                           </p>
                           <Button
+                            type="button"
                             size="sm"
                             className="w-full"
                             variant={isSelected ? "secondary" : "default"}
@@ -285,7 +277,6 @@ export default function BookingEdit() {
 
         {/* TAB 3: PROPERTIES */}
         <TabsContent value="properties" className="space-y-6">
-          {/* Selected Properties */}
           {selectedProperties.length > 0 && (
             <Card className="bg-primary/5">
               <CardHeader>
@@ -298,12 +289,12 @@ export default function BookingEdit() {
                       <p className="font-medium">{prop.property_name}</p>
                       <p className="text-sm text-muted-foreground">{prop.property_category}</p>
                       <p className="text-sm text-primary font-semibold mt-1">
-                        Rp {Number(prop.price).toLocaleString("id-ID")} × {prop.quantity} = 
-                        Rp {Number(prop.subtotal).toLocaleString("id-ID")}
+                        Rp {Number(prop.price).toLocaleString("id-ID")} × {prop.quantity} = Rp {Number(prop.subtotal).toLocaleString("id-ID")}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
+                        type="button"
                         variant="outline"
                         size="icon"
                         onClick={() => handleUpdatePropertyQuantity(index, prop.quantity - 1)}
@@ -318,6 +309,7 @@ export default function BookingEdit() {
                         min="1"
                       />
                       <Button
+                        type="button"
                         variant="outline"
                         size="icon"
                         onClick={() => handleUpdatePropertyQuantity(index, prop.quantity + 1)}
@@ -325,6 +317,7 @@ export default function BookingEdit() {
                         +
                       </Button>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveProperty(index)}
@@ -334,7 +327,6 @@ export default function BookingEdit() {
                     </div>
                   </div>
                 ))}
-                
                 <div className="pt-3 border-t flex justify-between items-center">
                   <span className="font-semibold">Total Properties:</span>
                   <span className="text-lg font-bold text-primary">
@@ -345,12 +337,12 @@ export default function BookingEdit() {
             </Card>
           )}
 
-          {/* Available Properties */}
           <Card>
             <CardHeader>
               <CardTitle>Tambah Property</CardTitle>
               <div className="flex flex-wrap gap-2 mt-4">
                 <Button
+                  type="button"
                   variant={propertyCategoryFilter === "all" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setPropertyCategoryFilter("all")}
@@ -360,6 +352,7 @@ export default function BookingEdit() {
                 {propertyCategories.map(cat => (
                   <Button
                     key={cat.id}
+                    type="button"
                     variant={propertyCategoryFilter === String(cat.id) ? "default" : "outline"}
                     size="sm"
                     onClick={() => setPropertyCategoryFilter(String(cat.id))}
@@ -379,16 +372,11 @@ export default function BookingEdit() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredProperties.map(property => {
                     const selectedProp = selectedProperties.find(p => p.property_id === property.id);
-                    
                     return (
                       <Card key={property.id} className={selectedProp ? "ring-2 ring-primary" : ""}>
                         <div className="aspect-square overflow-hidden rounded-t-lg">
                           {getPropertyImage(property) ? (
-                            <img
-                              src={getPropertyImage(property)}
-                              alt={property.name}
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={getPropertyImage(property)} alt={property.name} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full bg-muted flex items-center justify-center">
                               <span className="text-muted-foreground text-sm">No Image</span>
@@ -402,6 +390,7 @@ export default function BookingEdit() {
                             Rp {Number(property.price).toLocaleString("id-ID")}
                           </p>
                           <Button
+                            type="button"
                             size="sm"
                             className="w-full"
                             onClick={() => handleAddProperty(property)}
@@ -430,17 +419,12 @@ export default function BookingEdit() {
                 Rp {calculateTotal().toLocaleString("id-ID")}
               </p>
             </div>
+            {/* Tombol save sengaja tidak ada type="button" agar bisa trigger handleSave */}
             <Button onClick={handleSave} disabled={isSaving} size="lg">
               {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan...
-                </>
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</>
               ) : (
-                <>
-                  <Save size={18} className="mr-2" />
-                  Simpan Perubahan
-                </>
+                <><Save size={18} className="mr-2" />Simpan Perubahan</>
               )}
             </Button>
           </div>

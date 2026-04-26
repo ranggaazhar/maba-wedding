@@ -1,6 +1,6 @@
 // src/pages/admin/reviews/Reviews.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Star, Check, X, Search, Eye, Link2, Plus, MessageSquare, ThumbsUp, Award, Loader2, Trash2, RefreshCw, Copy } from "lucide-react";
+import { Star, Check, X, Search, Eye, MessageSquare, ThumbsUp, Award, Loader2, Trash2, RefreshCw, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,10 +12,6 @@ import {
 import {
   Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { StatCard } from "@/components/admin/StatCard";
 import Swal from "sweetalert2";
 import { reviewApi, type Review, type ReviewLink, type ReviewStatistics } from "@/api/reviewApi";
@@ -36,66 +32,6 @@ function RatingStars({ rating, size = 16 }: { rating: number; size?: number }) {
 function formatDate(dateStr?: string) {
   if (!dateStr) return "-";
   return new Date(dateStr).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
-}
-
-// ── Create Review Link Dialog ─────────────────────────────────
-
-function CreateReviewLinkDialog({ onCreated }: { onCreated: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [bookingId, setBookingId] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-
-  const handleCreate = async () => {
-    if (!bookingId) return Swal.fire("Error", "Masukkan Booking ID", "error");
-    try {
-      setIsCreating(true);
-      const res = await reviewApi.createReviewLink(Number(bookingId));
-      if (res.success) {
-        Swal.fire({ icon: "success", title: "Review link dibuat!", timer: 1500, showConfirmButton: false });
-        setOpen(false);
-        setBookingId("");
-        onCreated();
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal membuat review link";
-      Swal.fire("Error", msg, "error");
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button><Plus size={16} className="mr-2" />Buat Review Link</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Buat Review Link Baru</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <Label>Booking ID</Label>
-            <Input
-              type="number"
-              placeholder="Masukkan ID booking..."
-              value={bookingId}
-              onChange={(e) => setBookingId(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Link akan otomatis expire dalam 90 hari
-            </p>
-          </div>
-          <Button className="w-full" onClick={handleCreate} disabled={isCreating || !bookingId}>
-            {isCreating
-              ? <><Loader2 size={16} className="animate-spin mr-2" />Membuat...</>
-              : <><Link2 size={16} className="mr-2" />Buat Link</>
-            }
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 // ── Main Component ────────────────────────────────────────────
@@ -412,9 +348,6 @@ export default function Reviews() {
 
         {/* ── Review Links Tab ── */}
         <TabsContent value="links" className="space-y-4">
-          <div className="flex justify-end">
-            <CreateReviewLinkDialog onCreated={fetchReviewLinks} />
-          </div>
 
           {isLinksLoading ? (
             <div className="flex justify-center py-16"><Loader2 className="animate-spin text-muted-foreground" size={32} /></div>
