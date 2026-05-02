@@ -1,8 +1,9 @@
-import { useBookings } from "@/hooks/Admin/bookings/useBooking"; 
-import { 
-  Search, Eye, Trash2, Calendar, Loader2, 
-  CheckCircle2, XCircle, Filter, 
-  Link2, RefreshCw
+// src/pages/admin/Bookings.tsx
+import { useBookings } from "@/hooks/Admin/bookings/useBooking";
+import {
+  Search, Eye, Trash2, Calendar, Loader2,
+  CheckCircle2, XCircle, Filter,
+  Link2, RefreshCw, BookOpen, Sparkles, Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,17 +13,64 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Booking } from "@/types/booking.types";
+import { getBookingType } from "@/types/booking.types";
 
-const statusStyles = {
-  paid: "bg-success/10 text-success border-success/20",
-  unpaid: "bg-warning/10 text-warning border-warning/20",
+// ── Booking type badge ────────────────────────────────────────────────────────
+
+function BookingTypeBadge({ booking }: { booking: Booking }) {
+  const type = getBookingType(booking);
+
+  if (type === 'COMBINATION') {
+    return (
+      <Badge className="bg-purple-50 text-purple-700 border border-purple-200 gap-1 text-xs font-medium">
+        <Layers size={11} />
+        Kombinasi
+      </Badge>
+    );
+  }
+  if (type === 'CUSTOM') {
+    return (
+      <Badge className="bg-orange-50 text-orange-700 border border-orange-200 gap-1 text-xs font-medium">
+        <Sparkles size={11} />
+        Custom
+      </Badge>
+    );
+  }
+  return (
+    <Badge className="bg-blue-50 text-blue-700 border border-blue-200 gap-1 text-xs font-medium">
+      <BookOpen size={11} />
+      Katalog
+    </Badge>
+  );
+}
+
+// ── Payment status config ─────────────────────────────────────────────────────
+
+const paymentStatusStyles: Record<string, string> = {
+  PENDING:              'bg-warning/10 text-warning border-warning/20',
+  WAITING_CONFIRMATION: 'bg-blue-50 text-blue-600 border-blue-200',
+  CONFIRMED:            'bg-success/10 text-success border-success/20',
+  REJECTED:             'bg-destructive/10 text-destructive border-destructive/20',
 };
+
+const paymentStatusLabels: Record<string, string> = {
+  PENDING:              'Belum Bayar',
+  WAITING_CONFIRMATION: 'Menunggu Konfirmasi',
+  CONFIRMED:            'DP Dikonfirmasi',
+  REJECTED:             'Ditolak',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function Bookings() {
   const {
     bookings, bookingLinks, isLoadingBookings, isLoadingLinks,
-    searchQuery, setSearchQuery, paymentFilter, setPaymentFilter,
-    linkSearchQuery, setLinkSearchQuery, bookingStats,
+    searchQuery, setSearchQuery,
+    paymentFilter, setPaymentFilter,
+    bookingTypeFilter, setBookingTypeFilter,
+    linkSearchQuery, setLinkSearchQuery,
+    bookingStats,
     navigate,
     handleDeleteBooking, handleCopyLink, handleRegenerateToken, handleDeleteLink,
     isExpired, formatDate,
@@ -45,28 +93,27 @@ export default function Bookings() {
       <Tabs defaultValue="bookings" className="space-y-6">
         <TabsList className="bg-muted/50">
           <TabsTrigger value="bookings" className="data-[state=active]:bg-card">
-            <Calendar size={16} className="mr-2" />
-            Semua Booking
+            <Calendar size={16} className="mr-2" /> Semua Booking
           </TabsTrigger>
           <TabsTrigger value="links" className="data-[state=active]:bg-card">
-            <Link2 size={16} className="mr-2" />
-            Booking Links
+            <Link2 size={16} className="mr-2" /> Booking Links
           </TabsTrigger>
         </TabsList>
 
-        {/* TAB: BOOKINGS */}
+        {/* ── TAB: BOOKINGS ── */}
         <TabsContent value="bookings" className="space-y-4">
-          {/* Statistics Cards */}
+
+          {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{bookingStats.total}</div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Sudah Bayar DP</CardTitle>
@@ -76,7 +123,6 @@ export default function Bookings() {
                 <div className="text-2xl font-bold text-green-600">{bookingStats.withPayment}</div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Belum Bayar</CardTitle>
@@ -86,7 +132,6 @@ export default function Bookings() {
                 <div className="text-2xl font-bold text-red-600">{bookingStats.withoutPayment}</div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Bulan Ini</CardTitle>
@@ -99,7 +144,7 @@ export default function Bookings() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
               <Input
@@ -109,22 +154,50 @@ export default function Bookings() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-              <SelectTrigger className="w-full md:w-40 bg-card">
-                <SelectValue placeholder="Status" />
+
+            {/* Filter tipe booking */}
+            <Select
+              value={bookingTypeFilter}
+              onValueChange={(v) => setBookingTypeFilter(v as typeof bookingTypeFilter)}
+            >
+              <SelectTrigger className="w-full md:w-44 bg-card">
+                <Filter size={14} className="mr-2 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Tipe Booking" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Semua</SelectItem>
+                <SelectItem value="all">Semua Tipe</SelectItem>
+                <SelectItem value="catalog">
+                  <div className="flex items-center gap-2">
+                    <BookOpen size={13} className="text-blue-600" /> Katalog
+                  </div>
+                </SelectItem>
+                <SelectItem value="custom">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={13} className="text-orange-600" /> Custom
+                  </div>
+                </SelectItem>
+                <SelectItem value="combination">
+                  <div className="flex items-center gap-2">
+                    <Layers size={13} className="text-purple-600" /> Kombinasi
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Filter status bayar */}
+            <Select value={paymentFilter} onValueChange={(v) => setPaymentFilter(v as typeof paymentFilter)}>
+              <SelectTrigger className="w-full md:w-44 bg-card">
+                <SelectValue placeholder="Status Bayar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Status</SelectItem>
                 <SelectItem value="with_payment">Sudah Bayar</SelectItem>
                 <SelectItem value="without_payment">Belum Bayar</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon">
-              <Filter size={18} />
-            </Button>
           </div>
 
-          {/* Bookings Table */}
+          {/* Table */}
           {isLoadingBookings ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -151,14 +224,15 @@ export default function Bookings() {
                       <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tanggal Acara</th>
                       <th className="text-left p-4 text-sm font-medium text-muted-foreground">Venue</th>
                       <th className="text-left p-4 text-sm font-medium text-muted-foreground">Jenis Acara</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status Uang Muka</th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tipe Booking</th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status Bayar</th>
                       <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bookings.map((booking, index) => (
-                      <tr 
-                        key={booking.id} 
+                      <tr
+                        key={booking.id}
                         className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
@@ -166,39 +240,30 @@ export default function Bookings() {
                           <span className="font-mono text-sm text-foreground">{booking.booking_code}</span>
                         </td>
                         <td className="p-4">
-                          <div>
-                            <p className="font-medium text-foreground">{booking.customer_name}</p>
-                            <p className="text-sm text-muted-foreground">{booking.customer_phone}</p>
-                          </div>
+                          <p className="font-medium text-foreground">{booking.customer_name}</p>
+                          <p className="text-sm text-muted-foreground">{booking.customer_phone}</p>
                         </td>
-                        <td className="p-4 text-foreground">{formatDate(booking.event_date)}</td>
-                        <td className="p-4 text-muted-foreground">{booking.event_venue}</td>
+                        <td className="p-4 text-foreground whitespace-nowrap">{formatDate(booking.event_date)}</td>
+                        <td className="p-4 text-muted-foreground max-w-[120px] truncate">{booking.event_venue}</td>
                         <td className="p-4">
-                          <Badge variant="secondary" className="text-xs">
-                            {booking.event_type}
-                          </Badge>
+                          <Badge variant="secondary" className="text-xs">{booking.event_type}</Badge>
                         </td>
                         <td className="p-4">
-                          <Badge className={booking.payment_proof_url ? statusStyles.paid : statusStyles.unpaid}>
-                            {booking.payment_proof_url ? "Sudah Bayar DP" : "Belum bayar DP"}
+                          <BookingTypeBadge booking={booking} />
+                        </td>
+                        <td className="p-4">
+                          <Badge className={`${paymentStatusStyles[booking.payment_status] ?? paymentStatusStyles.PENDING} text-xs`}>
+                            {paymentStatusLabels[booking.payment_status] ?? 'Belum Bayar'}
                           </Badge>
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8"
-                              onClick={() => navigate(`/admin/bookings/${booking.id}`)}
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8"
+                              onClick={() => navigate(`/admin/bookings/${booking.id}`)}>
                               <Eye size={16} />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                              onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}>
                               <Trash2 size={16} />
                             </Button>
                           </div>
@@ -212,21 +277,14 @@ export default function Bookings() {
           )}
         </TabsContent>
 
-        {/* TAB: BOOKING LINKS */}
+        {/* ── TAB: BOOKING LINKS ── */}
         <TabsContent value="links" className="space-y-4">
-
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input
-              placeholder="Cari link..."
-              className="pl-10 bg-card"
-              value={linkSearchQuery}
-              onChange={(e) => setLinkSearchQuery(e.target.value)}
-            />
+            <Input placeholder="Cari link..." className="pl-10 bg-card"
+              value={linkSearchQuery} onChange={(e) => setLinkSearchQuery(e.target.value)} />
           </div>
 
-          {/* Booking Links Table */}
           {isLoadingLinks ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -257,58 +315,36 @@ export default function Bookings() {
                   </thead>
                   <tbody>
                     {bookingLinks.map((link, index) => (
-                      <tr 
-                        key={link.id} 
+                      <tr key={link.id}
                         className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
+                        style={{ animationDelay: `${index * 50}ms` }}>
                         <td className="p-4">
-                          <div>
-                            <p className="font-medium text-foreground">{link.customer_name || `Link #${link.id}`}</p>
-                            <p className="text-sm text-muted-foreground">{link.customer_phone}</p>
-                          </div>
+                          <p className="font-medium text-foreground">{link.customer_name || `Link #${link.id}`}</p>
+                          <p className="text-sm text-muted-foreground">{link.customer_phone}</p>
                         </td>
-                        <td className="p-4 text-muted-foreground">
-                          {formatDate(link.created_at)}
-                        </td>
-                        <td className="p-4 text-muted-foreground">
-                          {link.expires_at ? formatDate(link.expires_at) : '-'}
-                        </td>
+                        <td className="p-4 text-muted-foreground">{formatDate(link.created_at)}</td>
+                        <td className="p-4 text-muted-foreground">{link.expires_at ? formatDate(link.expires_at) : '-'}</td>
                         <td className="p-4">
                           {link.is_used ? (
-                            <Badge className={statusStyles.paid}>Terisi</Badge>
+                            <Badge className="bg-success/10 text-success border-success/20">Terisi</Badge>
                           ) : isExpired(link.expires_at) ? (
                             <Badge variant="destructive">Expired</Badge>
                           ) : (
-                            <Badge className={statusStyles.unpaid}>Belum Terisi</Badge>
+                            <Badge className="bg-warning/10 text-warning border-warning/20">Belum Terisi</Badge>
                           )}
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8"
-                              onClick={() => handleCopyLink(link.token)}
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopyLink(link.token)}>
                               <Link2 size={16} />
                             </Button>
                             {!link.is_used && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8"
-                                onClick={() => handleRegenerateToken(link.id)}
-                              >
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleRegenerateToken(link.id)}>
                                 <RefreshCw size={16} />
                               </Button>
                             )}
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                              onClick={() => handleDeleteLink(link.id)}
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDeleteLink(link.id)}>
                               <Trash2 size={16} />
                             </Button>
                           </div>

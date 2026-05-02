@@ -40,56 +40,99 @@ class BookingController {
     }
   }
   
-  async getBookingById(req, res) {
-    try {
-      const { id } = req.params;
-      const includeAll = req.query.include_all !== 'false';
-      
-      const booking = await bookingService.getBookingById(id, includeAll);
-      const bookingData = booking.toJSON();
-      
-      // Add full URL for payment proof
-      if (bookingData.payment_proof_url) {
-        bookingData.payment_proof_full_url = FileHelper.getFileUrl(bookingData.payment_proof_url, req);
-      }
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Booking retrieved successfully',
-        data: bookingData
-      });
-    } catch (error) {
-      const statusCode = error.message === 'Booking not found' ? 404 : 500;
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message
-      });
+ async getBookingById(req, res) {
+  try {
+    const { id } = req.params;
+    const includeAll = req.query.include_all !== 'false';
+
+    const booking = await bookingService.getBookingById(id, includeAll);
+    const bookingData = booking.toJSON();
+
+    // Full URL untuk payment proof
+    if (bookingData.payment_proof_url) {
+      bookingData.payment_proof_full_url = FileHelper.getFileUrl(bookingData.payment_proof_url, req);
     }
+
+    if (bookingData.customRequests && Array.isArray(bookingData.customRequests)) {
+      bookingData.customRequests = bookingData.customRequests.map(cr => ({
+        ...cr,
+        reference_images_urls: Array.isArray(cr.reference_images)
+          ? cr.reference_images.map(imgPath => FileHelper.getFileUrl(imgPath, req))
+          : []
+      }));
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Booking retrieved successfully',
+      data: bookingData
+    });
+  } catch (error) {
+    const statusCode = error.message === 'Booking not found' ? 404 : 500;
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message
+    });
   }
+}
   
   async createBooking(req, res) {
+  try {
+    const data = { ...req.body };
+
+    // Parse JSON fields — mirip projectController
     try {
-      const booking = await bookingService.createBooking(req.body);
-      
-      return res.status(201).json({
-        success: true,
-        message: 'Booking created successfully',
-        data: booking
-      });
-    } catch (error) {
-      let statusCode = 500;
-      if (error.message === 'Booking link not found') {
-        statusCode = 404;
-      } else if (error.message.includes('already been used') || error.message.includes('expired')) {
-        statusCode = 400;
-      }
-      
-      return res.status(statusCode).json({
+      if (typeof data.models === 'string')
+        data.models = JSON.parse(data.models);
+      if (typeof data.properties === 'string')
+        data.properties = JSON.parse(data.properties);
+      if (typeof data.custom_requests === 'string')
+        data.custom_requests = JSON.parse(data.custom_requests);
+    } catch (parseError) {
+      return res.status(400).json({
         success: false,
-        message: error.message
+        message: 'Invalid JSON format in request data',
+        error: parseError.message
       });
     }
+
+    // Distribusi files ke masing-masing custom_request
+    // berdasarkan image_count yang dikirim frontend
+    if (Array.isArray(data.custom_requests) && req.files?.length > 0) {
+      let fileOffset = 0;
+      data.custom_requests = data.custom_requests.map(cr => {
+        const count = parseInt(cr.image_count) || 0;
+        const files = req.files.slice(fileOffset, fileOffset + count);
+        fileOffset += count;
+        return { ...cr, files };
+      });
+    }
+
+    const booking = await bookingService.createBooking(data);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Booking created successfully',
+      data: booking
+    });
+  } catch (error) {
+    // Cleanup semua uploaded files kalau gagal
+    if (req.files?.length > 0) {
+      for (const file of req.files) {
+        await FileHelper.deleteFile(file.path.replace(/\\/g, '/'));
+      }
+    }
+
+    let statusCode = 500;
+    if (error.message === 'Booking link not found') statusCode = 404;
+    else if (error.message.includes('already been used') || error.message.includes('expired')) statusCode = 400;
+
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message
+    });
   }
+}
   
   async updateBooking(req, res) {
     try {

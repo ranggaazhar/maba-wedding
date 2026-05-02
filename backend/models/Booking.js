@@ -25,6 +25,13 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'booking_id',
         as: 'reviewLink'
       });
+
+      // ← Relasi ke custom requests
+      Booking.hasMany(models.BookingCustomRequest, {
+        foreignKey: 'booking_id',
+        as: 'customRequests',
+        onDelete: 'CASCADE'
+      });
     }
   }
 
@@ -37,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     booking_link_id: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       unique: true
     },
     booking_code: {
@@ -126,6 +133,12 @@ module.exports = (sequelize, DataTypes) => {
     rejection_reason: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    has_custom_request: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+      comment: 'true jika booking mengandung custom request dari customer'
     }
   }, {
     sequelize,

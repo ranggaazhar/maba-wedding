@@ -1,9 +1,10 @@
-// services/bookingService.js
+// services/customer/bookingService.js
 const { 
   Booking, 
   BookingLink, 
   BookingModel, 
   BookingProperty, 
+  BookingCustomRequest,
   Category, 
   Project,
   ProjectPhoto,
@@ -134,7 +135,12 @@ class BookingService {
           ],
           separate: true
         },
-        { model: Invoice, as: 'invoice' }
+        { model: Invoice, as: 'invoice' },
+        {
+          model: BookingCustomRequest,
+          as: 'customRequests',
+          order: [['created_at', 'DESC']]
+        }
       );
     }
     
@@ -203,15 +209,18 @@ class BookingService {
         bookingCode = this.generateBookingCode();
         exists = await Booking.findOne({ where: { booking_code: bookingCode } });
       }
+      const hasModels = Array.isArray(data.models) && data.models.length > 0;
+      const hasCustomRequests = Array.isArray(data.custom_requests) && data.custom_requests.length > 0;
 
-      // ── Hitung dp_amount ──────────────────────────────────────
-      // Prioritas: dari frontend → fallback hitung 10% dari total_estimate
-      const totalEstimate = parseFloat(data.total_estimate || 0);
-      const dpAmount = data.dp_amount
-        ? parseFloat(data.dp_amount)
-        : Math.ceil(totalEstimate * 0.1);
-      // ─────────────────────────────────────────────────────────
-      
+      let totalEstimate = null;
+      let dpAmount = null;
+
+      if (hasModels) {
+        totalEstimate = data.total_estimate ? parseFloat(data.total_estimate) : null;
+        dpAmount = data.dp_amount
+          ? parseFloat(data.dp_amount)
+          : (totalEstimate ? Math.ceil(totalEstimate * 0.1) : null);
+      }
       const booking = await Booking.create({
         booking_link_id:  data.booking_link_id,
         booking_code:     bookingCode,
@@ -223,12 +232,14 @@ class BookingService {
         event_type:       data.event_type,
         referral_source:  data.referral_source,
         theme_color:      data.theme_color,
-        total_estimate:   totalEstimate || null,
-        dp_amount:        dpAmount || null,       // ← FIX: simpan dp_amount
+        total_estimate:   totalEstimate,
+        dp_amount:        dpAmount,
         customer_notes:   data.customer_notes,
+        // Tandai tipe booking untuk keperluan frontend/admin
+        has_custom_request: hasCustomRequests,
       }, { transaction });
       
-      if (data.models && data.models.length > 0) {
+      if (hasModels) {
         const models = data.models.map((model, index) => ({
           booking_id:    booking.id,
           category_id:   model.category_id,
@@ -253,6 +264,25 @@ class BookingService {
         }));
         await BookingProperty.bulkCreate(properties, { transaction });
       }
+      if (hasCustomRequests) {
+  const customRequests = data.custom_requests.map(cr => {
+    // Ambil path file yang sudah diproses sharp & disimpan di uploads/custom-requests/
+    const uploadedImages = (cr.files || []).map(f =>
+      f.path.replace(/\\/g, '/')
+    );
+
+    return {
+      booking_id:       booking.id,
+      title:            cr.title,
+      description:      cr.description,
+      color_theme:      cr.color_theme || null,
+      reference_images: uploadedImages.length > 0 ? uploadedImages : null,
+      status:           'PENDING',
+    };
+  });
+
+  await BookingCustomRequest.bulkCreate(customRequests, { transaction });
+}
       
       await bookingLink.update({ is_used: true }, { transaction });
       await transaction.commit();
@@ -350,7 +380,7 @@ class BookingService {
 
     const paymentProofUrl = file.path.replace(/\\/g, '/');
 
-    // ── FIX: kalau dp_amount masih null, hitung dari total_estimate ──
+    // ── Update payment data ──────────────────────────────────────────
     const updateData = {
       payment_proof_url: paymentProofUrl,
       bank_name:         paymentData.bank_name || null,
@@ -360,6 +390,8 @@ class BookingService {
       payment_status:    'WAITING_CONFIRMATION',
     };
 
+    // Kalau dp_amount null tapi total_estimate ada (booking dari katalog)
+    // → hitung fallback 10%. Kalau murni custom request → biarkan null
     if (!booking.dp_amount && booking.total_estimate) {
       updateData.dp_amount = Math.ceil(Number(booking.total_estimate) * 0.1);
     }

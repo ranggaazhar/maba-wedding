@@ -8,7 +8,8 @@ const createUploadDirs = () => {
     'uploads/projects',
     'uploads/properties',
     'uploads/payment-proofs',
-    'uploads/temp'
+    'uploads/temp',
+    'uploads/custom-requests',
   ];
   
   dirs.forEach(dir => {
@@ -72,7 +73,16 @@ const uploadConfigs = {
     limits: {
       fileSize: 10 * 1024 * 1024 // 10MB for payment proofs
     }
-  })
+  }),
+
+  customRequestImages: multer({
+    storage: createStorage('uploads/custom-requests'),
+    fileFilter: imageFilter,
+    limits: {
+      fileSize: 10 * 1024 * 1024,  // 10MB per file
+      files: 7                      // maksimal 5 foto referensi
+    }
+  }),
 };
 
 module.exports = uploadConfigs;

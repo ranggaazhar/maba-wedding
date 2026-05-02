@@ -26,7 +26,7 @@ export function useInvoiceDetail() {
       }
     } catch {
       Swal.fire('Error', 'Gagal memuat data invoice', 'error');
-      navigate('/invoices');
+      navigate('/admin/invoices');
     } finally {
       setIsLoading(false);
     }

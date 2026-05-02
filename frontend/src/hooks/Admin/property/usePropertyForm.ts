@@ -68,7 +68,7 @@ export const usePropertyForm = () => {
         const message = axios.isAxiosError(error)
           ? error.response?.data?.message
           : 'Gagal memuat data property';
-        Swal.fire('Error', message, 'error').then(() => navigate('/properties'));
+        Swal.fire('Error', message, 'error').then(() => navigate('/admin/properties'));
       } finally {
         setIsFetching(false);
       }

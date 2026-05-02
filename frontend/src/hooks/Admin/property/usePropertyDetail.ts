@@ -25,7 +25,7 @@ export function usePropertyDetail() {
       }
     } catch (error: unknown) {
       const message = axios.isAxiosError(error) ? error.response?.data?.message : 'Terjadi kesalahan saat memuat data';
-      Swal.fire({ icon: 'error', title: 'Gagal Memuat Data', text: message }).then(() => navigate('/properties'));
+      Swal.fire({ icon: 'error', title: 'Gagal Memuat Data', text: message }).then(() => navigate('/admin/properties'));
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +47,7 @@ export function usePropertyDetail() {
         const response = await propertyApi.deleteProperty(property.id);
         if (response.success) {
           await Swal.fire({ icon: 'success', title: 'Terhapus!', text: 'Property berhasil dihapus.', timer: 1500, showConfirmButton: false });
-          navigate('/properties');
+          navigate('/admin/properties');
         }
       } catch (error: unknown) {
         Swal.fire({ icon: 'error', title: 'Gagal!', text: axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menghapus property' });

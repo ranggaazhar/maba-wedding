@@ -1,3 +1,5 @@
+// src/types/booking.types.ts
+
 export interface PropertyImage {
   id: number;
   url: string;
@@ -60,6 +62,75 @@ export interface BookingProperty {
 
 export type PaymentStatus = 'PENDING' | 'WAITING_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
 
+// ── Custom Request ────────────────────────────────────────────────────────────
+
+export type CustomRequestStatus = 'PENDING' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
+
+export interface BookingCustomRequest {
+  id: number;
+  booking_id: number;
+  title: string;
+  description: string;
+  color_theme?: string;
+  reference_images?: string[];
+  reference_images_urls?: string[];
+  estimated_price?: string;
+  admin_notes?: string;
+  reviewed_by?: number;
+  reviewed_at?: string;
+  status: CustomRequestStatus;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+  booking?: Pick<
+    Booking,
+    'id' | 'booking_code' | 'customer_name' | 'customer_phone' | 'event_date' | 'event_venue'
+  >;
+  reviewer?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface CreateCustomRequestData {
+  title: string;
+  description: string;
+  color_theme?: string;
+  reference_images?: string[];
+}
+
+export interface UpdateCustomRequestData {
+  title?: string;
+  description?: string;
+  color_theme?: string;
+  reference_images?: string[];
+  replace_images?: boolean;
+}
+
+export interface ReviewCustomRequestData {
+  status: 'REVIEWED' | 'APPROVED' | 'REJECTED';
+  estimated_price?: number;
+  admin_notes?: string;
+  rejection_reason?: string;
+}
+
+export interface CustomRequestStats {
+  total: number;
+  pending: number;
+  reviewed: number;
+  approved: number;
+  rejected: number;
+}
+
+export interface CustomRequestFilters {
+  status?: CustomRequestStatus;
+  booking_id?: number;
+  search?: string;
+}
+
+// ── Booking ───────────────────────────────────────────────────────────────────
+
 export interface Booking {
   id: number;
   booking_link_id: number;
@@ -88,10 +159,35 @@ export interface Booking {
   rejection_reason?: string;
   submitted_at: string;
   updated_at: string;
+  // ── Tipe booking ──────────────────────────────────────────────
+  has_custom_request: boolean;
+  // ── Relasi ────────────────────────────────────────────────────
   bookingLink?: BookingLink;
   models?: BookingModel[];
   properties?: BookingProperty[];
+  customRequests?: BookingCustomRequest[];
+  invoice?: {
+    id: number;
+    invoice_number: string;
+    status: string;
+    total_amount: string;
+  };
 }
+
+// ── Booking tipe helper ───────────────────────────────────────────────────────
+
+export type BookingType = 'CATALOG' | 'CUSTOM' | 'COMBINATION';
+
+export function getBookingType(booking: Pick<Booking, 'has_custom_request' | 'models'>): BookingType {
+  const hasModels = (booking.models?.length ?? 0) > 0;
+  const hasCustom = booking.has_custom_request;
+
+  if (hasModels && hasCustom) return 'COMBINATION';
+  if (hasCustom) return 'CUSTOM';
+  return 'CATALOG';
+}
+
+// ── Create / Update ───────────────────────────────────────────────────────────
 
 export interface CreateBookingData {
   booking_link_id: number;
@@ -108,7 +204,26 @@ export interface CreateBookingData {
   customer_notes?: string;
   models?: BookingModel[];
   properties?: BookingProperty[];
+  custom_requests?: CreateCustomRequestData[];
 }
+
+export interface UpdateBookingData {
+  customer_name?: string;
+  customer_phone?: string;
+  full_address?: string;
+  event_venue?: string;
+  event_date?: string;
+  event_type?: string;
+  referral_source?: string;
+  theme_color?: string;
+  total_estimate?: string;
+  dp_amount?: string;
+  customer_notes?: string;
+  models?: BookingModel[];
+  properties?: BookingProperty[];
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
 
 export interface BookingStats {
   total: number;

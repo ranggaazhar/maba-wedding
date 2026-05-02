@@ -4,7 +4,7 @@ const bookingController = require('../controllers/customer/bookingController');
 const bookingLinkController = require('../controllers/admin/bookingLinkController');
 const authMiddleware = require('../middleware/auth');
 const upload = require('../config/multer');
-const { processImage } = require('../middleware/imageProcessor');
+const { processImage, processMultipleImages } = require('../middleware/imageProcessor');
 const {
   createBookingLinkValidation,
   updateBookingLinkValidation,
@@ -32,7 +32,12 @@ router.get('/',authMiddleware, bookingController.getAllBookings);
 router.get('/statistics',authMiddleware, bookingController.getStatistics);
 router.get('/date-range',authMiddleware, bookingController.getBookingsByDateRange);
 router.get('/:id',authMiddleware, bookingIdValidation, validate, bookingController.getBookingById);
-router.post('/', createBookingValidation, validate, bookingController.createBooking);
+router.post('/',
+  upload.customRequestImages.array('custom_request_images', 50),
+  processMultipleImages({ width: 1280, quality: 80, format: 'jpeg' }),
+  createBookingValidation, validate,
+  bookingController.createBooking
+);
 router.put('/:id',authMiddleware, updateBookingValidation, validate, bookingController.updateBooking);
 router.delete('/:id',authMiddleware, bookingIdValidation, validate, bookingController.deleteBooking);
 

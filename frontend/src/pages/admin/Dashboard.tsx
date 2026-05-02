@@ -190,29 +190,6 @@ export default function Dashboard() {
           />
         </div>
       </div>
-
-      {/* Account Info */}
-      <div className="bg-card rounded-xl border border-border p-6">
-        <h3 className="text-lg font-bold text-foreground mb-4">Quick Info</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-ocean-light rounded-lg">
-            <p className="text-sm font-medium text-primary mb-1">Account Status</p>
-            <p className="text-xs text-primary/80">
-              {admin?.is_active ? '✓ Active' : '✗ Inactive'}
-            </p>
-          </div>
-          <div className="p-4 bg-secondary/10 rounded-lg">
-            <p className="text-sm font-medium text-secondary-foreground mb-1">Member Since</p>
-            <p className="text-xs text-muted-foreground">
-              {admin?.created_at ? new Date(admin.created_at).toLocaleDateString('id-ID') : '—'}
-            </p>
-          </div>
-          <div className="p-4 bg-success/10 rounded-lg">
-            <p className="text-sm font-medium text-success mb-1">Email</p>
-            <p className="text-xs text-success/80">{admin?.email}</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

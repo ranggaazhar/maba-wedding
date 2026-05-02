@@ -122,7 +122,7 @@ export default function ProjectForm() {
       }
 
       if (response.success) {
-        await Swal.fire({ icon: 'success', title: 'Mantap!', text: `Project berhasil ${isEdit ? 'diperbarui' : 'disimpan'}`, timer: 2000, showConfirmButton: false });
+        await Swal.fire({ icon: 'success', title: 'success', text: `Project berhasil ${isEdit ? 'diperbarui' : 'disimpan'}`, timer: 2000, showConfirmButton: false });
         navigate('/admin/projects');
       }
     } catch (error: unknown) {

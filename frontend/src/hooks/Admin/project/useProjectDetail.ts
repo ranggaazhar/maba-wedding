@@ -24,7 +24,7 @@ export function useProjectDetail() {
       }
     } catch (error) {
       const message = axios.isAxiosError(error) ? error.response?.data?.message : 'Terjadi kesalahan';
-      Swal.fire({ icon: 'error', title: 'Gagal Memuat Data', text: message }).then(() => navigate('/projects'));
+      Swal.fire({ icon: 'error', title: 'Gagal Memuat Data', text: message }).then(() => navigate('/admin/projects'));
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +45,7 @@ export function useProjectDetail() {
         const response = await projectApi.deleteProject(project.id);
         if (response.success) {
           await Swal.fire({ icon: 'success', title: 'Terhapus!', text: 'Project berhasil dihapus.', timer: 1500, showConfirmButton: false });
-          navigate('/projects');
+          navigate('/admin/projects');
         }
       } catch (error) {
         Swal.fire({ icon: 'error', title: 'Gagal!', text: axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menghapus' });
