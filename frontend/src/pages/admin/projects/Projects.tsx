@@ -76,16 +76,15 @@ export default function Projects() {
       {/* Content */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-muted-foreground">Memuat projects...</p>
+           <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <p className="text-sm text-muted-foreground">Memuat data...</p>
+          </div>
         </div>
       ) : projects.length === 0 ? (
         <div className="border rounded-lg p-12 text-center bg-card">
           <ImageIcon size={48} className="mx-auto text-muted-foreground mb-4" />
-          <h3 className="font-semibold mb-1">Belum ada project</h3>
-          <Button variant="outline" onClick={() => navigate("/admin/projects/new")} className="mt-2">
-            Mulai Tambah Project
-          </Button>
+          <h3 className="font-semibold mb-1">Project tidak ada</h3>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

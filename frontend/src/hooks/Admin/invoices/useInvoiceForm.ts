@@ -7,8 +7,8 @@ import type { Booking } from '@/types/booking.types';
 import Swal from 'sweetalert2';
 
 export const defaultPaymentTerms = `DP 10% saat konfirmasi booking.
-Pelunasan paling lambat H-7 sebelum hari acara.
-Pembatalan setelah DP tidak dapat di-refund.`;
+Pelunasan paling lambat H-7 sebelum hari acara atau sesudah acara maksimal 7 hari.
+Pembatalan setelah DP tidak dapat di-refund kecuali ada kendala serius.`;
 
 const defaultItem = (): ItemRow => ({
   _tempId: Date.now(),

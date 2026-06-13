@@ -103,7 +103,10 @@ export default function Invoices() {
       <div className="table-container">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin text-muted-foreground" size={32} />
+           <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <p className="text-sm text-muted-foreground">Memuat data...</p>
+          </div>
           </div>
         ) : invoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">

@@ -51,26 +51,31 @@ export default function PropertyForm() {
       <div className="flex items-center gap-4">
         <Button 
           type="button"
-          variant="outline" 
+          variant="ghost" 
           size="icon" 
           onClick={() => navigate("/admin/properties")}
         >
           <ArrowLeft size={20} />
         </Button>
+        
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold">
+           <h1 className="text-2xl font-bold tracking-tight">
             {isEditMode ? "Edit Property" : "Tambah Property Baru"}
           </h1>
           <p className="text-sm text-muted-foreground">
             {isEditMode ? "Update informasi property" : "Isi form untuk menambah property baru"}
           </p>
         </div>
-        <Button type="submit" disabled={isLoading}>
+        <Button 
+        className="gradient-ocean text-primary-foreground h-10 text-base font-medium"
+        type="submit" 
+        disabled={isLoading}>
           {isLoading ? (
             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
           ) : (
             <><Save size={18} className="mr-2" /> Simpan</>
           )}
+          
         </Button>
       </div>
 

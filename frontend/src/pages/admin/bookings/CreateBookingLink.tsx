@@ -68,10 +68,10 @@ export default function CreateBookingLink() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigate("/admin/bookings")}>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/bookings")}>
           <ArrowLeft size={20} />
         </Button>
         <div className="page-header mb-0">

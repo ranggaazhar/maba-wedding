@@ -5,13 +5,8 @@ const path = require('path');
 
 class InvoicePdfService {
 
-  /**
-   * Generate PDF invoice dan simpan ke disk
-   * @param {Object} invoice - data invoice lengkap (dengan items)
-   * @returns {string} filePath - absolute path file PDF
-   */
   async generateInvoicePdf(invoice) {
-    const outputDir = path.join(__dirname, '../uploads/invoice-pdfs');
+    const outputDir = path.join(process.cwd(), 'uploads/invoice-pdfs');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }

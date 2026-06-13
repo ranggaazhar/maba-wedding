@@ -1,7 +1,7 @@
 // src/hooks/customer/useCustomerBookingForm.ts
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { bookingLinkApi, bookingApi, customRequestApi } from '@/api/bookingApi';
+import { bookingLinkApi, bookingApi } from '@/api/bookingApi';
 import type { CreateBookingData, CreateCustomRequestData } from '@/types/booking.types';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -67,12 +67,10 @@ export function useCustomerBookingForm() {
 
   const dpAmount = totalEstimate > 0 ? Math.ceil(totalEstimate * 0.1) : 0;
 
-  const totalSteps = !bookingMode ? 99  // belum dipilih
-    : bookingMode === 'catalog'     ? 5  // 1 info | 2 models | 3 props | 4 payment | 5 done
-    : bookingMode === 'custom'      ? 4  // 1 info | 2 request | 3 konfirmasi | 4 done
+  const totalSteps = !bookingMode ? 99 
+    : bookingMode === 'catalog'     ? 5 
+    : bookingMode === 'custom'      ? 4  
     : 6;                                
-
-  // ── Validate link ─────────────────────────────────────────────────────────
   useEffect(() => {
     const validateLink = async () => {
       if (!token) {

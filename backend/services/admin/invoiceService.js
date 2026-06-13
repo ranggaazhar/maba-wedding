@@ -123,11 +123,6 @@ class InvoiceService {
     remainingAmount:  Math.max(0, unpaidTotal - unpaidDP).toFixed(2)  // ← hanya unpaid
   };
 }
-
-  // ============================================================
-  // INVOICE — CREATE / UPDATE / DELETE
-  // ============================================================
-
   async _generateUniqueNumber() {
     let number = this.generateInvoiceNumber();
     while (await Invoice.findOne({ where: { invoice_number: number } })) {
@@ -255,7 +250,7 @@ class InvoiceService {
         issue_date:       new Date(),
         due_date:         new Date(booking.event_date),
         notes:            booking.customer_notes,
-        payment_terms:    'Pelunasan dilakukan sebelum hari acara',
+        payment_terms:    'Pelunasan boleh dilakukan sebelum hari acara atau sesudah acara maksimal 7 hari setelah acara.',
         created_by:       adminId
       }, { transaction });
 
@@ -286,10 +281,6 @@ class InvoiceService {
     await invoice.destroy();
     return { message: 'Invoice deleted successfully' };
   }
-
-  // ============================================================
-  // INVOICE — STATUS
-  // ============================================================
 
   async markAsSent(id) {
     const invoice = await this.getInvoiceById(id, false);
@@ -331,7 +322,7 @@ class InvoiceService {
 
           await whatsappService.sendMessage(
             booking.customer_phone,
-            `🎉 *Pembayaran Lunas!*\n\nTerima kasih *${booking.customer_name}* telah mempercayakan dekorasi kepada *Maba Wedding Decoration* 💍\n\nKami akan sangat senang jika Anda berkenan memberikan ulasan:\n${reviewUrl}\n\n_Link aktif selama 90 hari_`
+            `*Pembayaran Lunas!*\n\nTerima kasih *${booking.customer_name}* telah mempercayakan dekorasi kepada *Maba Wedding Decoration* \n\nKami akan sangat senang jika Anda berkenan memberikan ulasan:\n${reviewUrl}\n\n_Link aktif selama 90 hari_`
           );
 
           // Update sent_at di review link
@@ -370,10 +361,6 @@ class InvoiceService {
     await invoice.update({ total: Math.max(0, total) });
     return await this.getInvoiceById(id);
   }
-
-  // ============================================================
-  // INVOICE ITEMS
-  // ============================================================
 
   async getItemsByInvoiceId(invoiceId) {
     await this.getInvoiceById(invoiceId, false);
@@ -488,10 +475,6 @@ class InvoiceService {
     return { total: Math.max(0, total), itemCount: items.length, items };
   }
 
-  // ============================================================
-  // SEND INVOICE VIA WHATSAPP
-  // ============================================================
-
   async sendInvoiceWhatsapp(invoiceId) {
     const invoice = await this.getInvoiceById(invoiceId);
     if (!invoice) throw new Error('Invoice tidak ditemukan');
@@ -505,7 +488,6 @@ class InvoiceService {
     const splitResult = normalized.split('/uploads/');
     const pdfRelative = splitResult.length > 1 ? `uploads/${splitResult[1]}` : normalized;
 
-    // 3. Simpan pdf_url ke DB
     await Invoice.update(
       { pdf_url: pdfRelative, pdf_generated_at: new Date() },
       { where: { id: invoiceId } }

@@ -193,13 +193,13 @@ export default function Reviews() {
       <Tabs defaultValue="pending" className="space-y-6">
         <TabsList className="bg-muted/50">
           <TabsTrigger value="pending" className="data-[state=active]:bg-card">
-            Menunggu ({pendingReviews.length})
+            Menunggu 
           </TabsTrigger>
           <TabsTrigger value="approved" className="data-[state=active]:bg-card">
-            Disetujui ({approvedReviews.length})
+            Disetujui 
           </TabsTrigger>
           <TabsTrigger value="links" className="data-[state=active]:bg-card">
-            Review Links ({reviewLinks.length})
+            Review Links
           </TabsTrigger>
         </TabsList>
 

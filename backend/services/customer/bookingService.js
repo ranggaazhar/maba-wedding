@@ -380,7 +380,6 @@ class BookingService {
 
     const paymentProofUrl = file.path.replace(/\\/g, '/');
 
-    // ── Update payment data ──────────────────────────────────────────
     const updateData = {
       payment_proof_url: paymentProofUrl,
       bank_name:         paymentData.bank_name || null,
@@ -389,9 +388,6 @@ class BookingService {
       payment_date:      new Date(),
       payment_status:    'WAITING_CONFIRMATION',
     };
-
-    // Kalau dp_amount null tapi total_estimate ada (booking dari katalog)
-    // → hitung fallback 10%. Kalau murni custom request → biarkan null
     if (!booking.dp_amount && booking.total_estimate) {
       updateData.dp_amount = Math.ceil(Number(booking.total_estimate) * 0.1);
     }

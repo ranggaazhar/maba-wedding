@@ -80,21 +80,19 @@ class ReminderService {
 ━━━━━━━━━━━━━━━━━━━━
 📌 *JOB ${index} dari ${total}*
 ━━━━━━━━━━━━━━━━━━━━
-👤 *Customer:* ${booking.customer_name}
-📞 *No HP:* ${booking.customer_phone}
-📋 *Kode:* ${booking.booking_code}
-🎭 *Acara:* ${booking.event_type}
-📍 *Venue:* ${booking.event_venue}
-📅 *Tanggal:* ${this._formatDate(booking.event_date)}
+*Customer:* ${booking.customer_name}
+*No HP:* ${booking.customer_phone}
+*Kode:* ${booking.booking_code}
+*Acara:* ${booking.event_type}
+*Venue:* ${booking.event_venue}
+*Tanggal:* ${this._formatDate(booking.event_date)}
 
-💼 *Item Dekorasi:*
+*Item Dekorasi:*
 ${itemLines}
 `.trim();
   }
 
-  /**
-   * Kirim reminder H-N ke group WA
-   */
+
   async sendReminder(daysAhead) {
     const GROUP_TARGET = process.env.WA_GROUP_TARGET;
     if (!GROUP_TARGET) {
@@ -115,9 +113,9 @@ ${itemLines}
 
     // Header pesan
     const header = `
-🔔 *REMINDER H-${daysAhead} — ${dateStr}*
-📦 Total Job: *${bookings.length} booking*
-⏰ Segera persiapkan perlengkapan!
+*REMINDER H-${daysAhead} — ${dateStr}*
+Total Job: *${bookings.length} booking*
+Segera persiapkan perlengkapan!
     `.trim();
 
     // Detail per booking
@@ -131,12 +129,12 @@ ${itemLines}
     const fullMessage = `${header}\n\n${details}${footer}`;
 
     try {
-  console.log('📤 Mengirim ke:', GROUP_TARGET);
-  console.log('📝 Pesan:', fullMessage);
+  console.log('Mengirim ke:', GROUP_TARGET);
+  console.log('Pesan:', fullMessage);
   await whatsappService.sendMessage(GROUP_TARGET, fullMessage);
-  console.log(`✅ Reminder H-5 berhasil dikirim ke group.`);
+  console.log(`Reminder H-5 berhasil dikirim ke group.`);
 } catch (err) {
-  console.error(`❌ Gagal kirim reminder H-5:`, err.message);
+  console.error(`Gagal kirim reminder H-5:`, err.message);
 }
   }
 

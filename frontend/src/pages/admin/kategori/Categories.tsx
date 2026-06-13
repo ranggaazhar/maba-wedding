@@ -26,7 +26,7 @@ export default function Categories() {
     isDialogOpen, selectedCategory,
     handleCreate, handleEdit, handleCloseDialog,
     handleSubmit, handleDelete, handleToggleStatus,
-  } = useKategori(); // ← semua dari hook
+  } = useKategori(); 
 
   return (
     <div className="space-y-6">

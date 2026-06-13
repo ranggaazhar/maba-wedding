@@ -5,7 +5,7 @@ const path = require('path');
 
 class BookingPdfService {
   async generateBookingPdf(booking) {
-    const outputDir = path.join(__dirname, '../uploads/booking-pdfs');
+    const outputDir = path.join(process.cwd(), 'uploads/booking-pdfs');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -24,7 +24,6 @@ class BookingPdfService {
       doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
       doc.moveDown();
 
-      // ── Booking Info ────────────────────────────────
       doc.fontSize(13).font('Helvetica-Bold').text('INFORMASI BOOKING');
       doc.moveDown(0.3);
       this._row(doc, 'Kode Booking', booking.booking_code);

@@ -1,13 +1,14 @@
 import { useInvoiceDetail } from '@/hooks/Admin/invoices/useInvoiceDetail';
 import {
-  ArrowLeft, Edit, Download, Send, FileText, CheckCircle,
+  ArrowLeft, Edit, Send, FileText, CheckCircle,
   AlertTriangle, Loader2, Clock, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import type { InvoiceStatus, InvoiceItem } from '@/types/invoice.types';
+import LogoMaba from '../../../assets/logomaba.svg';
+
 
 const formatCurrency = (val: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
@@ -34,11 +35,10 @@ const itemTypeLabel: Record<string, { label: string; className: string }> = {
 export default function InvoiceDetail() {
   const {
     id, invoice, isLoading,
-    adminNotes, setAdminNotes,
-    isSavingNotes, isActionLoading,
+    isActionLoading,
     calculatedTotal, navigate,
     handleSendWhatsapp, handleMarkAsPaid,
-    handleMarkAsOverdue, handleSaveNotes,
+    handleMarkAsOverdue,
   } = useInvoiceDetail();
 
   if (isLoading) {
@@ -81,14 +81,7 @@ export default function InvoiceDetail() {
               Edit
             </Button>
           )}
-          {invoice.pdf_url && (
-            <Button variant="outline" size="sm" asChild>
-              <a href={invoice.pdf_url} target="_blank" rel="noopener noreferrer">
-                <Download size={16} className="mr-2" />
-                PDF
-              </a>
-            </Button>
-          )}
+  
           {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
             <Button
               size="sm"
@@ -113,13 +106,17 @@ export default function InvoiceDetail() {
             {/* Invoice Header */}
             <div className="flex justify-between items-start mb-8">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="h-8 w-8 rounded-lg gradient-ocean flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">WD</span>
-                  </div>
-                  <span className="font-bold text-lg text-foreground">Maba Wedding Decor</span>
+                <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center">
+            <img
+              src={LogoMaba}
+              alt="Logo Maba"
+              className="h-12 w-12 object-contain"
+            />
                 </div>
-                <p className="text-sm text-muted-foreground">Purworejo, Jawa Tengah</p>
+                  <span className="font-bold text-foreground tracking-tight text-lg">MABA WEEDING DEKOR</span>
+                </div>
+                <p className="text-sm text-muted-foreground">Kulon Progo, Yogyakarta</p>
                 <p className="text-sm text-muted-foreground">WA: 081215061622</p>
               </div>
               <div className="text-right">
@@ -294,25 +291,6 @@ export default function InvoiceDetail() {
               </Button>
             </div>
           )}
-
-          {/* Admin Notes */}
-          <div className="bg-card rounded-xl border border-border p-6 shadow-card space-y-4">
-            <h3 className="font-semibold text-foreground">Catatan Admin</h3>
-            <Textarea
-              value={adminNotes}
-              onChange={(e) => setAdminNotes(e.target.value)}
-              placeholder="Tambah catatan internal..."
-              className="min-h-[100px] bg-muted/30"
-            />
-            <Button
-              variant="outline" size="sm" className="w-full"
-              onClick={handleSaveNotes}
-              disabled={isSavingNotes}
-            >
-              {isSavingNotes && <Loader2 size={14} className="animate-spin mr-2" />}
-              Simpan Catatan
-            </Button>
-          </div>
         </div>
       </div>
     </div>

@@ -54,20 +54,6 @@ export function ProjectDetail() {
 
   return (
     <div className="min-h-screen pt-20">
-
-      {/* Back Button */}
-      <div className="bg-white border-b border-[#E5E7EB] py-4">
-        <div className="max-w-7xl mx-auto px-6">
-          <Link
-            to="/projects"
-            className="inline-flex items-center gap-2 text-[#457B9D] hover:text-[#1D3557] transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Kembali ke Projects
-          </Link>
-        </div>
-      </div>
-
       {/* Hero Image */}
       <section className="relative h-[60vh] overflow-hidden">
         <ImageWithFallback
@@ -83,7 +69,7 @@ export function ProjectDetail() {
                 {project.category.name}
               </span>
             ) : null}
-            <h1 className="text-white mb-4">{project.title}</h1>
+            <h1 className="!text-white mb-4">{project.title}</h1>
             <div className="flex flex-wrap gap-6 text-[#A8DADC]">
               {project.theme ? (
                 <div className="flex items-center gap-2">
@@ -134,42 +120,10 @@ export function ProjectDetail() {
                     <div className="inline-block p-3 bg-gradient-to-br from-[#A8DADC] to-[#457B9D] rounded-2xl shadow-lg">
                       <Palette className="w-8 h-8 text-white" />
                     </div>
-                    <h3>{otherPhotos[0].caption ?? 'Detail Dekorasi'}</h3>
-
-                    {otherPhotos[0].colors && otherPhotos[0].colors.length > 0 ? (
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium text-[#1D3557]">Palet Warna</p>
-                        {otherPhotos[0].colors.slice(0, 3).map((c, i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            {c.color_hex ? (
-                              <div
-                                className="w-5 h-5 rounded-full border border-gray-200 flex-shrink-0"
-                                style={{ backgroundColor: c.color_hex }}
-                              />
-                            ) : (
-                              <div className="w-5 h-5 flex-shrink-0" />
-                            )}
-                            <p className="text-[#6B7280] text-sm">
-                              {c.color_name}{c.description ? ` — ${c.description}` : ''}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-
-                    {otherPhotos[0].flowers && otherPhotos[0].flowers.length > 0 ? (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-[#1D3557]">Jenis Bunga</p>
-                        {otherPhotos[0].flowers.slice(0, 3).map((f, i) => (
-                          <div key={i} className="flex items-start gap-3">
-                            <div className="w-2 h-2 bg-[#457B9D] rounded-full mt-2 flex-shrink-0" />
-                            <p className="text-[#6B7280] text-sm">
-                              {f.flower_name}{f.description ? ` — ${f.description}` : ''}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
+                    <h3>Detail Image 1</h3>
+                   <p className="text-gray-600 leading-relaxed">
+                      {otherPhotos[0].caption}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -185,40 +139,10 @@ export function ProjectDetail() {
                     <div className="inline-block p-3 bg-gradient-to-br from-[#457B9D] to-[#1D3557] rounded-2xl shadow-lg">
                       <Sparkles className="w-8 h-8 text-white" />
                     </div>
-                    <h3>{otherPhotos[1].caption ?? 'Detail Floral'}</h3>
-
-                    {otherPhotos[1].flowers && otherPhotos[1].flowers.length > 0 ? (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-[#1D3557]">Jenis Bunga</p>
-                        {otherPhotos[1].flowers.slice(0, 4).map((f, i) => (
-                          <div key={i} className="flex items-start gap-3">
-                            <div className="w-2 h-2 bg-[#457B9D] rounded-full mt-2 flex-shrink-0" />
-                            <p className="text-[#6B7280] text-sm">
-                              {f.flower_name}{f.description ? ` — ${f.description}` : ''}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-
-                    {otherPhotos[1].colors && otherPhotos[1].colors.length > 0 ? (
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium text-[#1D3557]">Palet Warna</p>
-                        {otherPhotos[1].colors.slice(0, 3).map((c, i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            {c.color_hex ? (
-                              <div
-                                className="w-5 h-5 rounded-full border border-gray-200 flex-shrink-0"
-                                style={{ backgroundColor: c.color_hex }}
-                              />
-                            ) : (
-                              <div className="w-5 h-5 flex-shrink-0" />
-                            )}
-                            <p className="text-[#6B7280] text-sm">{c.color_name}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
+                    <h3>Detail Image 2</h3>
+                   <p className="text-gray-600 leading-relaxed">
+                      {otherPhotos[1].caption}
+                    </p>
                   </div>
                   <div className="rounded-2xl overflow-hidden shadow-2xl">
                     <ImageWithFallback
@@ -232,7 +156,6 @@ export function ProjectDetail() {
             </section>
           ) : null}
 
-          {/* Remaining photos grid */}
           {otherPhotos.length > 3 ? (
             <section className="py-16 bg-white">
               <div className="max-w-7xl mx-auto px-6">
@@ -380,8 +303,8 @@ export function ProjectDetail() {
       {/* CTA */}
       <section className="py-20 bg-gradient-to-br from-[#1D3557] to-[#0F1F35] text-white">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
-          <h2 className="text-white">Tertarik dengan Konsep Ini?</h2>
-          <p className="text-[#A8DADC] text-lg max-w-2xl mx-auto">
+          <h2 className="!text-white">Tertarik dengan Konsep Ini?</h2>
+          <p className="!text-[#A8DADC] text-lg max-w-2xl mx-auto">
             Konsultasikan kebutuhan Anda dengan tim kami. Kami siap menyesuaikan desain sesuai budget dan preferensi Anda.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -397,22 +320,6 @@ export function ProjectDetail() {
             >
               Hubungi Kami
             </a>
-          </div>
-          <div className="pt-8 flex items-center justify-center gap-8 text-[#A8DADC]">
-            <div className="text-center">
-              <p className="text-3xl text-white mb-1">100+</p>
-              <p className="text-sm">Happy Clients</p>
-            </div>
-            <div className="w-px h-12 bg-white/20" />
-            <div className="text-center">
-              <p className="text-3xl text-white mb-1">200+</p>
-              <p className="text-sm">Projects Done</p>
-            </div>
-            <div className="w-px h-12 bg-white/20" />
-            <div className="text-center">
-              <p className="text-3xl text-white mb-1">5★</p>
-              <p className="text-sm">Average Rating</p>
-            </div>
           </div>
         </div>
       </section>

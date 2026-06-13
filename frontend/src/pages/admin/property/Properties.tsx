@@ -74,16 +74,15 @@ export default function Properties() {
       {/* Content */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-muted-foreground">Memuat properties...</p>
-        </div>
+         <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <p className="text-sm text-muted-foreground">Memuat data...</p>
+          </div>
+        </div>  
       ) : properties.length === 0 ? (
         <div className="border rounded-lg p-12 text-center bg-card">
           <Package size={48} className="mx-auto text-muted-foreground mb-4" />
-          <h3 className="font-semibold mb-1">Belum ada property</h3>
-          <Button variant="outline" onClick={() => navigate('/admin/properties/new')} className="mt-2">
-            Mulai Tambah Property
-          </Button>
+          <h3 className="font-semibold mb-1">Property tidak ada</h3>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -113,7 +112,7 @@ export default function Properties() {
                       <DropdownMenuItem onClick={() => navigate(`/admin/properties/${property.id}`)}>
                         <Eye size={14} className="mr-2" /> Detail
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/adminproperties/edit/${property.id}`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/admin/properties/edit/${property.id}`)}>
                         <Edit size={14} className="mr-2" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleToggleAvailability(property.id)}>

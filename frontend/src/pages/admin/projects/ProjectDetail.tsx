@@ -62,7 +62,7 @@ export default function ProjectDetailPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate("/admin/projects")}>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/admin/projects")}>
             <ArrowLeft size={18} />
           </Button>
           <div>
@@ -73,27 +73,45 @@ export default function ProjectDetailPage() {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Badge variant="outline">{project.category?.name || "Uncategorized"}</Badge>
-              <span>•</span>
-              <div className="flex items-center gap-1">
-                <Eye size={14} />
-                <span>{(project.view_count || 0).toLocaleString("id-ID")} views</span>
-              </div>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={handleTogglePublish} title={project.is_published ? "Unpublish" : "Publish"}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleTogglePublish}
+            title={project.is_published ? "Unpublish" : "Publish"}
+          >
             {project.is_published ? <EyeOff size={18} /> : <Eye size={18} />}
           </Button>
-          <Button variant="outline" size="icon" onClick={handleToggleFeatured}>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleToggleFeatured}
+            title={project.is_featured ? "Unfeature" : "Feature"}
+          >
             <Star size={18} className={project.is_featured ? "fill-amber-500 text-amber-500" : ""} />
           </Button>
-          <Button variant="outline" className="gap-2" onClick={() => navigate(`/admin/projects/edit/${project.id}`)}>
-            <Edit size={16} /> Edit
+
+          <Button
+            variant="outline"
+            className="gradient-ocean text-primary-foreground h-9 px-4 text-sm font-medium"
+            onClick={() => navigate(`/admin/projects/edit/${project.id}`)}
+          >
+            <Edit size={16} className="mr-2" />
+            Edit
           </Button>
-          <Button variant="destructive" size="icon" onClick={handleDelete}>
-            <Trash2 size={18} />
+
+          <Button
+            variant="destructive"
+            className="h-9 px-4 text-sm font-medium"
+            onClick={handleDelete}
+          >
+            <Trash2 size={16} className="mr-2" />
+            Hapus
           </Button>
         </div>
       </div>
@@ -369,22 +387,6 @@ export default function ProjectDetailPage() {
               </CardContent>
             </Card>
           )}
-
-          {/* Stats */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="text-2xl font-bold">{(project.view_count || 0).toLocaleString("id-ID")}</p>
-                  <p className="text-sm text-muted-foreground">Total Views</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{project.photos?.length || 0}</p>
-                  <p className="text-sm text-muted-foreground">Foto</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

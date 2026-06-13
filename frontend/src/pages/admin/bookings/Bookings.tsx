@@ -23,30 +23,24 @@ function BookingTypeBadge({ booking }: { booking: Booking }) {
 
   if (type === 'COMBINATION') {
     return (
-      <Badge className="bg-purple-50 text-purple-700 border border-purple-200 gap-1 text-xs font-medium">
-        <Layers size={11} />
+      <Badge variant="secondary" className="text-xs">
         Kombinasi
       </Badge>
     );
   }
   if (type === 'CUSTOM') {
     return (
-      <Badge className="bg-orange-50 text-orange-700 border border-orange-200 gap-1 text-xs font-medium">
-        <Sparkles size={11} />
+     <Badge variant="secondary" className="text-xs">
         Custom
       </Badge>
     );
   }
   return (
-    <Badge className="bg-blue-50 text-blue-700 border border-blue-200 gap-1 text-xs font-medium">
-      <BookOpen size={11} />
+   <Badge variant="secondary" className="text-xs">
       Katalog
     </Badge>
   );
 }
-
-// ── Payment status config ─────────────────────────────────────────────────────
-
 const paymentStatusStyles: Record<string, string> = {
   PENDING:              'bg-warning/10 text-warning border-warning/20',
   WAITING_CONFIRMATION: 'bg-blue-50 text-blue-600 border-blue-200',
@@ -60,8 +54,6 @@ const paymentStatusLabels: Record<string, string> = {
   CONFIRMED:            'DP Dikonfirmasi',
   REJECTED:             'Ditolak',
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 export default function Bookings() {
   const {
@@ -117,28 +109,28 @@ export default function Bookings() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Sudah Bayar DP</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{bookingStats.withPayment}</div>
+                <div className="text-2xl font-bold">{bookingStats.withPayment}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Belum Bayar</CardTitle>
-                <XCircle className="h-4 w-4 text-red-500" />
+                <XCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">{bookingStats.withoutPayment}</div>
+                <div className="text-2xl font-bold">{bookingStats.withoutPayment}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Bulan Ini</CardTitle>
-                <Calendar className="h-4 w-4 text-blue-500" />
+                <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{bookingStats.thisMonth}</div>
+                <div className="text-2xl font-bold">{bookingStats.thisMonth}</div>
               </CardContent>
             </Card>
           </div>
@@ -168,17 +160,17 @@ export default function Bookings() {
                 <SelectItem value="all">Semua Tipe</SelectItem>
                 <SelectItem value="catalog">
                   <div className="flex items-center gap-2">
-                    <BookOpen size={13} className="text-blue-600" /> Katalog
+                     Katalog
                   </div>
                 </SelectItem>
                 <SelectItem value="custom">
                   <div className="flex items-center gap-2">
-                    <Sparkles size={13} className="text-orange-600" /> Custom
+                     Custom
                   </div>
                 </SelectItem>
                 <SelectItem value="combination">
                   <div className="flex items-center gap-2">
-                    <Layers size={13} className="text-purple-600" /> Kombinasi
+                     Kombinasi
                   </div>
                 </SelectItem>
               </SelectContent>

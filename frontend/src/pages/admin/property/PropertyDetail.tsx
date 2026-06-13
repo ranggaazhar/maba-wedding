@@ -1,18 +1,17 @@
 // src/pages/admin/properties/PropertyDetail.tsx
 import {
   ArrowLeft, Edit, Trash2, Loader2, ImageIcon, Package,
-  DollarSign, Box, Star, Eye, EyeOff, Calendar,
+  DollarSign, Star, Eye, EyeOff, Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { usePropertyDetail } from '@/hooks/Admin/property/usePropertyDetail';
 
 export default function PropertyDetail() {
   const {
     property, isLoading, selectedImage, setSelectedImage,
-    navigate, handleDelete, handleToggleAvailability, formatPrice,
+    navigate, handleDelete, formatPrice,
   } = usePropertyDetail();
 
   if (isLoading) {
@@ -43,53 +42,51 @@ export default function PropertyDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <Button variant="outline" size="icon" onClick={() => navigate('/admin/properties')}>
-                <ArrowLeft size={20} />
-              </Button>
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <CardTitle className="text-2xl">{property.name}</CardTitle>
-                  {property.is_available ? (
-                    <Badge className="bg-green-500 hover:bg-green-600">
-                      <Eye size={12} className="mr-1" /> Tersedia
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">
-                      <EyeOff size={12} className="mr-1" /> Tidak Tersedia
-                    </Badge>
-                  )}
-                </div>
-                <CardDescription className="flex items-center gap-2">
-                  <span>{property.category?.name || 'Uncategorized'}</span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Calendar size={14} />
-                    {new Date(property.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </span>
-                </CardDescription>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={handleToggleAvailability}>
-                {property.is_available
-                  ? <><EyeOff size={16} className="mr-2" />Set Tidak Tersedia</>
-                  : <><Eye size={16} className="mr-2" />Set Tersedia</>
-                }
-              </Button>
-              <Button variant="default" size="sm" onClick={() => navigate(`/admin/properties/edit/${property.id}`)}>
-                <Edit size={16} className="mr-2" /> Edit
-              </Button>
-              <Button variant="destructive" size="sm" onClick={handleDelete}>
-                <Trash2 size={16} className="mr-2" /> Hapus
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+  <div className="flex items-start gap-4">
+    <Button variant="ghost" size="icon" onClick={() => navigate('/admin/properties')}>
+      <ArrowLeft size={20} />
+    </Button>
+    <div className="flex-1">
+      <div className="flex flex-wrap items-center gap-2 mb-1">
+        <h1 className="text-2xl font-bold tracking-tight">{property.name}</h1>
+        {property.is_available ? (
+          <Badge className="bg-green-500 hover:bg-green-600">
+            <Eye size={12} className="mr-1" /> Tersedia
+          </Badge>
+        ) : (
+          <Badge variant="secondary">
+            <EyeOff size={12} className="mr-1" /> Tidak Tersedia
+          </Badge>
+        )}
+      </div>
+      <p className="text-sm text-muted-foreground flex items-center gap-2">
+        <span>{property.category?.name || 'Uncategorized'}</span>
+        <span>•</span>
+        <span className="flex items-center gap-1">
+          <Calendar size={14} />
+          {new Date(property.created_at).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          })}
+        </span>
+      </p>
+    </div>
+  </div>
+
+  <div className="flex flex-wrap gap-2">
+    <Button
+      className="gradient-ocean text-primary-foreground h-9 px-4 text-sm font-medium"
+      onClick={() => navigate(`/admin/properties/edit/${property.id}`)}
+    >
+      <Edit size={16} className="mr-2" /> Edit
+    </Button>
+    <Button variant="destructive" size="sm" onClick={handleDelete}>
+      <Trash2 size={16} className="mr-2" /> Hapus
+    </Button>
+  </div>
+</div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -187,34 +184,6 @@ export default function PropertyDetail() {
                   <Calendar size={14} />
                   {new Date(property.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Box size={20} /> Manajemen Stok
-              </CardTitle>
-            </CardHeader>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-primary flex items-center gap-2">
-                <Package size={20} /> Statistik
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Gambar</span>
-                <Badge variant="outline" className="font-bold text-lg">
-                  {property.images?.length || 0}
-                </Badge>
-              </div>
-              <Separator />
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Stok Tersedia</span>
               </div>
             </CardContent>
           </Card>

@@ -2,7 +2,7 @@
 import {
   ArrowLeft, Calendar, MapPin, Phone,
   User, X, Send, FileText, Edit, MessageSquare,
-  Package, Palette, Loader2, Download,
+  Package, Palette, Loader2, 
   CheckCircle2, XCircle, AlertCircle,
   Sparkles, Layers, BookOpen, Clock, Image as ImageIcon,
   DollarSign, ChevronDown, ChevronUp
@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import type { BookingModel, BookingProperty, BookingCustomRequest } from '@/types/booking.types';
 import { getBookingType } from '@/types/booking.types';
 import {
@@ -25,7 +24,6 @@ import {
 export default function BookingDetail() {
   const {
     booking, isLoading, isConfirming, isRejecting, isReviewingRequest,
-    adminNotes, setAdminNotes,
     navigate,
     handleConfirmPayment, handleRejectPayment,
     handleReviewCustomRequest, handleDelete,
@@ -304,7 +302,7 @@ export default function BookingDetail() {
                     </div>
                     <Button variant="outline" className="w-full"
                       onClick={() => window.open(booking.payment_proof_full_url || booking.payment_proof_url, '_blank')}>
-                      <Download size={16} className="mr-2" /> Lihat Full Size
+                      Lihat Full Size
                     </Button>
 
                     {booking.bank_name && (
@@ -315,19 +313,6 @@ export default function BookingDetail() {
                           {booking.account_name && <p><span className="text-muted-foreground">Atas Nama:</span> {booking.account_name}</p>}
                           {booking.account_number && <p><span className="text-muted-foreground">No. Rekening:</span> {booking.account_number}</p>}
                         </div>
-                      </div>
-                    )}
-
-                    {showConfirmActions && (
-                      <div className="pt-3 border-t flex gap-2">
-                        <Button variant="outline" className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
-                          onClick={handleRejectPayment} disabled={isRejecting || isConfirming}>
-                          <XCircle size={16} className="mr-2" /> Tolak
-                        </Button>
-                        <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                          onClick={handleConfirmPayment} disabled={isConfirming || isRejecting}>
-                          <CheckCircle2 size={16} className="mr-2" /> Konfirmasi
-                        </Button>
                       </div>
                     )}
                   </CardContent>
@@ -516,46 +501,11 @@ export default function BookingDetail() {
               </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <FileText size={14} /> Catatan Admin
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Textarea
-                placeholder="Tambahkan catatan internal..."
-                className="min-h-[80px] text-sm bg-muted/30"
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-              />
-              <Button variant="outline" size="sm" className="w-full">
-                <Edit size={14} className="mr-2" /> Simpan Catatan
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6 space-y-2">
-              <Button variant="outline" className="w-full justify-start" size="sm"
-                onClick={() => window.open(`https://wa.me/${booking.customer_phone.replace(/^0/, '62')}`, '_blank')}>
-                <Send size={14} className="mr-2" /> Kirim via WhatsApp
-              </Button>
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <FileText size={14} className="mr-2" /> Export PDF
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
   );
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Sub-components
-// ─────────────────────────────────────────────────────────────────────────────
 
 function CustomRequestCard({
   request, statusConfig, isReviewing, onReview, formatCurrency, formatDateTime,
