@@ -108,8 +108,8 @@ function App() {
 
           {/* Bookings */}
           <Route path="/admin/bookings"          element={<Admin><Bookings /></Admin>} />
-          <Route path="/admin/bookings/:id"      element={<Admin><BookingDetail /></Admin>} />
           <Route path="/admin/bookings/edit/:id" element={<Admin><BookingEdit /></Admin>} />
+          <Route path="/admin/bookings/:id"      element={<Admin><BookingDetail /></Admin>} />
           <Route path="/admin/booking-links/new" element={<Admin><CreateBookingLink /></Admin>} />
 
           {/* Invoices */}

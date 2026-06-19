@@ -197,9 +197,9 @@ export function useBookingEdit() {
       return;
     }
 
-    // Kalau kombinasi: wajib ada model
-    if (hasCustomRequest && selectedModels.length === 0 && !hasCustomRequest) {
-      Swal.fire('Error', 'Pilih minimal 1 model dekorasi', 'error');
+    // Kalau kombinasi (punya custom request DAN model): wajib ada minimal 1 model
+    if (hasCustomRequest && selectedModels.length === 0) {
+      Swal.fire('Error', 'Booking kombinasi wajib memiliki minimal 1 model dekorasi', 'error');
       setActiveTab('models');
       return;
     }

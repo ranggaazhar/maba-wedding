@@ -174,7 +174,7 @@ export default function Reviews() {
           {pendingReviews.length > 0 && (
             <div className="flex items-center gap-2 px-3 py-2 bg-warning/10 rounded-lg">
               <div className="h-2 w-2 rounded-full bg-warning animate-pulse" />
-              <span className="text-sm font-medium text-warning">{pendingReviews.length} menunggu moderasi</span>
+              <span className="text-sm font-medium text-warning">{pendingReviews.length} menunggu status persetujuan</span>
             </div>
           )}
         </div>
@@ -185,8 +185,6 @@ export default function Reviews() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatCard title="Total Review" value={stats.total.toString()} icon={MessageSquare} />
           <StatCard title="Rating Rata-rata" value={`⭐ ${stats.averageRating}`} icon={Star} />
-          <StatCard title="Dipublikasikan" value={stats.published.toString()} icon={ThumbsUp} />
-          <StatCard title="Featured" value={stats.featured.toString()} icon={Award} />
         </div>
       )}
 

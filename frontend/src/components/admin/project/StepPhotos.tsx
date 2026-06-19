@@ -1,6 +1,6 @@
 // src/components/admin/project/StepPhotos.tsx
-import { useState, useEffect } from 'react';
-import { Upload, X, Star, Edit2, Trash2, Plus, Palette, Flower, MoreVertical } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Upload, X, Star, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,15 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { projectApi } from '@/api/projectApi';
 import type {
   CreateCompleteProjectData,
   ProjectPhoto,
   PhotoWithMetadata,
-  ProjectPhotoColor,
-  ProjectPhotoFlower,
 } from '@/types/project.types';
 import Swal from 'sweetalert2';
 
@@ -31,45 +28,30 @@ interface StepPhotosProps {
 type PhotoPosition = 'left' | 'right' | 'center';
 
 export function StepPhotos({ formData, updateFormData, existingPhotos, projectId, onRefresh }: StepPhotosProps) {
-  const [previews, setPreviews] = useState<string[]>([]);
   const [editingPhoto, setEditingPhoto] = useState<ProjectPhoto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newPhotoFile, setNewPhotoFile] = useState<File | null>(null);
-  const [editFormData, setEditFormData] = useState({ caption: '', position: 'center' as PhotoPosition, is_hero: false });
+  const [editFormData, setEditFormData] = useState({
+    caption: '',
+    position: 'center' as PhotoPosition,
+    is_hero: false,
+  });
 
-  const [newColorName, setNewColorName] = useState('');
-  const [newColorHex, setNewColorHex] = useState('');
-  const [newColorDesc, setNewColorDesc] = useState('');
-  const [newFlowerName, setNewFlowerName] = useState('');
-  const [newFlowerDesc, setNewFlowerDesc] = useState('');
-  const [editColors, setEditColors] = useState<ProjectPhotoColor[]>([]);
-  const [editFlowers, setEditFlowers] = useState<ProjectPhotoFlower[]>([]);
-
-  useEffect(() => {
-    const photos = formData.photos || [];
-    if (photos.length === 0) { setPreviews([]); return; }
-
-    const newPreviews: string[] = [];
-    let loadedCount = 0;
-    photos.forEach((photoData) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result as string);
-        loadedCount++;
-        if (loadedCount === photos.length) setPreviews([...newPreviews]);
-      };
-      reader.readAsDataURL(photoData.file);
-    });
-  }, [formData.photos]);
+  // Generate preview URLs langsung dari formData.photos — selalu sinkron
+  const previews = useMemo(
+    () => (formData.photos || []).map((p) => URL.createObjectURL(p.file)),
+    [formData.photos]
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
     const currentPhotos = formData.photos || [];
     const newPhotos: PhotoWithMetadata[] = files.map((file, index) => ({
-      file, caption: '', position: 'center' as const,
+      file,
+      caption: '',
+      position: 'center' as const,
       display_order: currentPhotos.length + index,
-      colors: [], flowers: [],
     }));
     updateFormData({ photos: [...currentPhotos, ...newPhotos] });
   };
@@ -91,65 +73,15 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
     updateFormData({ photos: newPhotos });
   };
 
-  const addColorToNewPhoto = (photoIndex: number) => {
-    if (!newColorName.trim()) return;
-    const colors = formData.photos![photoIndex].colors || [];
-    updatePhotoMetadata(photoIndex, {
-      colors: [...colors, { color_name: newColorName.trim(), color_hex: newColorHex || undefined, description: newColorDesc || undefined, display_order: colors.length }],
-    });
-    setNewColorName(''); setNewColorHex(''); setNewColorDesc('');
-  };
-
-  const removeColorFromNewPhoto = (photoIndex: number, colorIndex: number) => {
-    const colors = [...(formData.photos![photoIndex].colors || [])];
-    colors.splice(colorIndex, 1);
-    updatePhotoMetadata(photoIndex, { colors: colors.map((c, i) => ({ ...c, display_order: i })) });
-  };
-
-  const addFlowerToNewPhoto = (photoIndex: number) => {
-    if (!newFlowerName.trim()) return;
-    const flowers = formData.photos![photoIndex].flowers || [];
-    updatePhotoMetadata(photoIndex, {
-      flowers: [...flowers, { flower_name: newFlowerName.trim(), description: newFlowerDesc || undefined, display_order: flowers.length }],
-    });
-    setNewFlowerName(''); setNewFlowerDesc('');
-  };
-
-  const removeFlowerFromNewPhoto = (photoIndex: number, flowerIndex: number) => {
-    const flowers = [...(formData.photos![photoIndex].flowers || [])];
-    flowers.splice(flowerIndex, 1);
-    updatePhotoMetadata(photoIndex, { flowers: flowers.map((f, i) => ({ ...f, display_order: i })) });
-  };
-
   const openEditDialog = (photo: ProjectPhoto) => {
     setEditingPhoto(photo);
-    setEditFormData({ caption: photo.caption || '', position: photo.position as PhotoPosition, is_hero: photo.is_hero });
-    setEditColors(photo.colors ? [...photo.colors] : []);
-    setEditFlowers(photo.flowers ? [...photo.flowers] : []);
+    setEditFormData({
+      caption: photo.caption || '',
+      position: photo.position as PhotoPosition,
+      is_hero: photo.is_hero,
+    });
     setNewPhotoFile(null);
-    setNewColorName(''); setNewColorHex(''); setNewColorDesc('');
-    setNewFlowerName(''); setNewFlowerDesc('');
     setEditDialogOpen(true);
-  };
-
-  const addColorToEdit = () => {
-    if (!newColorName.trim()) return;
-    setEditColors(prev => [...prev, { color_name: newColorName.trim(), color_hex: newColorHex || undefined, description: newColorDesc || undefined, display_order: prev.length }]);
-    setNewColorName(''); setNewColorHex(''); setNewColorDesc('');
-  };
-
-  const removeColorFromEdit = (index: number) => {
-    setEditColors(prev => prev.filter((_, i) => i !== index).map((c, i) => ({ ...c, display_order: i })));
-  };
-
-  const addFlowerToEdit = () => {
-    if (!newFlowerName.trim()) return;
-    setEditFlowers(prev => [...prev, { flower_name: newFlowerName.trim(), description: newFlowerDesc || undefined, display_order: prev.length }]);
-    setNewFlowerName(''); setNewFlowerDesc('');
-  };
-
-  const removeFlowerFromEdit = (index: number) => {
-    setEditFlowers(prev => prev.filter((_, i) => i !== index).map((f, i) => ({ ...f, display_order: i })));
   };
 
   const handleSaveEdit = async () => {
@@ -162,8 +94,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
         caption: editFormData.caption,
         position: editFormData.position,
         is_hero: editFormData.is_hero,
-        colors: editColors,
-        flowers: editFlowers,
         file: newPhotoFile ?? undefined,
       });
       if (result.success) {
@@ -205,7 +135,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
       <div className="table-container p-6">
         <h2 className="text-lg font-semibold text-foreground mb-1">Pengaturan Foto Project</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Upload foto, lalu tambahkan informasi warna dan bunga untuk setiap foto.
+          Upload foto dan atur tampilan untuk setiap foto project.
         </p>
 
         <div className="space-y-6">
@@ -223,20 +153,6 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                       <div className="aspect-square">
                         <img src={photo.url} alt={photo.caption || 'Existing'} className="w-full h-full object-cover" />
                       </div>
-                      {((photo.colors?.length ?? 0) > 0 || (photo.flowers?.length ?? 0) > 0) && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1.5 flex gap-1 flex-wrap">
-                          {(photo.colors?.length ?? 0) > 0 && (
-                            <Badge className="text-[9px] bg-purple-500 border-none py-0">
-                              <Palette size={8} className="mr-1" />{photo.colors!.length} warna
-                            </Badge>
-                          )}
-                          {(photo.flowers?.length ?? 0) > 0 && (
-                            <Badge className="text-[9px] bg-pink-500 border-none py-0">
-                              <Flower size={8} className="mr-1" />{photo.flowers!.length} bunga
-                            </Badge>
-                          )}
-                        </div>
-                      )}
                       {isHero && (
                         <Badge className="absolute top-2 left-2 bg-amber-500 text-white text-[10px]">
                           <Star size={9} className="mr-1 fill-current" />Hero
@@ -245,7 +161,10 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                       <div className="absolute top-2 right-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button type="button" className="w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-colors">
+                            <button
+                              type="button"
+                              className="w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                            >
                               <MoreVertical size={14} />
                             </button>
                           </DropdownMenuTrigger>
@@ -257,7 +176,10 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                             <DropdownMenuItem onClick={() => openEditDialog(photo)} className="gap-2 cursor-pointer">
                               <Edit2 size={13} /> Edit Foto
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteExistingPhoto(photo.id)} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteExistingPhoto(photo.id)}
+                              className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                            >
                               <Trash2 size={13} /> Hapus Foto
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -298,18 +220,29 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                       <div className="flex gap-4">
                         <div className="relative w-32 h-32 shrink-0 rounded-lg overflow-hidden border-2 border-blue-200">
                           <img src={preview} alt="New" className="w-full h-full object-cover" />
-                          {isHero && <Badge className="absolute top-1 right-1 bg-amber-500 text-white text-[9px]">Hero</Badge>}
+                          {isHero && (
+                            <Badge className="absolute top-1 right-1 bg-amber-500 text-white text-[9px]">Hero</Badge>
+                          )}
                         </div>
 
                         <div className="flex-1 space-y-2">
                           <div>
                             <Label className="text-xs">Caption</Label>
-                            <Textarea value={photoData.caption} onChange={(e) => updatePhotoMetadata(index, { caption: e.target.value })} placeholder="Deskripsi foto..." rows={2} className="text-sm" />
+                            <Textarea
+                              value={photoData.caption}
+                              onChange={(e) => updatePhotoMetadata(index, { caption: e.target.value })}
+                              placeholder="Deskripsi foto..."
+                              rows={2}
+                              className="text-sm"
+                            />
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <Label className="text-xs">Position</Label>
-                              <Select value={photoData.position} onValueChange={(value: PhotoPosition) => updatePhotoMetadata(index, { position: value })}>
+                              <Select
+                                value={photoData.position}
+                                onValueChange={(value: PhotoPosition) => updatePhotoMetadata(index, { position: value })}
+                              >
                                 <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="left">Left</SelectItem>
@@ -320,102 +253,37 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
                             </div>
                             <div>
                               <Label className="text-xs">Display Order</Label>
-                              <Input type="number" value={photoData.display_order} onChange={(e) => updatePhotoMetadata(index, { display_order: parseInt(e.target.value) || 0 })} className="h-9 text-sm" />
+                              <Input
+                                type="number"
+                                value={photoData.display_order}
+                                onChange={(e) => updatePhotoMetadata(index, { display_order: parseInt(e.target.value) || 0 })}
+                                className="h-9 text-sm"
+                              />
                             </div>
                           </div>
                         </div>
 
                         <div className="flex flex-col gap-1 shrink-0">
-                          <Button size="sm" variant={isHero ? 'default' : 'outline'} className={isHero ? 'h-8 bg-amber-500 hover:bg-amber-600' : 'h-8'} onClick={() => setHeroPhoto(actualIndex)} type="button">
+                          <Button
+                            size="sm"
+                            variant={isHero ? 'default' : 'outline'}
+                            className={isHero ? 'h-8 bg-amber-500 hover:bg-amber-600' : 'h-8'}
+                            onClick={() => setHeroPhoto(actualIndex)}
+                            type="button"
+                          >
                             <Star size={12} className={isHero ? 'fill-current' : ''} />
                           </Button>
-                          <Button size="sm" variant="destructive" className="h-8" onClick={() => removeNewPhoto(index)} type="button">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-8"
+                            onClick={() => removeNewPhoto(index)}
+                            type="button"
+                          >
                             <X size={12} />
                           </Button>
                         </div>
                       </div>
-
-                      <Accordion type="multiple" className="border rounded-lg overflow-hidden">
-                        {/* Warna */}
-                        <AccordionItem value="colors" className="border-b last:border-0">
-                          <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
-                            <span className="flex items-center gap-2">
-                              <Palette size={14} className="text-purple-500" />
-                              Warna <Badge variant="secondary" className="ml-1 text-[10px]">{photoData.colors?.length || 0}</Badge>
-                            </span>
-                          </AccordionTrigger>
-                          <AccordionContent className="px-4 pb-4 space-y-3">
-                            {photoData.colors && photoData.colors.length > 0 && (
-                              <div className="space-y-2">
-                                {photoData.colors.map((color, colorIdx) => (
-                                  <div key={colorIdx} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                                    {color.color_hex && <div className="w-6 h-6 rounded-full border shrink-0" style={{ backgroundColor: color.color_hex }} />}
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium truncate">{color.color_name}</p>
-                                      {color.description && <p className="text-xs text-muted-foreground truncate">{color.description}</p>}
-                                    </div>
-                                    <button type="button" onClick={() => removeColorFromNewPhoto(index, colorIdx)} className="text-muted-foreground hover:text-destructive shrink-0">
-                                      <X size={14} />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <div className="space-y-2 pt-1">
-                              <div className="grid grid-cols-2 gap-2">
-                                <Input value={newColorName} onChange={(e) => setNewColorName(e.target.value)} placeholder="Nama warna *" className="text-sm h-9" />
-                                <div className="flex gap-2">
-                                  <input type="color" value={newColorHex || '#000000'} onChange={(e) => setNewColorHex(e.target.value)} className="h-9 w-12 rounded border cursor-pointer" />
-                                  <Input value={newColorHex} onChange={(e) => setNewColorHex(e.target.value)} placeholder="#HEX" className="text-sm h-9 flex-1" />
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <Input value={newColorDesc} onChange={(e) => setNewColorDesc(e.target.value)} placeholder="Deskripsi singkat (opsional)" className="text-sm h-9 flex-1" />
-                                <Button size="sm" type="button" onClick={() => addColorToNewPhoto(index)} className="h-9 bg-purple-500 hover:bg-purple-600 text-white shrink-0">
-                                  <Plus size={14} className="mr-1" /> Tambah
-                                </Button>
-                              </div>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-
-                        {/* Bunga */}
-                        <AccordionItem value="flowers">
-                          <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
-                            <span className="flex items-center gap-2">
-                              <Flower size={14} className="text-pink-500" />
-                              Bunga <Badge variant="secondary" className="ml-1 text-[10px]">{photoData.flowers?.length || 0}</Badge>
-                            </span>
-                          </AccordionTrigger>
-                          <AccordionContent className="px-4 pb-4 space-y-3">
-                            {photoData.flowers && photoData.flowers.length > 0 && (
-                              <div className="space-y-2">
-                                {photoData.flowers.map((flower, flowerIdx) => (
-                                  <div key={flowerIdx} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                                    <span className="text-pink-500 shrink-0">🌸</span>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium truncate">{flower.flower_name}</p>
-                                      {flower.description && <p className="text-xs text-muted-foreground truncate">{flower.description}</p>}
-                                    </div>
-                                    <button type="button" onClick={() => removeFlowerFromNewPhoto(index, flowerIdx)} className="text-muted-foreground hover:text-destructive shrink-0">
-                                      <X size={14} />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <div className="space-y-2 pt-1">
-                              <Input value={newFlowerName} onChange={(e) => setNewFlowerName(e.target.value)} placeholder="Nama bunga *" className="text-sm h-9" />
-                              <div className="flex gap-2">
-                                <Input value={newFlowerDesc} onChange={(e) => setNewFlowerDesc(e.target.value)} placeholder="Deskripsi singkat (opsional)" className="text-sm h-9 flex-1" />
-                                <Button size="sm" type="button" onClick={() => addFlowerToNewPhoto(index)} className="h-9 bg-pink-500 hover:bg-pink-600 text-white shrink-0">
-                                  <Plus size={14} className="mr-1" /> Tambah
-                                </Button>
-                              </div>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
                     </div>
                   );
                 })}
@@ -427,7 +295,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Foto</DialogTitle>
           </DialogHeader>
@@ -446,11 +314,19 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium">Ganti Foto (Opsional)</Label>
-                <Input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) setNewPhotoFile(f); }} className="mt-1.5" />
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) setNewPhotoFile(f); }}
+                  className="mt-1.5"
+                />
               </div>
               <div>
                 <Label className="text-sm font-medium">Posisi Tampilan</Label>
-                <Select value={editFormData.position} onValueChange={(value: PhotoPosition) => setEditFormData({ ...editFormData, position: value })}>
+                <Select
+                  value={editFormData.position}
+                  onValueChange={(value: PhotoPosition) => setEditFormData({ ...editFormData, position: value })}
+                >
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="left">Left</SelectItem>
@@ -461,86 +337,16 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, projectId
               </div>
               <div>
                 <Label className="text-sm font-medium">Caption</Label>
-                <Textarea value={editFormData.caption} onChange={(e) => setEditFormData({ ...editFormData, caption: e.target.value })} placeholder="Keterangan foto..." rows={3} className="mt-1.5 resize-none" />
+                <Textarea
+                  value={editFormData.caption}
+                  onChange={(e) => setEditFormData({ ...editFormData, caption: e.target.value })}
+                  placeholder="Keterangan foto..."
+                  rows={3}
+                  className="mt-1.5 resize-none"
+                />
               </div>
             </div>
           </div>
-
-          <Accordion type="multiple" className="border rounded-lg overflow-hidden mt-2">
-            <AccordionItem value="colors" className="border-b">
-              <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
-                <span className="flex items-center gap-2">
-                  <Palette size={14} className="text-purple-500" /> Warna
-                  <Badge variant="secondary" className="ml-1 text-[10px]">{editColors.length}</Badge>
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-3">
-                {editColors.length > 0 && (
-                  <div className="space-y-2">
-                    {editColors.map((color, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                        {color.color_hex && <div className="w-6 h-6 rounded-full border shrink-0" style={{ backgroundColor: color.color_hex }} />}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">{color.color_name}</p>
-                          {color.description && <p className="text-xs text-muted-foreground">{color.description}</p>}
-                        </div>
-                        <button type="button" onClick={() => removeColorFromEdit(i)} className="text-muted-foreground hover:text-destructive"><X size={14} /></button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input value={newColorName} onChange={(e) => setNewColorName(e.target.value)} placeholder="Nama warna *" className="text-sm h-9" />
-                    <div className="flex gap-2">
-                      <input type="color" value={newColorHex || '#000000'} onChange={(e) => setNewColorHex(e.target.value)} className="h-9 w-12 rounded border cursor-pointer" />
-                      <Input value={newColorHex} onChange={(e) => setNewColorHex(e.target.value)} placeholder="#HEX" className="text-sm h-9 flex-1" />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input value={newColorDesc} onChange={(e) => setNewColorDesc(e.target.value)} placeholder="Deskripsi (opsional)" className="text-sm h-9 flex-1" />
-                    <Button size="sm" type="button" onClick={addColorToEdit} className="h-9 bg-purple-500 hover:bg-purple-600 text-white shrink-0">
-                      <Plus size={14} className="mr-1" /> Tambah
-                    </Button>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="flowers">
-              <AccordionTrigger className="px-4 py-2 text-sm font-medium hover:no-underline">
-                <span className="flex items-center gap-2">
-                  <Flower size={14} className="text-pink-500" /> Bunga
-                  <Badge variant="secondary" className="ml-1 text-[10px]">{editFlowers.length}</Badge>
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-3">
-                {editFlowers.length > 0 && (
-                  <div className="space-y-2">
-                    {editFlowers.map((flower, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                        <span className="shrink-0">🌸</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">{flower.flower_name}</p>
-                          {flower.description && <p className="text-xs text-muted-foreground">{flower.description}</p>}
-                        </div>
-                        <button type="button" onClick={() => removeFlowerFromEdit(i)} className="text-muted-foreground hover:text-destructive"><X size={14} /></button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Input value={newFlowerName} onChange={(e) => setNewFlowerName(e.target.value)} placeholder="Nama bunga *" className="text-sm h-9" />
-                  <div className="flex gap-2">
-                    <Input value={newFlowerDesc} onChange={(e) => setNewFlowerDesc(e.target.value)} placeholder="Deskripsi (opsional)" className="text-sm h-9 flex-1" />
-                    <Button size="sm" type="button" onClick={addFlowerToEdit} className="h-9 bg-pink-500 hover:bg-pink-600 text-white shrink-0">
-                      <Plus size={14} className="mr-1" /> Tambah
-                    </Button>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
 
           <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} type="button">Batal</Button>

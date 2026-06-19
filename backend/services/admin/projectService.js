@@ -2,8 +2,6 @@ const {
   Project, 
   Category, 
   ProjectPhoto,
-  ProjectPhotoColor,
-  ProjectPhotoFlower,
   ProjectInclude, 
   Admin 
 } = require('../../models');
@@ -38,7 +36,7 @@ class ProjectService {
 
       console.log('✅ Project created:', project.id);
 
-      // 2. Create Photos with Colors & Flowers
+      // 2. Create Photos
       if (files && files.length > 0) {
         try {
           const photosMetadata = data.photos_metadata || [];
@@ -48,7 +46,7 @@ class ProjectService {
             const file = files[index];
             const metadata = photosMetadata[index] || {};
 
-            const photo = await ProjectPhoto.create({
+            await ProjectPhoto.create({
               project_id: project.id,
               url: file.path.replace(/\\/g, '/'),
               caption: metadata.caption || null,
@@ -56,32 +54,9 @@ class ProjectService {
               display_order: metadata.display_order !== undefined ? metadata.display_order : index,
               is_hero: index === (parseInt(data.hero_photo_index) || 0)
             }, { transaction });
-
-            // Create colors untuk foto ini
-            if (metadata.colors && metadata.colors.length > 0) {
-              const colorsData = metadata.colors.map((color, i) => ({
-                photo_id: photo.id,
-                color_name: color.color_name,
-                color_hex: color.color_hex || null,
-                description: color.description || null,
-                display_order: color.display_order !== undefined ? color.display_order : i
-              }));
-              await ProjectPhotoColor.bulkCreate(colorsData, { transaction });
-            }
-
-            // Create flowers untuk foto ini
-            if (metadata.flowers && metadata.flowers.length > 0) {
-              const flowersData = metadata.flowers.map((flower, i) => ({
-                photo_id: photo.id,
-                flower_name: flower.flower_name,
-                description: flower.description || null,
-                display_order: flower.display_order !== undefined ? flower.display_order : i
-              }));
-              await ProjectPhotoFlower.bulkCreate(flowersData, { transaction });
-            }
           }
 
-          console.log('✅ Photos with colors & flowers created');
+          console.log('✅ Photos created');
         } catch (photoError) {
           console.error('❌ Photo error:', photoError);
           throw new Error(`Failed to create photos: ${photoError.message}`);
@@ -148,7 +123,7 @@ class ProjectService {
         is_published: data.is_published !== undefined ? data.is_published : project.is_published
       }, { transaction });
 
-      // 2. Add new photos with colors & flowers
+      // 2. Add new photos
       if (newFiles && newFiles.length > 0) {
         const photosMetadata = data.photos_metadata 
           ? (typeof data.photos_metadata === 'string' ? JSON.parse(data.photos_metadata) : data.photos_metadata) 
@@ -158,7 +133,7 @@ class ProjectService {
           const file = newFiles[index];
           const metadata = photosMetadata[index] || {};
 
-          const photo = await ProjectPhoto.create({
+          await ProjectPhoto.create({
             project_id: project.id,
             url: file.path.replace(/\\/g, '/'),
             caption: metadata.caption || null,
@@ -166,27 +141,6 @@ class ProjectService {
             display_order: metadata.display_order !== undefined ? metadata.display_order : index,
             is_hero: false
           }, { transaction });
-
-          if (metadata.colors && metadata.colors.length > 0) {
-            const colorsData = metadata.colors.map((color, i) => ({
-              photo_id: photo.id,
-              color_name: color.color_name,
-              color_hex: color.color_hex || null,
-              description: color.description || null,
-              display_order: color.display_order !== undefined ? color.display_order : i
-            }));
-            await ProjectPhotoColor.bulkCreate(colorsData, { transaction });
-          }
-
-          if (metadata.flowers && metadata.flowers.length > 0) {
-            const flowersData = metadata.flowers.map((flower, i) => ({
-              photo_id: photo.id,
-              flower_name: flower.flower_name,
-              description: flower.description || null,
-              display_order: flower.display_order !== undefined ? flower.display_order : i
-            }));
-            await ProjectPhotoFlower.bulkCreate(flowersData, { transaction });
-          }
         }
       }
 
@@ -206,35 +160,6 @@ class ProjectService {
             where: { id: photoUpdate.id, project_id: id },
             transaction
           });
-
-          // Update colors foto yang sudah ada (replace semua)
-          if (photoUpdate.colors !== undefined) {
-            await ProjectPhotoColor.destroy({ where: { photo_id: photoUpdate.id }, transaction });
-            if (photoUpdate.colors.length > 0) {
-              const colorsData = photoUpdate.colors.map((color, i) => ({
-                photo_id: photoUpdate.id,
-                color_name: color.color_name,
-                color_hex: color.color_hex || null,
-                description: color.description || null,
-                display_order: color.display_order !== undefined ? color.display_order : i
-              }));
-              await ProjectPhotoColor.bulkCreate(colorsData, { transaction });
-            }
-          }
-
-          // Update flowers foto yang sudah ada (replace semua)
-          if (photoUpdate.flowers !== undefined) {
-            await ProjectPhotoFlower.destroy({ where: { photo_id: photoUpdate.id }, transaction });
-            if (photoUpdate.flowers.length > 0) {
-              const flowersData = photoUpdate.flowers.map((flower, i) => ({
-                photo_id: photoUpdate.id,
-                flower_name: flower.flower_name,
-                description: flower.description || null,
-                display_order: flower.display_order !== undefined ? flower.display_order : i
-              }));
-              await ProjectPhotoFlower.bulkCreate(flowersData, { transaction });
-            }
-          }
         }
       }
 
@@ -261,16 +186,14 @@ class ProjectService {
           transaction
         });
 
-        // Colors & flowers terhapus otomatis via CASCADE
         await ProjectPhoto.destroy({ where: { id: deleteIds, project_id: id }, transaction });
 
-        // Hapus file fisik setelah commit
         for (const photo of photosToDelete) {
           await FileHelper.deleteFile(photo.url);
         }
       }
 
-      // 6. Update includes (replace semua)
+      // 6. Update includes (replace all)
       if (data.includes !== undefined) {
         const includes = typeof data.includes === 'string' ? JSON.parse(data.includes) : data.includes;
         await ProjectInclude.destroy({ where: { project_id: id }, transaction });
@@ -314,14 +237,12 @@ class ProjectService {
         transaction
       });
 
-      // Colors & flowers terhapus otomatis via CASCADE ketika photos dihapus
       await ProjectInclude.destroy({ where: { project_id: id }, transaction });
       await ProjectPhoto.destroy({ where: { project_id: id }, transaction });
       await project.destroy({ transaction });
 
       await transaction.commit();
 
-      // Hapus file fisik setelah commit
       for (const photo of photos) {
         await FileHelper.deleteFile(photo.url);
       }
@@ -346,19 +267,7 @@ class ProjectService {
           model: ProjectPhoto, 
           as: 'photos',
           separate: true,
-          order: [['display_order', 'ASC'], ['created_at', 'ASC']],
-          include: [
-            { 
-              model: ProjectPhotoColor, 
-              as: 'colors',
-              order: [['display_order', 'ASC']]
-            },
-            { 
-              model: ProjectPhotoFlower, 
-              as: 'flowers',
-              order: [['display_order', 'ASC']]
-            }
-          ]
+          order: [['display_order', 'ASC'], ['created_at', 'ASC']]
         },
         { 
           model: ProjectInclude, 
@@ -404,11 +313,7 @@ class ProjectService {
           model: ProjectPhoto, 
           as: 'photos', 
           separate: true, 
-          order: [['display_order', 'ASC']],
-          include: [
-            { model: ProjectPhotoColor, as: 'colors', order: [['display_order', 'ASC']] },
-            { model: ProjectPhotoFlower, as: 'flowers', order: [['display_order', 'ASC']] }
-          ]
+          order: [['display_order', 'ASC']]
         },
         { model: ProjectInclude, as: 'includes', separate: true, order: [['display_order', 'ASC']] }
       ]
@@ -455,11 +360,7 @@ class ProjectService {
         model: ProjectPhoto, 
         as: 'photos', 
         separate: true, 
-        order: [['display_order', 'ASC']],
-        include: [
-          { model: ProjectPhotoColor, as: 'colors', order: [['display_order', 'ASC']] },
-          { model: ProjectPhotoFlower, as: 'flowers', order: [['display_order', 'ASC']] }
-        ]
+        order: [['display_order', 'ASC']]
       });
     }
     
@@ -481,13 +382,12 @@ class ProjectService {
     });
   }
 
-  async updateProjectPhoto(photoId, { caption, position, is_hero, colors, flowers, file }) {
+  async updateProjectPhoto(photoId, { caption, position, is_hero, file }) {
     const transaction = await sequelize.transaction();
     try {
       const photo = await ProjectPhoto.findByPk(photoId);
       if (!photo) throw new Error('Photo not found');
 
-      // Ganti file jika ada upload baru
       let newUrl = photo.url;
       if (file) {
         if (photo.url) await FileHelper.deleteFile(photo.url).catch(() => {});
@@ -501,50 +401,9 @@ class ProjectService {
         url: newUrl
       }, { transaction });
 
-      // Replace colors jika dikirim
-      if (colors !== undefined) {
-        let parsed = typeof colors === 'string' ? JSON.parse(colors) : colors;
-        await ProjectPhotoColor.destroy({ where: { photo_id: photoId }, transaction });
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          await ProjectPhotoColor.bulkCreate(
-            parsed.map((c, i) => ({
-              photo_id: photoId,
-              color_name: c.color_name,
-              color_hex: c.color_hex || null,
-              description: c.description || null,
-              display_order: c.display_order ?? i
-            })),
-            { transaction }
-          );
-        }
-      }
-
-      // Replace flowers jika dikirim
-      if (flowers !== undefined) {
-        let parsed = typeof flowers === 'string' ? JSON.parse(flowers) : flowers;
-        await ProjectPhotoFlower.destroy({ where: { photo_id: photoId }, transaction });
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          await ProjectPhotoFlower.bulkCreate(
-            parsed.map((f, i) => ({
-              photo_id: photoId,
-              flower_name: f.flower_name,
-              description: f.description || null,
-              display_order: f.display_order ?? i
-            })),
-            { transaction }
-          );
-        }
-      }
-
       await transaction.commit();
 
-      // Kembalikan data terbaru lengkap
-      return await ProjectPhoto.findByPk(photoId, {
-        include: [
-          { model: ProjectPhotoColor, as: 'colors', order: [['display_order', 'ASC']] },
-          { model: ProjectPhotoFlower, as: 'flowers', order: [['display_order', 'ASC']] }
-        ]
-      });
+      return await ProjectPhoto.findByPk(photoId);
     } catch (error) {
       await transaction.rollback();
       throw error;
@@ -556,7 +415,7 @@ class ProjectService {
     if (!photo) throw new Error('Photo not found');
 
     if (photo.url) await FileHelper.deleteFile(photo.url).catch(() => {});
-    await photo.destroy(); // colors & flowers auto-cascade
+    await photo.destroy();
   }
 
   async toggleProjectStatus(id, field = 'is_published') {
@@ -575,11 +434,7 @@ class ProjectService {
           as: 'photos', 
           where: { is_hero: true }, 
           required: false, 
-          limit: 1,
-          include: [
-            { model: ProjectPhotoColor, as: 'colors' },
-            { model: ProjectPhotoFlower, as: 'flowers' }
-          ]
+          limit: 1
         }
       ],
       order: [['created_at', 'DESC']],

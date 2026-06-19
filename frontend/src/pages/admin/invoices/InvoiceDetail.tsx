@@ -114,7 +114,7 @@ export default function InvoiceDetail() {
               className="h-12 w-12 object-contain"
             />
                 </div>
-                  <span className="font-bold text-foreground tracking-tight text-lg">MABA WEEDING DEKOR</span>
+                  <span className="font-bold text-foreground tracking-tight text-lg">MABA WEDDING DEKOR</span>
                 </div>
                 <p className="text-sm text-muted-foreground">Kulon Progo, Yogyakarta</p>
                 <p className="text-sm text-muted-foreground">WA: 081215061622</p>

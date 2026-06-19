@@ -106,7 +106,6 @@ const projectSlugValidation = [
     .notEmpty().withMessage('Slug is required')
 ];
 
-// Validation for nested resources
 const createProjectPhotoValidation = [
   param('projectId')
     .isInt({ min: 1 }).withMessage('Invalid project ID'),
@@ -131,38 +130,6 @@ const createProjectPhotoValidation = [
   body('is_hero')
     .optional()
     .isBoolean().withMessage('is_hero must be a boolean')
-];
-
-const createProjectDetailValidation = [
-  param('projectId')
-    .isInt({ min: 1 }).withMessage('Invalid project ID'),
-  
-  body('detail_type')
-    .optional()
-    .isIn(['color_palette', 'flowers', 'other']).withMessage('Invalid detail type'),
-  
-  body('title')
-    .trim()
-    .notEmpty().withMessage('Title is required')
-    .isLength({ max: 200 }).withMessage('Title must not exceed 200 characters'),
-  
-  body('display_order')
-    .optional()
-    .isInt({ min: 0 }).withMessage('Display order must be a positive integer'),
-  
-  body('items')
-    .optional()
-    .isArray().withMessage('Items must be an array'),
-  
-  body('items.*.content')
-    .if(body('items').exists())
-    .trim()
-    .notEmpty().withMessage('Item content is required'),
-  
-  body('items.*.display_order')
-    .if(body('items').exists())
-    .optional()
-    .isInt({ min: 0 }).withMessage('Item display order must be a positive integer')
 ];
 
 const createProjectIncludeValidation = [
@@ -210,7 +177,6 @@ module.exports = {
   projectIdValidation,
   projectSlugValidation,
   createProjectPhotoValidation,
-  createProjectDetailValidation,
   createProjectIncludeValidation,
   createProjectMoodValidation,
   validate

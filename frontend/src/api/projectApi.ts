@@ -5,8 +5,6 @@ import type {
   Project,
   ProjectPhoto,
   CreateCompleteProjectData,
-  ProjectPhotoColor,
-  ProjectPhotoFlower,
 } from '@/types/project.types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -41,7 +39,11 @@ class ProjectApi {
     if (data.photos?.length > 0) {
       data.photos.forEach((p) => formData.append('photos', p.file));
       formData.append('photos_metadata', JSON.stringify(
-        data.photos.map(p => ({ caption: p.caption, position: p.position, display_order: p.display_order, colors: p.colors || [], flowers: p.flowers || [] }))
+        data.photos.map(p => ({
+          caption: p.caption,
+          position: p.position,
+          display_order: p.display_order,
+        }))
       ));
       formData.append('hero_photo_index', String(data.hero_photo_index));
     }
@@ -73,7 +75,11 @@ class ProjectApi {
     if (data.photos?.length) {
       data.photos.forEach((p) => formData.append('photos', p.file));
       formData.append('photos_metadata', JSON.stringify(
-        data.photos.map(p => ({ caption: p.caption, position: p.position, display_order: p.display_order, colors: p.colors || [], flowers: p.flowers || [] }))
+        data.photos.map(p => ({
+          caption: p.caption,
+          position: p.position,
+          display_order: p.display_order,
+        }))
       ));
     }
 
@@ -132,14 +138,17 @@ class ProjectApi {
   async updateProjectPhoto(
     projectId: number,
     photoId: number,
-    data: { caption?: string; position?: 'left' | 'right' | 'center'; is_hero?: boolean; colors?: ProjectPhotoColor[]; flowers?: ProjectPhotoFlower[]; file?: File | null; }
+    data: {
+      caption?: string;
+      position?: 'left' | 'right' | 'center';
+      is_hero?: boolean;
+      file?: File | null;
+    }
   ): Promise<ApiResponse<ProjectPhoto>> {
     const formData = new FormData();
     if (data.caption !== undefined) formData.append('caption', data.caption);
     if (data.position !== undefined) formData.append('position', data.position);
     if (data.is_hero !== undefined) formData.append('is_hero', String(data.is_hero));
-    if (data.colors !== undefined) formData.append('colors', JSON.stringify(data.colors));
-    if (data.flowers !== undefined) formData.append('flowers', JSON.stringify(data.flowers));
     if (data.file) formData.append('photo', data.file);
 
     const response = await axios.put(`${API_URL}/projects/${projectId}/photos/${photoId}`, formData, this.getMultipartHeaders());

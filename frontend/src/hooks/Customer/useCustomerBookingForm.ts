@@ -68,9 +68,9 @@ export function useCustomerBookingForm() {
   const dpAmount = totalEstimate > 0 ? Math.ceil(totalEstimate * 0.1) : 0;
 
   const totalSteps = !bookingMode ? 99 
-    : bookingMode === 'catalog'     ? 5 
-    : bookingMode === 'custom'      ? 4  
-    : 6;                                
+    : bookingMode === 'catalog'     ? 4  // CATALOG_STEPS has 4 steps
+    : bookingMode === 'custom'      ? 3  // CUSTOM_STEPS has 3 steps
+    : 5;                                 // COMBINATION_STEPS has 5 steps
   useEffect(() => {
     const validateLink = async () => {
       if (!token) {

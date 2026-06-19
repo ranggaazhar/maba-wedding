@@ -26,11 +26,11 @@ router.patch('/:id/mark-paid',            authMiddleware, invoiceIdValidation, v
 router.patch('/:id/mark-overdue',         authMiddleware, invoiceIdValidation, validate, invoiceController.markAsOverdue);
 router.post('/:id/send-whatsapp',         authMiddleware, invoiceIdValidation, validate, invoiceController.sendInvoiceWhatsapp);
 
-// Invoice Items
-router.get('/:invoiceId/items',                  authMiddleware, invoiceController.getItemsByInvoice);
+// Invoice Items — static sub-paths MUST come before dynamic /:invoiceId/items
 router.get('/:invoiceId/items/calculate-total',  authMiddleware, invoiceController.calculateItemsTotal);
-router.post('/:invoiceId/items',                 authMiddleware, createInvoiceItemValidation, validate, invoiceController.createItem);
 router.post('/:invoiceId/items/bulk',            authMiddleware, invoiceController.bulkCreateItems);
 router.post('/:invoiceId/items/reorder',         authMiddleware, invoiceController.reorderItems);
+router.get('/:invoiceId/items',                  authMiddleware, invoiceController.getItemsByInvoice);
+router.post('/:invoiceId/items',                 authMiddleware, createInvoiceItemValidation, validate, invoiceController.createItem);
 
-module.exports = router;
+module.exports = router;

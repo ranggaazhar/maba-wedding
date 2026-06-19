@@ -9,16 +9,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'project_id',
         as: 'project'
       });
-
-      ProjectPhoto.hasMany(models.ProjectPhotoColor, {
-        foreignKey: 'photo_id',
-        as: 'colors'
-      });
-
-      ProjectPhoto.hasMany(models.ProjectPhotoFlower, {
-        foreignKey: 'photo_id',
-        as: 'flowers'
-      });
     }
   }
 

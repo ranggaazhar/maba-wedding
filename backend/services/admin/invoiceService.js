@@ -409,9 +409,9 @@ class InvoiceService {
     const item = await this.getItemById(id);
 
     const updateData = { ...data };
-    if (data.quantity || data.unit_price) {
-      const quantity  = data.quantity  || item.quantity;
-      const unitPrice = data.unit_price || item.unit_price;
+    if (data.quantity !== undefined || data.unit_price !== undefined) {
+      const quantity  = data.quantity  !== undefined ? data.quantity  : item.quantity;
+      const unitPrice = data.unit_price !== undefined ? data.unit_price : item.unit_price;
       updateData.subtotal = parseFloat(unitPrice) * parseInt(quantity);
     }
 

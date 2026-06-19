@@ -232,14 +232,12 @@ class ProjectController {
   async updatePhoto(req, res) {
     try {
       const { photoId } = req.params;
-      const { caption, position, is_hero, colors, flowers } = req.body;
+      const { caption, position, is_hero } = req.body;
 
       const photo = await projectService.updateProjectPhoto(photoId, {
         caption,
         position,
         is_hero,
-        colors,
-        flowers,
         file: req.file || null
       });
 

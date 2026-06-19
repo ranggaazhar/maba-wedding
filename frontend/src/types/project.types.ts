@@ -1,20 +1,5 @@
 // src/types/project.types.ts
 
-export interface ProjectPhotoColor {
-  id?: number;
-  color_name: string;
-  color_hex?: string;
-  description?: string;
-  display_order: number;
-}
-
-export interface ProjectPhotoFlower {
-  id?: number;
-  flower_name: string;
-  description?: string;
-  display_order: number;
-}
-
 export interface ProjectPhoto {
   id: number;
   project_id: number;
@@ -23,8 +8,6 @@ export interface ProjectPhoto {
   position: 'left' | 'right' | 'center';
   display_order: number;
   is_hero: boolean;
-  colors?: ProjectPhotoColor[];
-  flowers?: ProjectPhotoFlower[];
 }
 
 export interface ProjectInclude {
@@ -32,24 +15,6 @@ export interface ProjectInclude {
   item: string;
   display_order: number;
 }
-
-// ─── Project Detail ───────────────────────────────────────────────────────────
-
-export interface ProjectDetailItem {
-  id?: number;
-  content: string;
-  display_order: number;
-}
-
-export interface ProjectDetail {
-  id?: number;
-  detail_type: 'color_palette' | 'flowers' | 'other';
-  title: string;
-  display_order: number;
-  items: ProjectDetailItem[];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface Project {
   id: number;
@@ -69,7 +34,6 @@ export interface Project {
   category?: { id: number; name: string };
   photos?: ProjectPhoto[];
   includes?: ProjectInclude[];
-  details?: ProjectDetail[];   // ← tambahan
 }
 
 export interface PhotoWithMetadata {
@@ -77,8 +41,6 @@ export interface PhotoWithMetadata {
   caption: string;
   position: 'left' | 'right' | 'center';
   display_order: number;
-  colors?: ProjectPhotoColor[];
-  flowers?: ProjectPhotoFlower[];
 }
 
 export interface CreateCompleteProjectData {
@@ -94,5 +56,4 @@ export interface CreateCompleteProjectData {
   photos: PhotoWithMetadata[];
   hero_photo_index: number;
   includes: ProjectInclude[];
-  details?: ProjectDetail[];   // ← tambahan
 }

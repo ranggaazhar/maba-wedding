@@ -1,0 +1,80 @@
+src/components/admin/project/StepDetails.tsx(15,42): error TS2305: Module '"@/types/project.types"' has no exported member 'ProjectDetail'.
+src/components/admin/project/StepDetails.tsx(15,57): error TS2305: Module '"@/types/project.types"' has no exported member 'ProjectDetailItem'.
+src/components/admin/project/StepDetails.tsx(40,30): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(41,52): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(54,24): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(62,24): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(69,35): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(73,43): error TS7006: Parameter '_' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(73,46): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(78,30): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(78,36): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(80,24): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(83,24): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(88,35): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(91,22): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(95,35): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(98,22): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(102,35): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(106,22): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(110,35): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(120,22): error TS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Partial<CreateCompleteProjectData>'.
+src/components/admin/project/StepDetails.tsx(182,19): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(182,39): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(184,23): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(184,36): error TS7006: Parameter 'detail' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(184,44): error TS7006: Parameter 'detailIndex' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(192,165): error TS2339: Property 'details' does not exist on type 'CreateCompleteProjectData'.
+src/components/admin/project/StepDetails.tsx(206,44): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/admin/project/StepDetails.tsx(206,50): error TS7006: Parameter 'itemIndex' implicitly has an 'any' type.
+src/components/admin/project/StepPhotos.tsx(2,20): error TS6133: 'useEffect' is declared but its value is never read.
+src/components/admin/project/StepReview.tsx(105,34): error TS2339: Property 'colors' does not exist on type 'ProjectPhoto'.
+src/components/admin/project/StepReview.tsx(105,69): error TS2339: Property 'flowers' does not exist on type 'ProjectPhoto'.
+src/components/admin/project/StepReview.tsx(107,37): error TS2339: Property 'colors' does not exist on type 'ProjectPhoto'.
+src/components/admin/project/StepReview.tsx(107,119): error TS2339: Property 'colors' does not exist on type 'ProjectPhoto'.
+src/components/admin/project/StepReview.tsx(108,37): error TS2339: Property 'flowers' does not exist on type 'ProjectPhoto'.
+src/components/admin/project/StepReview.tsx(108,118): error TS2339: Property 'flowers' does not exist on type 'ProjectPhoto'.
+src/components/admin/project/StepReview.tsx(157,38): error TS2339: Property 'colors' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(157,58): error TS2339: Property 'colors' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(160,73): error TS2339: Property 'colors' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(163,44): error TS2339: Property 'colors' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(163,56): error TS7006: Parameter 'color' implicitly has an 'any' type.
+src/components/admin/project/StepReview.tsx(163,63): error TS7006: Parameter 'ci' implicitly has an 'any' type.
+src/components/admin/project/StepReview.tsx(173,38): error TS2339: Property 'flowers' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(173,59): error TS2339: Property 'flowers' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(176,72): error TS2339: Property 'flowers' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(179,44): error TS2339: Property 'flowers' does not exist on type 'PhotoWithMetadata'.
+src/components/admin/project/StepReview.tsx(179,57): error TS7006: Parameter 'flower' implicitly has an 'any' type.
+src/components/admin/project/StepReview.tsx(179,65): error TS7006: Parameter 'fi' implicitly has an 'any' type.
+src/components/admin/project/StepReview.tsx(251,59): error TS2339: Property 'colors' does not exist on type 'PhotoWithMetadata'.
+src/components/ui/calendar.tsx(45,9): error TS2353: Object literal may only specify known properties, and 'IconLeft' does not exist in type 'Partial<CustomComponents>'.
+src/components/ui/calendar.tsx(45,20): error TS6133: '_props' is declared but its value is never read.
+src/components/ui/calendar.tsx(46,21): error TS6133: '_props' is declared but its value is never read.
+src/components/ui/chart.tsx(106,7): error TS2339: Property 'payload' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; allowEscapeViewBox?: AllowInDimension | undefined; ... 17 more ...; wrapperStyle?: CSSProperties | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+src/components/ui/chart.tsx(111,7): error TS2339: Property 'label' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; allowEscapeViewBox?: AllowInDimension | undefined; ... 17 more ...; wrapperStyle?: CSSProperties | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+src/components/ui/chart.tsx(163,25): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/ui/chart.tsx(163,31): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/components/ui/chart.tsx(233,41): error TS2344: Type '"payload" | "verticalAlign"' does not satisfy the constraint '"string" | "filter" | "fill" | "values" | "style" | "clipPath" | "mask" | "path" | "key" | "type" | "suppressHydrationWarning" | "className" | "id" | "lang" | "tabIndex" | "role" | ... 430 more ... | "onBBoxUpdate"'.
+  Type '"payload"' is not assignable to type '"string" | "filter" | "fill" | "values" | "style" | "clipPath" | "mask" | "path" | "key" | "type" | "suppressHydrationWarning" | "className" | "id" | "lang" | "tabIndex" | "role" | ... 430 more ... | "onBBoxUpdate"'.
+src/components/ui/chart.tsx(240,17): error TS2339: Property 'length' does not exist on type '{}'.
+src/components/ui/chart.tsx(249,16): error TS2339: Property 'map' does not exist on type '{}'.
+src/components/ui/chart.tsx(249,21): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/ui/form.tsx(4,22): error TS1484: 'ControllerProps' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/ui/form.tsx(4,39): error TS1484: 'FieldPath' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/ui/form.tsx(4,50): error TS1484: 'FieldValues' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/ui/resizable.tsx(6,102): error TS2339: Property 'PanelGroup' does not exist on type 'typeof import("D:/MYPROJECT/maba-wedding/frontend/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+src/components/ui/resizable.tsx(7,23): error TS2339: Property 'PanelGroup' does not exist on type 'typeof import("D:/MYPROJECT/maba-wedding/frontend/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+src/components/ui/resizable.tsx(19,51): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("D:/MYPROJECT/maba-wedding/frontend/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+src/components/ui/resizable.tsx(22,23): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("D:/MYPROJECT/maba-wedding/frontend/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+src/components/ui/resizable.tsx(34,24): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("D:/MYPROJECT/maba-wedding/frontend/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+src/hooks/Customer/useProjectDetail.ts(45,49): error TS2339: Property 'colors' does not exist on type 'ProjectPhoto'.
+src/hooks/Customer/useProjectDetail.ts(50,49): error TS2339: Property 'flowers' does not exist on type 'ProjectPhoto'.
+src/pages/admin/bookings/Bookings.tsx(5,17): error TS6133: 'XCircle' is declared but its value is never read.
+src/pages/admin/bookings/Bookings.tsx(6,21): error TS6133: 'BookOpen' is declared but its value is never read.
+src/pages/admin/bookings/Bookings.tsx(6,31): error TS6133: 'Sparkles' is declared but its value is never read.
+src/pages/admin/bookings/Bookings.tsx(6,41): error TS6133: 'Layers' is declared but its value is never read.
+src/pages/admin/projects/Projects.tsx(2,78): error TS6133: 'Loader2' is declared but its value is never read.
+src/pages/admin/property/Properties.tsx(4,12): error TS6133: 'Loader2' is declared but its value is never read.
+src/pages/admin/property/PropertyDetail.tsx(8,29): error TS6133: 'CardDescription' is declared but its value is never read.
+src/pages/admin/reviews/Review.tsx(3,54): error TS6133: 'ThumbsUp' is declared but its value is never read.
+src/pages/admin/reviews/Review.tsx(3,64): error TS6133: 'Award' is declared but its value is never read.

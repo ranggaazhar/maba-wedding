@@ -21,7 +21,7 @@ import LogoMaba from '../../assets/logomaba.svg';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard',         path: '/admin/dashboard' },
-  { icon: FolderOpen,      label: 'Kategori',          path: '/admin/categories' },
+  { icon: FolderOpen,      label: 'Kategori Project',          path: '/admin/categories' },
   { icon: Layers,          label: 'Kategori Properti', path: '/admin/property-categories' },
   { icon: ImageIcon,       label: 'Projects',          path: '/admin/projects' },
   { icon: Package,         label: 'Properties',        path: '/admin/properties' },

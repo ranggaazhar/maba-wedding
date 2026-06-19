@@ -157,7 +157,7 @@ export const usePropertyForm = () => {
         await propertyApi.createProperty(formData);
         Swal.fire('Berhasil!', 'Property berhasil dibuat.', 'success');
       }
-      navigate('/properties');
+      navigate('/admin/properties');
     } catch (error: unknown) {
       Swal.fire('Error', axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menyimpan property', 'error');
     } finally {

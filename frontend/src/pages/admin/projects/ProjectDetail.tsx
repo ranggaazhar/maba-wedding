@@ -1,7 +1,7 @@
 // src/pages/admin/projects/ProjectDetailPage.tsx
 import {
   ArrowLeft, Edit, Trash2, Eye, EyeOff, Calendar, Palette,
-  Flower2, Star, Check, ImageIcon, Loader2,
+  Star, Check, ImageIcon, Loader2,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { useProjectDetail } from "@/hooks/Admin/project/useProjectDetail";
 export default function ProjectDetailPage() {
   const {
     project, isLoading, activeIndex, setActiveIndex,
-    navigate, 
+    navigate,
     handleDelete, handleTogglePublish, handleToggleFeatured, formatPrice,
   } = useProjectDetail();
 
@@ -47,15 +47,6 @@ export default function ProjectDetailPage() {
   const activePhoto = photos[activeIndex] ?? null;
   const prevPhoto = () => setActiveIndex((i) => (i - 1 + totalPhotos) % totalPhotos);
   const nextPhoto = () => setActiveIndex((i) => (i + 1) % totalPhotos);
-
-  const allColors = project.photos?.flatMap((p) => p.colors || []) || [];
-  const uniqueColors = allColors.filter(
-    (color, index, self) => index === self.findIndex((c) => c.color_name === color.color_name)
-  );
-  const allFlowers = project.photos?.flatMap((p) => p.flowers || []) || [];
-  const uniqueFlowers = allFlowers.filter(
-    (flower, index, self) => index === self.findIndex((f) => f.flower_name === flower.flower_name)
-  );
 
   return (
     <div className="space-y-6">
@@ -133,21 +124,11 @@ export default function ProjectDetailPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent" />
 
-                <div className="absolute bottom-10 left-4 right-4 flex items-end justify-between">
-                  <p className="text-white text-sm opacity-90 drop-shadow">{activePhoto.caption || ""}</p>
-                  <div className="flex gap-1.5">
-                    {(activePhoto.colors?.length ?? 0) > 0 && (
-                      <span className="text-[10px] bg-black/50 text-purple-200 px-2 py-0.5 rounded-full">
-                        🎨 {activePhoto.colors!.length}
-                      </span>
-                    )}
-                    {(activePhoto.flowers?.length ?? 0) > 0 && (
-                      <span className="text-[10px] bg-black/50 text-pink-200 px-2 py-0.5 rounded-full">
-                        🌸 {activePhoto.flowers!.length}
-                      </span>
-                    )}
+                {activePhoto.caption && (
+                  <div className="absolute bottom-10 left-4 right-4">
+                    <p className="text-white text-sm opacity-90 drop-shadow">{activePhoto.caption}</p>
                   </div>
-                </div>
+                )}
 
                 {totalPhotos > 1 && (
                   <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
@@ -165,10 +146,16 @@ export default function ProjectDetailPage() {
 
                 {totalPhotos > 1 && (
                   <>
-                    <button onClick={prevPhoto} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm">
+                    <button
+                      onClick={prevPhoto}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                    >
                       <ChevronLeft size={20} />
                     </button>
-                    <button onClick={nextPhoto} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm">
+                    <button
+                      onClick={nextPhoto}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                    >
                       <ChevronRight size={20} />
                     </button>
                   </>
@@ -194,56 +181,6 @@ export default function ProjectDetailPage() {
             )}
           </div>
 
-          {/* Warna & Bunga foto aktif */}
-          {activePhoto && ((activePhoto.colors?.length ?? 0) > 0 || (activePhoto.flowers?.length ?? 0) > 0) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activePhoto.colors && activePhoto.colors.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Palette size={18} className="text-primary" /> Palet Warna
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {activePhoto.colors.map((color, i) => (
-                        <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                          {color.color_hex ? (
-                            <div className="w-5 h-5 rounded-full border shadow-sm shrink-0" style={{ backgroundColor: color.color_hex }} />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0 ml-1.5" />
-                          )}
-                          <span>{color.color_name}</span>
-                          {color.color_hex && <span className="text-xs opacity-60">{color.color_hex}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-              {activePhoto.flowers && activePhoto.flowers.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Flower2 size={18} className="text-primary" /> Jenis Bunga
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {activePhoto.flowers.map((flower, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0" />
-                          <span>{flower.flower_name}</span>
-                          {flower.description && <span className="text-xs opacity-60">— {flower.description}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
           {/* Deskripsi */}
           <Card>
             <CardHeader>
@@ -261,56 +198,6 @@ export default function ProjectDetailPage() {
               )}
             </CardContent>
           </Card>
-
-          {/* Summary semua warna & bunga */}
-          {(uniqueColors.length > 0 || uniqueFlowers.length > 0) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {uniqueColors.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Palette size={18} className="text-primary" /> Semua Warna
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {uniqueColors.map((color, i) => (
-                        <li key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                          {color.color_hex ? (
-                            <div className="w-5 h-5 rounded-full border shadow-sm shrink-0" style={{ backgroundColor: color.color_hex }} />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0 ml-1.5" />
-                          )}
-                          <span>{color.color_name}</span>
-                          {color.color_hex && <span className="text-xs opacity-60">{color.color_hex}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-              {uniqueFlowers.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Flower2 size={18} className="text-primary" /> Semua Bunga
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {uniqueFlowers.map((flower, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <div className="w-2 h-2 rounded-full bg-primary/60 shrink-0" />
-                          <span>{flower.flower_name}</span>
-                          {flower.description && <span className="text-xs opacity-60">— {flower.description}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Right Column */}
@@ -341,7 +228,11 @@ export default function ProjectDetailPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Dibuat</p>
-                  <p className="font-medium">{new Date(project.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</p>
+                  <p className="font-medium">
+                    {new Date(project.created_at).toLocaleDateString("id-ID", {
+                      day: "numeric", month: "long", year: "numeric",
+                    })}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
