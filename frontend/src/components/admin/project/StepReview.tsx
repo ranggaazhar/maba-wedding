@@ -1,7 +1,7 @@
 // src/components/admin/project/StepReview.tsx
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit2, CheckCircle, Image as ImageIcon, Star, MapPin, Palette, Flower } from 'lucide-react';
+import { Edit2, CheckCircle, Image as ImageIcon, Star, MapPin } from 'lucide-react';
 import type { CreateCompleteProjectData, ProjectPhoto } from '@/types/project.types';
 
 interface StepReviewProps {
@@ -102,12 +102,6 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
                             <Star size={8} className="text-white fill-current" />
                           </div>
                         )}
-                        {((photo.colors?.length ?? 0) > 0 || (photo.flowers?.length ?? 0) > 0) && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-0.5 flex gap-0.5 justify-center">
-                            {(photo.colors?.length ?? 0) > 0 && <span className="text-[8px] text-purple-300">🎨{photo.colors!.length}</span>}
-                            {(photo.flowers?.length ?? 0) > 0 && <span className="text-[8px] text-pink-300">🌸{photo.flowers!.length}</span>}
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -153,38 +147,6 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
                               )}
                             </div>
                           </div>
-
-                          {photoData.colors && photoData.colors.length > 0 && (
-                            <div className="px-3 pb-2 border-t pt-2">
-                              <p className="text-[10px] font-semibold text-purple-600 flex items-center gap-1 mb-1.5">
-                                <Palette size={10} /> Warna ({photoData.colors.length})
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {photoData.colors.map((color, ci) => (
-                                  <div key={ci} className="flex items-center gap-1 bg-purple-50 border border-purple-100 rounded-full px-2 py-0.5">
-                                    {color.color_hex && <div className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: color.color_hex }} />}
-                                    <span className="text-[10px] text-purple-700">{color.color_name}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {photoData.flowers && photoData.flowers.length > 0 && (
-                            <div className="px-3 pb-2 border-t pt-2">
-                              <p className="text-[10px] font-semibold text-pink-600 flex items-center gap-1 mb-1.5">
-                                <Flower size={10} /> Bunga ({photoData.flowers.length})
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {photoData.flowers.map((flower, fi) => (
-                                  <div key={fi} className="flex items-center gap-1 bg-pink-50 border border-pink-100 rounded-full px-2 py-0.5">
-                                    <span className="text-[10px]">🌸</span>
-                                    <span className="text-[10px] text-pink-700">{flower.flower_name}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       );
                     })}
@@ -245,12 +207,6 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
         <div className="bg-card border rounded-lg p-4 text-center">
           <p className="text-2xl font-bold text-primary">{formData.photos?.length || 0}</p>
           <p className="text-xs text-muted-foreground mt-1">Foto Baru</p>
-        </div>
-        <div className="bg-card border rounded-lg p-4 text-center">
-          <p className="text-2xl font-bold text-primary">
-            {formData.photos?.reduce((acc, p) => acc + (p.colors?.length || 0), 0) || 0}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">Total Warna</p>
         </div>
         <div className="bg-card border rounded-lg p-4 text-center">
           <p className="text-2xl font-bold text-primary">{formData.includes?.length || 0}</p>

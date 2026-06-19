@@ -1,5 +1,5 @@
 // src/components/admin/project/StepPhotos.tsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Upload, X, Star, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
