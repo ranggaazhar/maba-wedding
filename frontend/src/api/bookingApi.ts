@@ -137,6 +137,7 @@ class BookingApi {
     payment_status?: PaymentStatus;
     has_custom_request?: boolean;
     include_models?: boolean;
+    include_invoice?: boolean;
   }): Promise<ApiResponse<Booking[]>> {
     const params = new URLSearchParams();
     if (filters?.search) params.append('search', filters.search);
@@ -149,6 +150,8 @@ class BookingApi {
       params.append('has_custom_request', String(filters.has_custom_request));
     if (filters?.include_models !== undefined)
       params.append('include_models', String(filters.include_models));
+    if (filters?.include_invoice !== undefined)
+      params.append('include_invoice', String(filters.include_invoice));
 
     const response = await axios.get(
       `${API_URL}/bookings?${params.toString()}`,

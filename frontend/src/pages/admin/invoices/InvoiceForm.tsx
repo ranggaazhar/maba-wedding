@@ -220,10 +220,12 @@ export default function InvoiceForm() {
                   <SelectValue placeholder="Pilih jenis acara" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Wedding">Pernikahan (Wedding)</SelectItem>
                   <SelectItem value="Wedding Reception">Wedding Reception</SelectItem>
                   <SelectItem value="Akad Nikah">Akad Nikah</SelectItem>
-                  <SelectItem value="Engagement">Engagement</SelectItem>
-                  <SelectItem value="Birthday">Birthday</SelectItem>
+                  <SelectItem value="Engagement">Lamaran (Engagement)</SelectItem>
+                  <SelectItem value="Birthday">Ulang Tahun (Birthday)</SelectItem>
+                  <SelectItem value="Corporate">Corporate Event</SelectItem>
                   <SelectItem value="Other">Lainnya</SelectItem>
                 </SelectContent>
               </Select>

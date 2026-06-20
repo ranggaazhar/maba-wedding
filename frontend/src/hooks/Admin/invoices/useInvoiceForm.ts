@@ -52,8 +52,17 @@ export function useInvoiceForm() {
     const fetch_ = async () => {
       try {
         setIsLoadingBookings(true);
-        const res = await bookingApi.getAllBookings({ payment_status: 'CONFIRMED' });
-        if (res.success) setBookings(res.data || []);
+        const res = await bookingApi.getAllBookings({
+          payment_status: 'CONFIRMED',
+          include_invoice: true,
+        });
+        if (res.success) {
+          // Filter hanya booking yang BELUM memiliki invoice
+          const bookingsWithoutInvoice = (res.data || []).filter(
+            (b: Booking) => !b.invoice
+          );
+          setBookings(bookingsWithoutInvoice);
+        }
       } catch {
         console.error('Gagal memuat data booking');
       } finally {
