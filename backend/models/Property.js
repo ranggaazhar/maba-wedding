@@ -17,12 +17,6 @@ module.exports = (sequelize, DataTypes) => {
         as: 'creator'
       });
       
-      // Property has many PropertyImages
-      Property.hasMany(models.PropertyImage, {
-        foreignKey: 'property_id',
-        as: 'images'
-      });
-      
       // Property has many BookingProperties
       Property.hasMany(models.BookingProperty, {
         foreignKey: 'property_id',

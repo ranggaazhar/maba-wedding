@@ -15,17 +15,6 @@ function addFullUrlsToProperty(property, req) {
   }
   
   
-  if (propertyData.images && Array.isArray(propertyData.images)) {
-    propertyData.images = propertyData.images.map(img => {
-      const imageData = img.toJSON ? img.toJSON() : { ...img };
-      return {
-        ...imageData,
-        url: FileHelper.getFileUrl(imageData.url, req),
-        original_url: imageData.url // Keep original path
-      };
-    });
-  }
-  
   // Add full URL to primary image_url if exists
   if (propertyData.image_url) {
     propertyData.image_url = FileHelper.getFileUrl(propertyData.image_url, req);
@@ -129,6 +118,10 @@ class PropertyController {
         created_by: req.admin?.id || req.body.created_by
       };
       
+      if (req.file) {
+        propertyData.image_url = req.file.path.replace(/\\/g, '/');
+      }
+      
       const property = await propertyService.createProperty(propertyData);
       const propertyWithUrls = addFullUrlsToProperty(property, req);
       
@@ -156,7 +149,13 @@ class PropertyController {
   async updateProperty(req, res) {
     try {
       const { id } = req.params;
-      const property = await propertyService.updateProperty(id, req.body);
+      const propertyData = { ...req.body };
+      
+      if (req.file) {
+        propertyData.image_url = req.file.path.replace(/\\/g, '/');
+      }
+      
+      const property = await propertyService.updateProperty(id, propertyData);
       const propertyWithUrls = addFullUrlsToProperty(property, req);
       
       return res.status(200).json({

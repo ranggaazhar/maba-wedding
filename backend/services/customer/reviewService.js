@@ -10,14 +10,6 @@ class ReviewService {
       where.is_approved = filters.is_approved;
     }
     
-    if (filters.is_published !== undefined) {
-      where.is_published = filters.is_published;
-    }
-    
-    if (filters.is_featured !== undefined) {
-      where.is_featured = filters.is_featured;
-    }
-    
     if (filters.rating) {
       where.rating = filters.rating;
     }
@@ -163,8 +155,13 @@ class ReviewService {
   async moderateReview(id, moderationData, adminId) {
     const review = await this.getReviewById(id, false);
     
+    if (moderationData.is_approved === false) {
+      await review.destroy();
+      return { message: 'Review rejected and deleted successfully', deleted: true };
+    }
+    
     await review.update({
-      is_approved: moderationData.is_approved,
+      is_approved: true,
       moderated_at: new Date(),
       moderated_by: adminId
     });
@@ -172,39 +169,10 @@ class ReviewService {
     return await this.getReviewById(id);
   }
   
-  async togglePublishStatus(id) {
-    const review = await this.getReviewById(id, false);
-    
-    // Can only publish approved reviews
-    if (!review.is_approved && !review.is_published) {
-      throw new Error('Cannot publish an unapproved review');
-    }
-    
-    await review.update({ is_published: !review.is_published });
-    return review;
-  }
-  
-  async toggleFeaturedStatus(id) {
-    const review = await this.getReviewById(id, false);
-    
-    // Can only feature published reviews
-    if (!review.is_published && !review.is_featured) {
-      throw new Error('Cannot feature an unpublished review');
-    }
-    
-    await review.update({ is_featured: !review.is_featured });
-    return review;
-  }
-  
-  async getPublishedReviews(limit = null, featuredOnly = false) {
+  async getPublishedReviews(limit = null) {
     const where = {
-      is_published: true,
       is_approved: true
     };
-    
-    if (featuredOnly) {
-      where.is_featured = true;
-    }
     
     const options = {
       where,
@@ -232,8 +200,7 @@ class ReviewService {
         [Review.sequelize.fn('COUNT', Review.sequelize.col('id')), 'totalReviews']
       ],
       where: {
-        is_approved: true,
-        is_published: true
+        is_approved: true
       },
       raw: true
     });
@@ -251,8 +218,7 @@ class ReviewService {
         [Review.sequelize.fn('COUNT', Review.sequelize.col('id')), 'count']
       ],
       where: {
-        is_approved: true,
-        is_published: true
+        is_approved: true
       },
       group: ['rating'],
       order: [['rating', 'DESC']],
@@ -277,8 +243,6 @@ class ReviewService {
   async getStatistics() {
     const total = await Review.count();
     const approved = await Review.count({ where: { is_approved: true } });
-    const published = await Review.count({ where: { is_published: true } });
-    const featured = await Review.count({ where: { is_featured: true } });
     const pending = await Review.count({ where: { is_approved: false } });
     const withReply = await Review.count({ where: { admin_reply: { [Op.ne]: null } } });
     
@@ -287,8 +251,8 @@ class ReviewService {
     return {
       total,
       approved,
-      published,
-      featured,
+      published: approved,
+      featured: 0,
       pending,
       withReply,
       averageRating: avgRating.averageRating,

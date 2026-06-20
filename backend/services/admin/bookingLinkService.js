@@ -19,19 +19,30 @@ class BookingLinkService {
       if (filters.is_expired) {
         where.expires_at = { [Op.lt]: new Date() };
       } else {
-        where[Op.or] = [
-          { expires_at: null },
-          { expires_at: { [Op.gte]: new Date() } }
+        // FIX BUG-1: Gunakan Op.and agar tidak menimpa search Op.or
+        where[Op.and] = [
+          {
+            [Op.or]: [
+              { expires_at: null },
+              { expires_at: { [Op.gte]: new Date() } }
+            ]
+          }
         ];
       }
     }
     
     if (filters.search) {
-      where[Op.or] = [
+      const searchOr = [
         { customer_name: { [Op.like]: `%${filters.search}%` } },
         { customer_phone: { [Op.like]: `%${filters.search}%` } },
         { token: { [Op.like]: `%${filters.search}%` } }
       ];
+      // Gabungkan dengan Op.and yang sudah ada jika ada, atau tambah baru
+      if (where[Op.and]) {
+        where[Op.and].push({ [Op.or]: searchOr });
+      } else {
+        where[Op.and] = [{ [Op.or]: searchOr }];
+      }
     }
     
     const include = [];

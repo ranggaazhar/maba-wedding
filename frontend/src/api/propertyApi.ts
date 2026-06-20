@@ -51,52 +51,13 @@ class PropertyApi {
     return response.data;
   }
 
-  async createProperty(data: PropertyFormData): Promise<ApiResponse<Property>> {
-    const propertyData: CreatePropertyData = {
-      name: data.name,
-      slug: data.slug,
-      category_id: data.category_id,
-      description: data.description,
-      price: data.price,
-      is_available: data.is_available ?? true,
-    };
-
-    const propertyResponse = await axios.post(`${API_URL}/properties`, propertyData, this.getAuthHeaders());
-    const createdProperty = propertyResponse.data.data;
-
-    if (data.images?.length > 0) {
-      const formData = new FormData();
-      data.images.forEach((file) => formData.append('images', file));
-      if (data.primary_image_index !== undefined) {
-        formData.append('primary_image_index', String(data.primary_image_index));
-      }
-      await axios.post(`${API_URL}/properties/${createdProperty.id}/images/upload-multiple`, formData, this.getMultipartHeaders());
-      return await this.getPropertyById(createdProperty.id);
-    }
-
-    return propertyResponse.data;
-  }
-
-  async updateProperty(id: number, data: Partial<CreatePropertyData>): Promise<ApiResponse<Property>> {
-    const response = await axios.put(`${API_URL}/properties/${id}`, data, this.getAuthHeaders());
+  async createProperty(formData: FormData): Promise<ApiResponse<Property>> {
+    const response = await axios.post(`${API_URL}/properties`, formData, this.getMultipartHeaders());
     return response.data;
   }
 
-  async uploadImages(propertyId: number, files: File[], primaryIndex?: number): Promise<ApiResponse<Property>> {
-    const formData = new FormData();
-    files.forEach((file) => formData.append('images', file));
-    if (primaryIndex !== undefined) formData.append('primary_image_index', String(primaryIndex));
-    const response = await axios.post(`${API_URL}/properties/${propertyId}/images/upload-multiple`, formData, this.getMultipartHeaders());
-    return response.data;
-  }
-
-  async deleteImage(imageId: number): Promise<ApiResponse<null>> {
-    const response = await axios.delete(`${API_URL}/property-images/${imageId}`, this.getAuthHeaders());
-    return response.data;
-  }
-
-  async setPrimaryImage(imageId: number): Promise<ApiResponse<null>> {
-    const response = await axios.patch(`${API_URL}/property-images/${imageId}/set-primary`, {}, this.getAuthHeaders());
+  async updateProperty(id: number, formData: FormData): Promise<ApiResponse<Property>> {
+    const response = await axios.put(`${API_URL}/properties/${id}`, formData, this.getMultipartHeaders());
     return response.data;
   }
 

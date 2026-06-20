@@ -4,7 +4,8 @@ import {
   User, X, Send, FileText, Edit, MessageSquare,
   Package, Palette, Loader2, 
   CheckCircle2, XCircle, AlertCircle,
-  Sparkles, Layers, BookOpen, Clock, Image as ImageIcon,
+  Sparkles, Layers, BookOpen,
+  Image as ImageIcon,
   DollarSign, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useState } from 'react';
@@ -23,14 +24,12 @@ import {
 
 export default function BookingDetail() {
   const {
-    booking, isLoading, isConfirming, isRejecting, isReviewingRequest,
+    booking, isLoading, isConfirming, isRejecting,
     navigate,
     handleConfirmPayment, handleRejectPayment,
-    handleReviewCustomRequest, handleDelete,
+    handleDelete,
     formatDate, formatDateTime, formatCurrency,
     totalPropertyCost, totalModelCost, totalCustomEstimate,
-    pendingCustomRequests,
-    customRequestStatusConfig: crConfig,
   } = useBookingDetail();
 
   if (isLoading) {
@@ -50,8 +49,8 @@ export default function BookingDetail() {
   const showConfirmActions = paymentStatus === 'WAITING_CONFIRMATION';
   const bookingType = getBookingType(booking);
 
-  // Tab default: kalau ada custom request pending → langsung ke tab custom
-  const defaultTab = pendingCustomRequests.length > 0 ? 'custom' : 'info';
+  // Tab default: selalu mulai dari info
+  const defaultTab = 'info';
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -101,24 +100,6 @@ export default function BookingDetail() {
           </div>
         </div>
 
-        {/* Banner: ada custom request pending */}
-        {pendingCustomRequests.length > 0 && (
-          <Card className="border-orange-200 bg-orange-50">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <Sparkles className="text-orange-500 mt-0.5 shrink-0" size={20} />
-                <div>
-                  <p className="font-semibold text-orange-700">
-                    {pendingCustomRequests.length} Custom Request Menunggu Review
-                  </p>
-                  <p className="text-sm text-orange-600">
-                    Customer mengajukan custom request yang belum ditinjau. Buka tab "Custom Request" untuk mereview.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Banner: waiting confirmation */}
         {showConfirmActions && (
@@ -206,12 +187,9 @@ export default function BookingDetail() {
 
               {/* Tab custom request — tampil kalau has_custom_request */}
               {booking.has_custom_request && (
-                <TabsTrigger value="custom" className="data-[state=active]:bg-card relative">
+                <TabsTrigger value="custom" className="data-[state=active]:bg-card">
                   <Sparkles size={16} className="mr-2" /> Custom Request
                   <Badge variant="secondary" className="ml-2 text-xs">{booking.customRequests?.length ?? 0}</Badge>
-                  {pendingCustomRequests.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full" />
-                  )}
                 </TabsTrigger>
               )}
             </TabsList>
@@ -421,14 +399,22 @@ export default function BookingDetail() {
             {/* ── TAB: CUSTOM REQUEST ── */}
             {booking.has_custom_request && (
               <TabsContent value="custom" className="space-y-4">
+                <Card className="border-orange-100 bg-orange-50/30">
+                  <CardContent className="py-4">
+                    <div className="flex items-start gap-3">
+                      <Sparkles className="text-orange-500 mt-0.5 shrink-0" size={18} />
+                      <p className="text-sm text-orange-700">
+                        Customer mengajukan custom request. Diskusikan detail dan estimasi harga langsung dengan customer melalui <strong>WhatsApp</strong>.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {booking.customRequests && booking.customRequests.length > 0 ? (
                   booking.customRequests.map((cr: BookingCustomRequest) => (
                     <CustomRequestCard
                       key={cr.id}
                       request={cr}
-                      statusConfig={crConfig}
-                      isReviewing={isReviewingRequest}
-                      onReview={handleReviewCustomRequest}
                       formatCurrency={formatCurrency}
                       formatDateTime={formatDateTime}
                     />
@@ -508,34 +494,29 @@ export default function BookingDetail() {
 }
 
 function CustomRequestCard({
-  request, statusConfig, isReviewing, onReview, formatCurrency, formatDateTime,
+  request, formatCurrency, formatDateTime,
 }: {
   request: BookingCustomRequest;
-  statusConfig: ReturnType<typeof useBookingDetail>['customRequestStatusConfig'];
-  isReviewing: boolean;
-  onReview: (req: BookingCustomRequest, action: 'APPROVED' | 'REJECTED' | 'REVIEWED') => void;
   formatCurrency: (v?: string | number) => string;
   formatDateTime: (v: string) => string;
 }) {
   const [showImages, setShowImages] = useState(false);
-  const crStatus = request.status;
-  const crConfig = statusConfig[crStatus];
 
   return (
-    <Card className={crStatus === 'PENDING' ? 'border-orange-200' : ''}>
+    <Card>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <Badge className={`${crConfig.style} text-xs`}>{crConfig.label}</Badge>
-              {request.estimated_price && (
-                <Badge variant="outline" className="text-xs gap-1">
-                  <DollarSign size={11} /> {formatCurrency(request.estimated_price)}
-                </Badge>
-              )}
-            </div>
+            {request.estimated_price && (
+              <Badge variant="outline" className="text-xs gap-1 mb-1">
+                <DollarSign size={11} /> {formatCurrency(request.estimated_price)}
+              </Badge>
+            )}
             <h4 className="font-semibold text-foreground">{request.title}</h4>
           </div>
+          <Badge className="bg-orange-50 text-orange-700 border-orange-200 text-xs shrink-0">
+            <Sparkles size={11} className="mr-1" /> Custom
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -571,50 +552,9 @@ function CustomRequestCard({
           </div>
         )}
 
-        {/* Admin notes */}
-        {request.admin_notes && (
-          <div className="bg-muted/40 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-              <MessageSquare size={12} /> Catatan Admin
-            </p>
-            <p className="text-sm">{request.admin_notes}</p>
-          </div>
-        )}
-
-        {/* Rejection reason */}
-        {crStatus === 'REJECTED' && request.rejection_reason && (
-          <div className="bg-red-50 rounded-lg p-3 border border-red-200">
-            <p className="text-xs text-red-600 mb-1 font-medium">Alasan Penolakan</p>
-            <p className="text-sm text-red-700">{request.rejection_reason}</p>
-          </div>
-        )}
-
-        {/* Reviewer info */}
-        {request.reviewed_at && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <Clock size={11} /> Direview pada {formatDateTime(request.reviewed_at)}
-            {request.reviewer && <> oleh <strong>{request.reviewer.name}</strong></>}
-          </p>
-        )}
-
-        {/* Action buttons — hanya kalau PENDING */}
-        {crStatus === 'PENDING' && (
-          <div className="flex gap-2 pt-2 border-t">
-            <Button variant="outline" className="flex-1 border-red-300 text-red-600 hover:bg-red-50" size="sm"
-              onClick={() => onReview(request, 'REJECTED')} disabled={isReviewing}>
-              <XCircle size={14} className="mr-1.5" /> Tolak
-            </Button>
-            <Button variant="outline" className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50" size="sm"
-              onClick={() => onReview(request, 'REVIEWED')} disabled={isReviewing}>
-              <Clock size={14} className="mr-1.5" /> Tandai Direview
-            </Button>
-            <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white" size="sm"
-              onClick={() => onReview(request, 'APPROVED')} disabled={isReviewing}>
-              {isReviewing ? <Loader2 size={14} className="mr-1.5 animate-spin" /> : <CheckCircle2 size={14} className="mr-1.5" />}
-              Setujui
-            </Button>
-          </div>
-        )}
+        <p className="text-xs text-muted-foreground">
+          Diajukan pada {formatDateTime(request.created_at)}
+        </p>
       </CardContent>
     </Card>
   );

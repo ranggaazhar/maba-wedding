@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
@@ -367,10 +368,9 @@ export default function InvoiceForm() {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Harga Satuan <span className="text-destructive">*</span></Label>
-                      <Input
-                        type="number" min={0}
+                      <CurrencyInput
                         value={item.unit_price}
-                        onChange={e => updateItem(item._tempId, 'unit_price', parseFloat(e.target.value) || 0)}
+                        onChange={val => updateItem(item._tempId, 'unit_price', parseFloat(val) || 0)}
                         className="bg-background"
                       />
                     </div>
@@ -424,11 +424,10 @@ export default function InvoiceForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>DP (Down Payment)</Label>
-              <Input
-                type="number"
+              <CurrencyInput
                 placeholder="Jumlah DP"
                 value={downPayment}
-                onChange={e => setDownPayment(parseFloat(e.target.value) || 0)}
+                onChange={val => setDownPayment(parseFloat(val) || 0)}
                 className="bg-muted/30"
               />
               {calculatedTotal > 0 && (

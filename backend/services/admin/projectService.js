@@ -225,10 +225,22 @@ class ProjectService {
   }
 
   async deleteProject(id) {
+    const { BookingModel, InvoiceItem } = require('../../models');
+    
+    const bookingCount = await BookingModel.count({ where: { project_id: id } });
+    if (bookingCount > 0) {
+      throw new Error('Cannot delete project with existing bookings');
+    }
+    
+    const invoiceCount = await InvoiceItem.count({ where: { project_id: id } });
+    if (invoiceCount > 0) {
+      throw new Error('Cannot delete project with existing invoices');
+    }
+
     const transaction = await sequelize.transaction();
     
     try {
-      const project = await Project.findByPk(id);
+      const project = await Project.findByPk(id, { transaction });
       if (!project) throw new Error('Project not found');
       
       const photos = await ProjectPhoto.findAll({
@@ -394,12 +406,39 @@ class ProjectService {
         newUrl = file.path.replace(/\\/g, '/');
       }
 
-      await photo.update({
+      const isNewHero = is_hero !== undefined ? (is_hero === 'true' || is_hero === true) : photo.is_hero;
+      const isNewCenter = position === 'center';
+      
+      const updateData = {
         caption: caption !== undefined ? caption : photo.caption,
         position: position !== undefined ? position : photo.position,
-        is_hero: is_hero !== undefined ? (is_hero === 'true' || is_hero === true) : photo.is_hero,
+        is_hero: isNewHero || isNewCenter, // if center, automatically hero!
         url: newUrl
-      }, { transaction });
+      };
+
+      await photo.update(updateData, { transaction });
+
+      // If this photo is hero or center, update other photos of the same project
+      if (updateData.is_hero) {
+        if (isNewCenter) {
+          // If this photo is set to center, others must NOT be center, and must NOT be hero
+          await ProjectPhoto.update({
+            is_hero: false,
+            position: 'left'
+          }, {
+            where: { project_id: photo.project_id, id: { [Op.ne]: photo.id } },
+            transaction
+          });
+        } else {
+          // If this photo is set to hero (but not center), others must NOT be hero
+          await ProjectPhoto.update({
+            is_hero: false
+          }, {
+            where: { project_id: photo.project_id, id: { [Op.ne]: photo.id } },
+            transaction
+          });
+        }
+      }
 
       await transaction.commit();
 
@@ -421,6 +460,7 @@ class ProjectService {
   async toggleProjectStatus(id, field = 'is_published') {
     const project = await this.getProjectById(id, false);
     await project.update({ [field]: !project[field] });
+    await project.reload(); // FIX BUG-2: Reload agar return value tidak stale
     return project;
   }
 

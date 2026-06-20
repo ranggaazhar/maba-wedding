@@ -29,6 +29,7 @@ export default function ProjectForm() {
   const [saving, setSaving] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(isEdit);
   const [existingPhotos, setExistingPhotos] = useState<ProjectPhoto[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<CreateCompleteProjectData>({
     title: '', slug: '', category_id: 0,
@@ -73,8 +74,66 @@ export default function ProjectForm() {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
+  const validateStep = (step: number): boolean => {
+    if (step === 1) {
+      const newErrors: Record<string, string> = {};
+      if (!formData.title?.trim()) {
+        newErrors.title = 'Judul Project harus diisi.';
+      }
+      if (!formData.slug?.trim()) {
+        newErrors.slug = 'Slug harus diisi.';
+      }
+      if (!formData.category_id) {
+        newErrors.category_id = 'Kategori harus dipilih.';
+      }
+      if (!formData.price || (typeof formData.price === 'string' && !formData.price.trim())) {
+        newErrors.price = 'Harga harus diisi.';
+      }
+      if (!formData.theme?.trim()) {
+        newErrors.theme = 'Tema harus diisi.';
+      }
+      if (!formData.description?.trim()) {
+        newErrors.description = 'Deskripsi Project harus diisi.';
+      }
+      if (!formData.atmosphere_description?.trim()) {
+        newErrors.atmosphere_description = 'Deskripsi Suasana/Atmosfer harus diisi.';
+      }
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    }
+
+    if (step === 2) {
+      const photoErrors: Record<string, string> = {};
+      let hasError = false;
+
+      // 1. Check existing photos (that are not hero)
+      existingPhotos.forEach((photo) => {
+        if (!photo.is_hero && !photo.caption?.trim()) {
+          photoErrors[`existing_caption_${photo.id}`] = 'Caption untuk foto detail wajib diisi.';
+          hasError = true;
+        }
+      });
+
+      // 2. Check new photos (that are not hero)
+      (formData.photos || []).forEach((photo, idx) => {
+        const absoluteIndex = existingPhotos.length + idx;
+        const isHero = absoluteIndex === 0;
+        if (!isHero && !photo.caption?.trim()) {
+          photoErrors[`new_caption_${idx}`] = 'Caption untuk foto detail wajib diisi.';
+          hasError = true;
+        }
+      });
+
+      setErrors(photoErrors);
+      return !hasError;
+    }
+    return true;
+  };
+
   const nextStep = () => {
     if (currentStep < steps.length) {
+      if (!validateStep(currentStep)) return;
       setCurrentStep((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -88,18 +147,40 @@ export default function ProjectForm() {
   };
 
   const goToStep = (step: number) => {
-    if (!saving) {
-      setCurrentStep(step);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (saving) return;
+
+    // Validate current step if trying to go to a future step
+    if (step > currentStep) {
+      if (!validateStep(currentStep)) return;
     }
+
+    // Always validate previous steps
+    if (step > 1) {
+      if (!validateStep(1)) {
+        setCurrentStep(1);
+        return;
+      }
+    }
+    if (step > 2) {
+      if (!validateStep(2)) {
+        setCurrentStep(2);
+        return;
+      }
+    }
+
+    setCurrentStep(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async () => {
     try {
       setSaving(true);
-      if (!formData.title || !formData.category_id) {
-        Swal.fire({ icon: 'warning', title: 'Oops!', text: 'Lengkapi info dasar dulu.' });
-        goToStep(1);
+      if (!validateStep(1)) {
+        setCurrentStep(1);
+        return;
+      }
+      if (!validateStep(2)) {
+        setCurrentStep(2);
         return;
       }
 
@@ -187,15 +268,24 @@ export default function ProjectForm() {
 
       <div className="bg-card border rounded-xl shadow-sm overflow-hidden min-h-[400px]">
         {currentStep === 1 && (
-          <StepBasicInfo formData={formData} updateFormData={updateFormData} onNext={nextStep} />
+          <StepBasicInfo
+            formData={formData}
+            updateFormData={updateFormData}
+            errors={errors}
+            setErrors={setErrors}
+            onNext={nextStep}
+          />
         )}
         {currentStep === 2 && (
           <StepPhotos
             formData={formData}
             updateFormData={updateFormData}
             existingPhotos={existingPhotos}
+            setExistingPhotos={setExistingPhotos}
             projectId={id ? Number(id) : undefined}
             onRefresh={fetchProjectData}
+            errors={errors}
+            setErrors={setErrors}
           />
         )}
         {currentStep === 3 && (

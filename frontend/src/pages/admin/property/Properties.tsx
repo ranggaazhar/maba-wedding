@@ -1,4 +1,4 @@
-// src/pages/admin/properties/Properties.tsx
+import { useState, useEffect } from 'react';
 import {
   Plus, Search, Filter, MoreHorizontal, Edit, Trash2,
   Package, Loader2, Eye, EyeOff,
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProperties } from '@/hooks/Admin/property/useProperties';
+import { Pagination } from '@/components/admin/Pagination';
 
 export default function Properties() {
   const {
@@ -20,6 +21,20 @@ export default function Properties() {
     handleDelete, handleToggleAvailability,
     getPrimaryImage, formatPrice,
   } = useProperties();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedStatus]);
+
+  const totalPages = Math.ceil(properties.length / ITEMS_PER_PAGE);
+  const paginatedProperties = properties.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="space-y-6">
@@ -85,65 +100,75 @@ export default function Properties() {
           <h3 className="font-semibold mb-1">Property tidak ada</h3>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {properties.map((property, index) => (
-            <div
-              key={property.id}
-              className="border rounded-xl bg-card overflow-hidden group shadow-sm hover:shadow-md transition-all animate-in fade-in slide-in-from-bottom-2"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div className="relative h-40 overflow-hidden">
-                <img
-                  src={getPrimaryImage(property)}
-                  alt={property.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-3 left-3">
-                  {!property.is_available && <Badge variant="secondary">Tidak Tersedia</Badge>}
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {paginatedProperties.map((property, index) => (
+              <div
+                key={property.id}
+                className="border rounded-xl bg-card overflow-hidden group shadow-sm hover:shadow-md transition-all animate-in fade-in slide-in-from-bottom-2"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="relative h-40 overflow-hidden">
+                  <img
+                    src={getPrimaryImage(property)}
+                    alt={property.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 left-3">
+                    {!property.is_available && <Badge variant="secondary">Tidak Tersedia</Badge>}
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="secondary" className="h-8 w-8 opacity-90">
+                          <MoreHorizontal size={16} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate(`/admin/properties/${property.id}`)}>
+                          <Eye size={14} className="mr-2" /> Detail
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/admin/properties/edit/${property.id}`)}>
+                          <Edit size={14} className="mr-2" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleAvailability(property.id)}>
+                          {property.is_available
+                            ? <><EyeOff size={14} className="mr-2" /> Set Tidak Tersedia</>
+                            : <><Eye size={14} className="mr-2" /> Set Tersedia</>
+                          }
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(property.id, property.name)}>
+                          <Trash2 size={14} className="mr-2" /> Hapus
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-                <div className="absolute top-3 right-3">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="secondary" className="h-8 w-8 opacity-90">
-                        <MoreHorizontal size={16} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/admin/properties/${property.id}`)}>
-                        <Eye size={14} className="mr-2" /> Detail
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/admin/properties/edit/${property.id}`)}>
-                        <Edit size={14} className="mr-2" /> Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleToggleAvailability(property.id)}>
-                        {property.is_available
-                          ? <><EyeOff size={14} className="mr-2" /> Set Tidak Tersedia</>
-                          : <><Eye size={14} className="mr-2" /> Set Tersedia</>
-                        }
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(property.id, property.name)}>
-                        <Trash2 size={14} className="mr-2" /> Hapus
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <div className="p-4 space-y-2">
+                  <h3 className="font-bold line-clamp-2">{property.name}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {property.description || 'Tidak ada deskripsi'}
+                  </p>
+                  <div className="flex justify-between items-center pt-2">
+                    <Badge variant="outline" className="text-xs">
+                      {property.category?.name || 'No Category'}
+                    </Badge>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <p className="font-bold text-primary text-lg">Rp {formatPrice(property.price)}</p>
+                  </div>
                 </div>
               </div>
-              <div className="p-4 space-y-2">
-                <h3 className="font-bold line-clamp-2">{property.name}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {property.description || 'Tidak ada deskripsi'}
-                </p>
-                <div className="flex justify-between items-center pt-2">
-                  <Badge variant="outline" className="text-xs">
-                    {property.category?.name || 'No Category'}
-                  </Badge>
-                </div>
-                <div className="pt-2 border-t">
-                  <p className="font-bold text-primary text-lg">Rp {formatPrice(property.price)}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalEntries={properties.length}
+            entriesPerPage={ITEMS_PER_PAGE}
+            label="property"
+          />
         </div>
       )}
     </div>

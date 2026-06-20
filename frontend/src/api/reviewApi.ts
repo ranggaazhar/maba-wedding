@@ -14,8 +14,6 @@ export interface Review {
   rating: number;
   review_text: string;
   is_approved: boolean;
-  is_published: boolean;
-  is_featured: boolean;
   admin_reply?: string;
   replied_at?: string;
   replied_by?: number;
@@ -106,8 +104,6 @@ class ReviewApi {
 
   async getAllReviews(filters?: {
     is_approved?: boolean;
-    is_published?: boolean;
-    is_featured?: boolean;
     rating?: number;
     min_rating?: number;
     search?: string;
@@ -115,8 +111,6 @@ class ReviewApi {
   }) {
     const params = new URLSearchParams();
     if (filters?.is_approved !== undefined) params.append('is_approved', String(filters.is_approved));
-    if (filters?.is_published !== undefined) params.append('is_published', String(filters.is_published));
-    if (filters?.is_featured !== undefined) params.append('is_featured', String(filters.is_featured));
     if (filters?.rating) params.append('rating', String(filters.rating));
     if (filters?.min_rating) params.append('min_rating', String(filters.min_rating));
     if (filters?.search) params.append('search', filters.search);
@@ -139,10 +133,9 @@ class ReviewApi {
     return response.data;
   }
 
-  async getPublishedReviews(limit?: number, featuredOnly?: boolean) {
+  async getPublishedReviews(limit?: number) {
     const params = new URLSearchParams();
     if (limit) params.append('limit', String(limit));
-    if (featuredOnly) params.append('featured_only', 'true');
     const response = await axios.get(`${API_URL}/reviews/published?${params.toString()}`);
     return response.data;
   }

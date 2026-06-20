@@ -129,7 +129,6 @@ export default function Step1CustomerInfo({ formData, setFormData, onNext }: Ste
               <SelectContent>
                 <SelectItem value="Wedding">Pernikahan</SelectItem>
                 <SelectItem value="Engagement">Lamaran</SelectItem>
-                <SelectItem value="Other">Lainnya</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,10 +1,6 @@
 // src/types/booking.types.ts
 
-export interface PropertyImage {
-  id: number;
-  url: string;
-  is_primary: boolean;
-}
+
 
 export interface ProjectPhoto {
   id: number;
@@ -54,7 +50,7 @@ export interface BookingProperty {
   price: string;
   subtotal: string;
   property?: {
-    images: PropertyImage[];
+    image_url?: string;
     thumbnail_url?: string;
   };
   display_image?: string;

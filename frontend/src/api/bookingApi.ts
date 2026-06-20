@@ -109,21 +109,20 @@ class BookingApi {
         m.project?.photos?.find((p) => p.is_hero)?.url ||
         m.project?.photos?.[0]?.url ||
         m.project?.thumbnail_url;
-      return {
-        ...m,
-        display_image: rawPath ? `${BASE_URL}/${rawPath}` : '/placeholder.png',
-      };
+      // FIX BUG-5: Cek apakah URL sudah absolute (backend sudah prefix BASE_URL)
+      const imageUrl = rawPath
+        ? rawPath.startsWith('http') ? rawPath : `${BASE_URL}/${rawPath}`
+        : '/placeholder.png';
+      return { ...m, display_image: imageUrl };
     });
 
     booking.properties = booking.properties?.map((p: BookingProperty) => {
-      const rawPath =
-        p.property?.images?.find((i) => i.is_primary)?.url ||
-        p.property?.images?.[0]?.url ||
-        p.property?.thumbnail_url;
-      return {
-        ...p,
-        display_image: rawPath ? `${BASE_URL}/${rawPath}` : '/placeholder.png',
-      };
+      const rawPath = p.property?.image_url || p.property?.thumbnail_url;
+      // FIX BUG-5: Cek apakah URL sudah absolute (backend sudah prefix BASE_URL)
+      const imageUrl = rawPath
+        ? rawPath.startsWith('http') ? rawPath : `${BASE_URL}/${rawPath}`
+        : '/placeholder.png';
+      return { ...p, display_image: imageUrl };
     });
 
     return booking;
@@ -137,6 +136,7 @@ class BookingApi {
     has_payment?: boolean;
     payment_status?: PaymentStatus;
     has_custom_request?: boolean;
+    include_models?: boolean;
   }): Promise<ApiResponse<Booking[]>> {
     const params = new URLSearchParams();
     if (filters?.search) params.append('search', filters.search);
@@ -147,6 +147,8 @@ class BookingApi {
     if (filters?.payment_status) params.append('payment_status', filters.payment_status);
     if (filters?.has_custom_request !== undefined)
       params.append('has_custom_request', String(filters.has_custom_request));
+    if (filters?.include_models !== undefined)
+      params.append('include_models', String(filters.include_models));
 
     const response = await axios.get(
       `${API_URL}/bookings?${params.toString()}`,

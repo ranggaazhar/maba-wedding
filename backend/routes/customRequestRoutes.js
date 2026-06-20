@@ -47,15 +47,7 @@ router.get(
 router.post(
   '/bookings/:bookingId/custom-requests',
   upload.customRequestImages.array('reference_images', 7),
-  (req, res, next) => {
-    console.log('Files setelah multer:', req.files); // ← cek apakah multer berhasil
-    next();
-  },
   processMultipleImages({ width: 1280, quality: 80, format: 'jpeg' }),
-  (req, res, next) => {
-    console.log('Files setelah optimize:', req.files); // ← cek apakah sharp berhasil
-    next();
-  },
   createCustomRequestValidation, validate,
   customRequestController.create
 );

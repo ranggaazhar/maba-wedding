@@ -141,6 +141,22 @@ export function useInvoiceForm() {
         const subtotal = parseFloat(prop.subtotal || '0');
         newItems.push({ _tempId: Date.now() + order, item_name: prop.property_name, item_type: 'item', description: `Kategori: ${prop.property_category}`, quantity: prop.quantity, unit_price: parseFloat(prop.price || '0'), subtotal, display_order: order++ });
       }
+
+      // Import custom requests
+      for (const req of detail.customRequests || []) {
+        const price = parseFloat(req.estimated_price || '0');
+        newItems.push({
+          _tempId: Date.now() + order,
+          item_name: `Custom Request: ${req.title}`,
+          item_type: 'item',
+          description: req.description || '',
+          quantity: 1,
+          unit_price: price,
+          subtotal: price,
+          display_order: order++
+        });
+      }
+
       if (newItems.length > 0) setItems(newItems);
 
       Swal.fire({ icon: 'success', title: 'Data berhasil diisi!', text: `Invoice otomatis diisi dari booking ${booking.booking_code}`, timer: 2000, showConfirmButton: false });

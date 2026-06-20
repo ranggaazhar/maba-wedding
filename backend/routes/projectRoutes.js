@@ -3,7 +3,7 @@ const router = express.Router();
 const projectController = require('../controllers/admin/projectController');
 const authMiddleware = require('../middleware/auth');
 const upload = require('../config/multer');
-const { processMultipleImages } = require('../middleware/imageProcessor');
+const { processImage, processMultipleImages } = require('../middleware/imageProcessor');
 const {
   createProjectValidation,
   updateProjectValidation,
@@ -39,7 +39,7 @@ router.patch('/:id/toggle-featured',authMiddleware, projectIdValidation, validat
 router.put('/:id/photos/:photoId',
   authMiddleware,
   upload.projectPhoto.single('photo'),
-  processMultipleImages({ width: 1920, quality: 85 }),
+  processImage({ width: 1920, quality: 85 }), // FIX: pakai processImage (single) bukan processMultipleImages
   projectController.updatePhoto
 );
 router.delete('/:id/photos/:photoId',

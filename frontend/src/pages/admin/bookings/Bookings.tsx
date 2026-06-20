@@ -1,4 +1,4 @@
-// src/pages/admin/Bookings.tsx
+import { useState, useEffect } from "react";
 import { useBookings } from "@/hooks/Admin/bookings/useBooking";
 import {
   Search, Eye, Trash2, Calendar, Loader2,
@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Booking } from "@/types/booking.types";
 import { getBookingType } from "@/types/booking.types";
+import { Pagination } from "@/components/admin/Pagination";
 
 // ── Booking type badge ────────────────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ function BookingTypeBadge({ booking }: { booking: Booking }) {
   }
   if (type === 'CUSTOM') {
     return (
-     <Badge variant="secondary" className="text-xs">
+      <Badge variant="secondary" className="text-xs">
         Custom
       </Badge>
     );
@@ -67,6 +68,31 @@ export default function Bookings() {
     handleDeleteBooking, handleCopyLink, handleRegenerateToken, handleDeleteLink,
     isExpired, formatDate,
   } = useBookings();
+
+  const [currentBookingPage, setCurrentBookingPage] = useState(1);
+  const [currentLinkPage, setCurrentLinkPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  // Reset page numbers when search / filter parameters change
+  useEffect(() => {
+    setCurrentBookingPage(1);
+  }, [searchQuery, paymentFilter, bookingTypeFilter]);
+
+  useEffect(() => {
+    setCurrentLinkPage(1);
+  }, [linkSearchQuery]);
+
+  const totalBookingPages = Math.ceil(bookings.length / ITEMS_PER_PAGE);
+  const paginatedBookings = bookings.slice(
+    (currentBookingPage - 1) * ITEMS_PER_PAGE,
+    currentBookingPage * ITEMS_PER_PAGE
+  );
+
+  const totalLinkPages = Math.ceil(bookingLinks.length / ITEMS_PER_PAGE);
+  const paginatedBookingLinks = bookingLinks.slice(
+    (currentLinkPage - 1) * ITEMS_PER_PAGE,
+    currentLinkPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="space-y-6">
@@ -197,65 +223,75 @@ export default function Bookings() {
               </CardContent>
             </Card>
           ) : (
-            <div className="table-container">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Kode</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tanggal Acara</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Venue</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Jenis Acara</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tipe Booking</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status Bayar</th>
-                      <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookings.map((booking, index) => (
-                      <tr
-                        key={booking.id}
-                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <td className="p-4">
-                          <span className="font-mono text-sm text-foreground">{booking.booking_code}</span>
-                        </td>
-                        <td className="p-4">
-                          <p className="font-medium text-foreground">{booking.customer_name}</p>
-                          <p className="text-sm text-muted-foreground">{booking.customer_phone}</p>
-                        </td>
-                        <td className="p-4 text-foreground whitespace-nowrap">{formatDate(booking.event_date)}</td>
-                        <td className="p-4 text-muted-foreground max-w-[120px] truncate">{booking.event_venue}</td>
-                        <td className="p-4">
-                          <Badge variant="secondary" className="text-xs">{booking.event_type}</Badge>
-                        </td>
-                        <td className="p-4">
-                          <BookingTypeBadge booking={booking} />
-                        </td>
-                        <td className="p-4">
-                          <Badge className={`${paymentStatusStyles[booking.payment_status] ?? paymentStatusStyles.PENDING} text-xs`}>
-                            {paymentStatusLabels[booking.payment_status] ?? 'Belum Bayar'}
-                          </Badge>
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8"
-                              onClick={() => navigate(`/admin/bookings/${booking.id}`)}>
-                              <Eye size={16} />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                              onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}>
-                              <Trash2 size={16} />
-                            </Button>
-                          </div>
-                        </td>
+            <div className="space-y-4">
+              <div className="table-container">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Kode</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tanggal Acara</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Venue</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Jenis Acara</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tipe Booking</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status Bayar</th>
+                        <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {paginatedBookings.map((booking, index) => (
+                        <tr
+                          key={booking.id}
+                          className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <td className="p-4">
+                            <span className="font-mono text-sm text-foreground">{booking.booking_code}</span>
+                          </td>
+                          <td className="p-4">
+                            <p className="font-medium text-foreground">{booking.customer_name}</p>
+                            <p className="text-sm text-muted-foreground">{booking.customer_phone}</p>
+                          </td>
+                          <td className="p-4 text-foreground whitespace-nowrap">{formatDate(booking.event_date)}</td>
+                          <td className="p-4 text-muted-foreground max-w-[120px] truncate">{booking.event_venue}</td>
+                          <td className="p-4">
+                            <Badge variant="secondary" className="text-xs">{booking.event_type}</Badge>
+                          </td>
+                          <td className="p-4">
+                            <BookingTypeBadge booking={booking} />
+                          </td>
+                          <td className="p-4">
+                            <Badge className={`${paymentStatusStyles[booking.payment_status] ?? paymentStatusStyles.PENDING} text-xs`}>
+                              {paymentStatusLabels[booking.payment_status] ?? 'Belum Bayar'}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button variant="ghost" size="icon" className="h-8 w-8"
+                                onClick={() => navigate(`/admin/bookings/${booking.id}`)}>
+                                <Eye size={16} />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}>
+                                <Trash2 size={16} />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
+              <Pagination
+                currentPage={currentBookingPage}
+                totalPages={totalBookingPages}
+                onPageChange={setCurrentBookingPage}
+                totalEntries={bookings.length}
+                entriesPerPage={ITEMS_PER_PAGE}
+                label="booking"
+              />
             </div>
           )}
         </TabsContent>
@@ -284,59 +320,69 @@ export default function Bookings() {
               </CardContent>
             </Card>
           ) : (
-            <div className="table-container">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Dibuat</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Kadaluarsa</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-                      <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookingLinks.map((link, index) => (
-                      <tr key={link.id}
-                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
-                        style={{ animationDelay: `${index * 50}ms` }}>
-                        <td className="p-4">
-                          <p className="font-medium text-foreground">{link.customer_name || `Link #${link.id}`}</p>
-                          <p className="text-sm text-muted-foreground">{link.customer_phone}</p>
-                        </td>
-                        <td className="p-4 text-muted-foreground">{formatDate(link.created_at)}</td>
-                        <td className="p-4 text-muted-foreground">{link.expires_at ? formatDate(link.expires_at) : '-'}</td>
-                        <td className="p-4">
-                          {link.is_used ? (
-                            <Badge className="bg-success/10 text-success border-success/20">Terisi</Badge>
-                          ) : isExpired(link.expires_at) ? (
-                            <Badge variant="destructive">Expired</Badge>
-                          ) : (
-                            <Badge className="bg-warning/10 text-warning border-warning/20">Belum Terisi</Badge>
-                          )}
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopyLink(link.token)}>
-                              <Link2 size={16} />
-                            </Button>
-                            {!link.is_used && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleRegenerateToken(link.id)}>
-                                <RefreshCw size={16} />
-                              </Button>
-                            )}
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                              onClick={() => handleDeleteLink(link.id)}>
-                              <Trash2 size={16} />
-                            </Button>
-                          </div>
-                        </td>
+            <div className="space-y-4">
+              <div className="table-container">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Dibuat</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Kadaluarsa</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
+                        <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {paginatedBookingLinks.map((link, index) => (
+                        <tr key={link.id}
+                          className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
+                          style={{ animationDelay: `${index * 50}ms` }}>
+                          <td className="p-4">
+                            <p className="font-medium text-foreground">{link.customer_name || `Link #${link.id}`}</p>
+                            <p className="text-sm text-muted-foreground">{link.customer_phone}</p>
+                          </td>
+                          <td className="p-4 text-muted-foreground">{formatDate(link.created_at)}</td>
+                          <td className="p-4 text-muted-foreground">{link.expires_at ? formatDate(link.expires_at) : '-'}</td>
+                          <td className="p-4">
+                            {link.is_used ? (
+                              <Badge className="bg-success/10 text-success border-success/20">Terisi</Badge>
+                            ) : isExpired(link.expires_at) ? (
+                              <Badge variant="destructive">Expired</Badge>
+                            ) : (
+                              <Badge className="bg-warning/10 text-warning border-warning/20">Belum Terisi</Badge>
+                            )}
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopyLink(link.token)}>
+                                <Link2 size={16} />
+                              </Button>
+                              {!link.is_used && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleRegenerateToken(link.id)}>
+                                  <RefreshCw size={16} />
+                                </Button>
+                              )}
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteLink(link.id)}>
+                                <Trash2 size={16} />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
+              <Pagination
+                currentPage={currentLinkPage}
+                totalPages={totalLinkPages}
+                onPageChange={setCurrentLinkPage}
+                totalEntries={bookingLinks.length}
+                entriesPerPage={ITEMS_PER_PAGE}
+                label="link"
+              />
             </div>
           )}
         </TabsContent>

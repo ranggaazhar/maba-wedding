@@ -32,8 +32,7 @@ const createPropertyValidation = [
   
   body('image_url')
     .optional()
-    .trim()
-    .isURL().withMessage('Image URL must be a valid URL'),
+    .trim(),
   
   body('created_by')
     .optional()
@@ -77,7 +76,6 @@ const updatePropertyValidation = [
   body('image_url')
     .optional()
     .trim()
-    .isURL().withMessage('Image URL must be a valid URL')
 ];
 
 const propertyIdValidation = [
@@ -89,49 +87,6 @@ const propertySlugValidation = [
   param('slug')
     .trim()
     .notEmpty().withMessage('Slug is required')
-];
-
-// Validation for PropertyImage
-const createPropertyImageValidation = [
-  param('propertyId')
-    .isInt({ min: 1 }).withMessage('Invalid property ID'),
-  
-  body('url')
-    .trim()
-    .notEmpty().withMessage('URL is required')
-    .isURL().withMessage('Must be a valid URL'),
-  
-  body('is_primary')
-    .optional()
-    .isBoolean().withMessage('is_primary must be a boolean'),
-  
-  body('display_order')
-    .optional()
-    .isInt({ min: 0 }).withMessage('Display order must be a positive integer')
-];
-
-const updatePropertyImageValidation = [
-  param('id')
-    .isInt({ min: 1 }).withMessage('Invalid image ID'),
-  
-  body('url')
-    .optional()
-    .trim()
-    .notEmpty().withMessage('URL cannot be empty')
-    .isURL().withMessage('Must be a valid URL'),
-  
-  body('is_primary')
-    .optional()
-    .isBoolean().withMessage('is_primary must be a boolean'),
-  
-  body('display_order')
-    .optional()
-    .isInt({ min: 0 }).withMessage('Display order must be a positive integer')
-];
-
-const imageIdValidation = [
-  param('id')
-    .isInt({ min: 1 }).withMessage('Invalid image ID')
 ];
 
 const validate = (req, res, next) => {
@@ -151,8 +106,5 @@ module.exports = {
   updatePropertyValidation,
   propertyIdValidation,
   propertySlugValidation,
-  createPropertyImageValidation,
-  updatePropertyImageValidation,
-  imageIdValidation,
   validate
 };

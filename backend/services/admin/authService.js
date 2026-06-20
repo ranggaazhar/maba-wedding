@@ -107,6 +107,7 @@ class AuthService {
       // Only update if there's data to update
       if (Object.keys(updateData).length > 0) {
         await admin.update(updateData);
+        await admin.reload(); // FIX: reload agar data yang dikembalikan segar
       }
 
       return {

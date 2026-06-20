@@ -2,14 +2,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Star, Check, X, Send, Globe, Award, MessageSquare,
-  Calendar, User, Tag, Loader2, Eye, EyeOff, BookmarkCheck, Bookmark, Trash2
+  ArrowLeft, Star, Check, X, Send, Globe, MessageSquare,
+  Calendar, User, Tag, Loader2, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Swal from "sweetalert2";
@@ -49,11 +47,6 @@ export default function ReviewDetail() {
   const [replyText, setReplyText] = useState("");
   const [isSavingReply, setIsSavingReply] = useState(false);
 
-  // Visibility state (local optimistic)
-  const [isPublished, setIsPublished] = useState(false);
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [isSavingVisibility, setIsSavingVisibility] = useState(false);
-
   const fetchReview = useCallback(async () => {
     if (!id) return;
     try {
@@ -62,8 +55,6 @@ export default function ReviewDetail() {
       if (res.success) {
         setReview(res.data);
         setReplyText(res.data.admin_reply || "");
-        setIsPublished(res.data.is_published);
-        setIsFeatured(res.data.is_featured);
       }
     } catch {
       Swal.fire("Error", "Gagal memuat data review", "error");
@@ -93,7 +84,7 @@ export default function ReviewDetail() {
     try {
       setIsActionLoading(true);
       await reviewApi.moderateReview(review.id, true);
-      Swal.fire({ icon: "success", title: "Review disetujui", timer: 1200, showConfirmButton: false });
+      Swal.fire({ icon: "success", title: "Review disetujui & dipublikasikan", timer: 1200, showConfirmButton: false });
       fetchReview();
     } catch { Swal.fire("Error", "Gagal menyetujui review", "error"); }
     finally { setIsActionLoading(false); }
@@ -102,9 +93,10 @@ export default function ReviewDetail() {
   const handleReject = async () => {
     const confirm = await Swal.fire({
       title: "Tolak review ini?",
+      text: "Review yang ditolak akan langsung dihapus secara permanen.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Ya, Tolak",
+      confirmButtonText: "Ya, Tolak & Hapus",
       cancelButtonText: "Batal",
       confirmButtonColor: "#ef4444",
     });
@@ -112,8 +104,8 @@ export default function ReviewDetail() {
     try {
       setIsActionLoading(true);
       await reviewApi.moderateReview(review.id, false);
-      Swal.fire({ icon: "info", title: "Review ditolak", timer: 1200, showConfirmButton: false });
-      fetchReview();
+      await Swal.fire({ icon: "info", title: "Review ditolak & dihapus", timer: 1200, showConfirmButton: false });
+      navigate("/admin/reviews");
     } catch { Swal.fire("Error", "Gagal menolak review", "error"); }
     finally { setIsActionLoading(false); }
   };
@@ -127,33 +119,6 @@ export default function ReviewDetail() {
       fetchReview();
     } catch { Swal.fire("Error", "Gagal menyimpan balasan", "error"); }
     finally { setIsSavingReply(false); }
-  };
-
-  const handleSaveVisibility = async () => {
-    try {
-      setIsSavingVisibility(true);
-
-      // Toggle publish jika berubah
-      if (isPublished !== review.is_published) {
-        await reviewApi.togglePublishStatus(review.id);
-      }
-
-      // Toggle featured jika berubah
-      if (isFeatured !== review.is_featured) {
-        await reviewApi.toggleFeaturedStatus(review.id);
-      }
-
-      Swal.fire({ icon: "success", title: "Pengaturan tersimpan", timer: 1200, showConfirmButton: false });
-      fetchReview();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal menyimpan pengaturan";
-      Swal.fire("Error", msg, "error");
-      // Rollback optimistic
-      setIsPublished(review.is_published);
-      setIsFeatured(review.is_featured);
-    } finally {
-      setIsSavingVisibility(false);
-    }
   };
 
   const handleDelete = async () => {
@@ -173,8 +138,6 @@ export default function ReviewDetail() {
       navigate("/admin/reviews");
     } catch { Swal.fire("Error", "Gagal menghapus review", "error"); }
   };
-
-  const visibilityChanged = isPublished !== review.is_published || isFeatured !== review.is_featured;
 
   return (
     <div className="space-y-6">
@@ -221,11 +184,11 @@ export default function ReviewDetail() {
               <h2 className="font-semibold text-foreground text-lg">Ulasan</h2>
               <Badge className={cn(
                 review.is_approved
-                  ? review.is_published ? "bg-success/10 text-success" : "bg-blue-100 text-blue-700"
+                  ? "bg-success/10 text-success"
                   : "bg-warning/10 text-warning"
               )}>
                 {review.is_approved
-                  ? review.is_published ? "Dipublikasikan" : "Disetujui"
+                  ? "Dipublikasikan"
                   : "Menunggu Moderasi"}
               </Badge>
             </div>
@@ -238,11 +201,6 @@ export default function ReviewDetail() {
                 <p className="font-semibold text-foreground text-lg">{review.customer_name}</p>
                 <RatingStars rating={review.rating} />
               </div>
-              {review.is_featured && (
-                <Badge className="ml-auto bg-warning/10 text-warning border-warning/20">
-                  ⭐ Featured
-                </Badge>
-              )}
             </div>
 
             <Separator />
@@ -353,52 +311,6 @@ export default function ReviewDetail() {
             )}
           </div>
 
-          {/* Visibility Settings — hanya tampil kalau sudah approved */}
-          {review.is_approved && (
-            <div className="table-container p-6 space-y-4">
-              <h3 className="font-semibold text-foreground">Pengaturan Visibilitas</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {isPublished ? <Eye size={16} className="text-muted-foreground" /> : <EyeOff size={16} className="text-muted-foreground" />}
-                    <Label htmlFor="published">Publikasikan</Label>
-                  </div>
-                  <Switch id="published" checked={isPublished} onCheckedChange={setIsPublished} />
-                </div>
-                <p className="text-xs text-muted-foreground -mt-2 ml-6">
-                  Tampilkan di halaman ulasan publik
-                </p>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {isFeatured ? <BookmarkCheck size={16} className="text-muted-foreground" /> : <Bookmark size={16} className="text-muted-foreground" />}
-                    <Label htmlFor="featured">Featured</Label>
-                  </div>
-                  <Switch
-                    id="featured"
-                    checked={isFeatured}
-                    onCheckedChange={setIsFeatured}
-                    disabled={!isPublished}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground -mt-2 ml-6">
-                  {!isPublished
-                    ? "Publikasikan dulu untuk mengaktifkan featured"
-                    : "Tampilkan di halaman beranda"}
-                </p>
-              </div>
-
-              <Button className="w-full" onClick={handleSaveVisibility}
-                disabled={!visibilityChanged || isSavingVisibility}>
-                {isSavingVisibility
-                  ? <Loader2 size={14} className="animate-spin mr-2" />
-                  : <Award size={14} className="mr-2" />}
-                Simpan Pengaturan
-              </Button>
-            </div>
-          )}
 
           {/* Moderator Info */}
           {review.moderator && (

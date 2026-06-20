@@ -66,7 +66,7 @@ class DashboardService {
         [fn('COUNT', col('id')), 'total'],
         [fn('AVG', col('rating')), 'avg_rating'],
       ],
-      where: { is_approved: true, is_published: true },
+      where: { is_approved: true },
       raw: true,
     });
 
@@ -136,7 +136,7 @@ class DashboardService {
   async getRecentReviews(limit = 5) {
     const reviews = await Review.findAll({
       attributes: ['id', 'customer_name', 'rating', 'review_text', 'submitted_at'],
-      where: { is_approved: true, is_published: true },
+      where: { is_approved: true },
       order: [['submitted_at', 'DESC']],
       limit: parseInt(limit),
     });

@@ -15,6 +15,7 @@ import {
 import { StatCard } from "@/components/admin/StatCard";
 import Swal from "sweetalert2";
 import { reviewApi, type Review, type ReviewLink, type ReviewStatistics } from "@/api/reviewApi";
+import { Pagination } from "@/components/admin/Pagination";
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -46,6 +47,13 @@ export default function Reviews() {
   const [isLinksLoading, setIsLinksLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState("all");
+
+  const [currentPendingPage, setCurrentPendingPage] = useState(1);
+  const [currentApprovedPage, setCurrentApprovedPage] = useState(1);
+  const [currentLinkPage, setCurrentLinkPage] = useState(1);
+
+  const ITEMS_PER_PAGE_REVIEWS = 5;
+  const ITEMS_PER_PAGE_LINKS = 10;
 
   const fetchReviews = useCallback(async () => {
     try {
@@ -151,6 +159,19 @@ export default function Reviews() {
     Swal.fire({ icon: "success", title: "Link disalin!", timer: 1000, showConfirmButton: false });
   };
 
+  // Reset pages when datasets or filters change
+  useEffect(() => {
+    setCurrentPendingPage(1);
+  }, [reviews]);
+
+  useEffect(() => {
+    setCurrentApprovedPage(1);
+  }, [searchQuery, ratingFilter]);
+
+  useEffect(() => {
+    setCurrentLinkPage(1);
+  }, [reviewLinks]);
+
   const pendingReviews = reviews.filter((r) => !r.is_approved);
   const approvedReviews = reviews.filter((r) => r.is_approved);
 
@@ -161,6 +182,25 @@ export default function Reviews() {
     const matchRating = ratingFilter === "all" || r.rating === parseInt(ratingFilter);
     return matchSearch && matchRating;
   });
+
+  // Paginated lists
+  const paginatedPending = pendingReviews.slice(
+    (currentPendingPage - 1) * ITEMS_PER_PAGE_REVIEWS,
+    currentPendingPage * ITEMS_PER_PAGE_REVIEWS
+  );
+  const totalPendingPages = Math.ceil(pendingReviews.length / ITEMS_PER_PAGE_REVIEWS);
+
+  const paginatedApproved = filteredApproved.slice(
+    (currentApprovedPage - 1) * ITEMS_PER_PAGE_REVIEWS,
+    currentApprovedPage * ITEMS_PER_PAGE_REVIEWS
+  );
+  const totalApprovedPages = Math.ceil(filteredApproved.length / ITEMS_PER_PAGE_REVIEWS);
+
+  const paginatedReviewLinks = reviewLinks.slice(
+    (currentLinkPage - 1) * ITEMS_PER_PAGE_LINKS,
+    currentLinkPage * ITEMS_PER_PAGE_LINKS
+  );
+  const totalLinkPages = Math.ceil(reviewLinks.length / ITEMS_PER_PAGE_LINKS);
 
   return (
     <div className="space-y-6">
@@ -212,51 +252,61 @@ export default function Reviews() {
               <p className="text-muted-foreground">Tidak ada review yang menunggu persetujuan</p>
             </div>
           ) : (
-            <div className="grid gap-4">
-              {pendingReviews.map((review, index) => (
-                <div key={review.id} className="table-container p-6 animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}>
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full gradient-ocean flex items-center justify-center text-primary-foreground font-semibold">
-                          {review.customer_name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-foreground">{review.customer_name}</p>
-                          <div className="flex items-center gap-2">
-                            <RatingStars rating={review.rating} />
-                            <span className="text-sm text-muted-foreground">• {formatDate(review.submitted_at)}</span>
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                {paginatedPending.map((review, index) => (
+                  <div key={review.id} className="table-container p-6 animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}>
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full gradient-ocean flex items-center justify-center text-primary-foreground font-semibold">
+                            {review.customer_name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-foreground">{review.customer_name}</p>
+                            <div className="flex items-center gap-2">
+                              <RatingStars rating={review.rating} />
+                              <span className="text-sm text-muted-foreground">• {formatDate(review.submitted_at)}</span>
+                            </div>
                           </div>
                         </div>
+                        <p className="text-foreground">{review.review_text}</p>
+                        {review.reviewLink?.booking && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">{review.reviewLink.booking.event_type}</Badge>
+                            <code className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                              {review.reviewLink.booking.booking_code}
+                            </code>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-foreground">{review.review_text}</p>
-                      {review.reviewLink?.booking && (
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">{review.reviewLink.booking.event_type}</Badge>
-                          <code className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">
-                            {review.reviewLink.booking.booking_code}
-                          </code>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="icon" className="h-9 w-9"
-                        onClick={() => navigate(`/admin/reviews/${review.id}`)}>
-                        <Eye size={16} />
-                      </Button>
-                      <Button className="bg-success hover:bg-success/90 text-success-foreground"
-                        onClick={() => handleApprove(review.id)}>
-                        <Check size={16} className="mr-2" />Setujui
-                      </Button>
-                      <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                        onClick={() => handleReject(review.id)}>
-                        <X size={16} className="mr-2" />Tolak
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="icon" className="h-9 w-9"
+                          onClick={() => navigate(`/admin/reviews/${review.id}`)}>
+                          <Eye size={16} />
+                        </Button>
+                        <Button className="bg-success hover:bg-success/90 text-success-foreground"
+                          onClick={() => handleApprove(review.id)}>
+                          <Check size={16} className="mr-2" />Setujui
+                        </Button>
+                        <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                          onClick={() => handleReject(review.id)}>
+                          <X size={16} className="mr-2" />Tolak
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              <Pagination
+                currentPage={currentPendingPage}
+                totalPages={totalPendingPages}
+                onPageChange={setCurrentPendingPage}
+                totalEntries={pendingReviews.length}
+                entriesPerPage={ITEMS_PER_PAGE_REVIEWS}
+                label="ulasan"
+              />
             </div>
           )}
         </TabsContent>
@@ -290,56 +340,59 @@ export default function Reviews() {
               <p className="text-muted-foreground">Tidak ada review yang cocok</p>
             </div>
           ) : (
-            <div className="grid gap-4">
-              {filteredApproved.map((review, index) => (
-                <div key={review.id} className="table-container p-6 animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}>
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full gradient-ocean flex items-center justify-center text-primary-foreground font-semibold">
-                          {review.customer_name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-foreground">{review.customer_name}</p>
-                            {review.is_featured && (
-                              <Badge className="bg-warning/10 text-warning border-warning/20">Featured</Badge>
-                            )}
-                            {review.is_published
-                              ? <Badge className="bg-success/10 text-success border-success/20">Published</Badge>
-                              : <Badge variant="secondary">Unpublished</Badge>
-                            }
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                {paginatedApproved.map((review, index) => (
+                  <div key={review.id} className="table-container p-6 animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}>
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full gradient-ocean flex items-center justify-center text-primary-foreground font-semibold">
+                            {review.customer_name.charAt(0)}
                           </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-semibold text-foreground">{review.customer_name}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RatingStars rating={review.rating} />
+                              <span className="text-sm text-muted-foreground">• {formatDate(review.submitted_at)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-foreground">{review.review_text}</p>
+                        {review.admin_reply && (
+                          <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Balasan Admin</p>
+                            <p className="text-sm text-foreground">{review.admin_reply}</p>
+                          </div>
+                        )}
+                        {review.reviewLink?.booking && (
                           <div className="flex items-center gap-2">
-                            <RatingStars rating={review.rating} />
-                            <span className="text-sm text-muted-foreground">• {formatDate(review.submitted_at)}</span>
+                            <Badge variant="secondary">{review.reviewLink.booking.event_type}</Badge>
+                            <code className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                              {review.reviewLink.booking.booking_code}
+                            </code>
                           </div>
-                        </div>
+                        )}
                       </div>
-                      <p className="text-foreground">{review.review_text}</p>
-                      {review.admin_reply && (
-                        <div className="bg-muted/50 rounded-lg p-3 border border-border">
-                          <p className="text-xs font-medium text-muted-foreground mb-1">Balasan Admin</p>
-                          <p className="text-sm text-foreground">{review.admin_reply}</p>
-                        </div>
-                      )}
-                      {review.reviewLink?.booking && (
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">{review.reviewLink.booking.event_type}</Badge>
-                          <code className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">
-                            {review.reviewLink.booking.booking_code}
-                          </code>
-                        </div>
-                      )}
+                      <Button variant="outline" size="icon" className="h-9 w-9"
+                        onClick={() => navigate(`/admin/reviews/${review.id}`)}>
+                        <Eye size={16} />
+                      </Button>
                     </div>
-                    <Button variant="outline" size="icon" className="h-9 w-9"
-                      onClick={() => navigate(`/admin/reviews/${review.id}`)}>
-                      <Eye size={16} />
-                    </Button>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              <Pagination
+                currentPage={currentApprovedPage}
+                totalPages={totalApprovedPages}
+                onPageChange={setCurrentApprovedPage}
+                totalEntries={filteredApproved.length}
+                entriesPerPage={ITEMS_PER_PAGE_REVIEWS}
+                label="ulasan"
+              />
             </div>
           )}
         </TabsContent>
@@ -350,87 +403,97 @@ export default function Reviews() {
           {isLinksLoading ? (
             <div className="flex justify-center py-16"><Loader2 className="animate-spin text-muted-foreground" size={32} /></div>
           ) : (
-            <div className="table-container">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Booking</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Dibuat</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Kadaluarsa</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-                      <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reviewLinks.length === 0 ? (
+            <div className="space-y-4">
+              <div className="table-container">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
                       <tr>
-                        <td colSpan={6} className="p-12 text-center text-muted-foreground">
-                          Belum ada review link
-                        </td>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Booking</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Dibuat</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Kadaluarsa</th>
+                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
+                        <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
                       </tr>
-                    ) : reviewLinks.map((link, index) => {
-                      const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
-                      return (
-                        <tr key={link.id}
-                          className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
-                          style={{ animationDelay: `${index * 50}ms` }}>
-                          <td className="p-4">
-                            <span className="font-mono text-sm">
-                              {link.booking?.booking_code || `#${link.booking_id}`}
-                            </span>
-                          </td>
-                          <td className="p-4 font-medium text-foreground">
-                            {link.booking?.customer_name || "-"}
-                          </td>
-                          <td className="p-4 text-muted-foreground">{formatDate(link.created_at)}</td>
-                          <td className="p-4 text-muted-foreground">
-                            <span className={cn(isExpired && "text-destructive")}>
-                              {formatDate(link.expires_at)}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {link.is_used
-                                ? <Badge className="bg-success/10 text-success border-success/20">Terisi</Badge>
-                                : isExpired
-                                  ? <Badge className="bg-destructive/10 text-destructive border-destructive/20">Kadaluarsa</Badge>
-                                  : <Badge className="bg-warning/10 text-warning border-warning/20">Belum Terisi</Badge>
-                              }
-                              {link.sent_at && (
-                                <Badge variant="outline" className="text-xs">Terkirim</Badge>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-4 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              {!link.is_used && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8" title="Copy Link"
-                                  onClick={() => handleCopyLink(link.token)}>
-                                  <Copy size={15} />
-                                </Button>
-                              )}
-                              {!link.is_used && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8" title="Regenerate Token"
-                                  onClick={() => handleRegenerateToken(link.id)}>
-                                  <RefreshCw size={15} />
-                                </Button>
-                              )}
-                              {!link.is_used && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                  title="Hapus" onClick={() => handleDeleteReviewLink(link.id)}>
-                                  <Trash2 size={15} />
-                                </Button>
-                              )}
-                            </div>
+                    </thead>
+                    <tbody>
+                      {reviewLinks.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-12 text-center text-muted-foreground">
+                            Belum ada review link
                           </td>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      ) : paginatedReviewLinks.map((link, index) => {
+                        const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
+                        return (
+                          <tr key={link.id}
+                            className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
+                            style={{ animationDelay: `${index * 50}ms` }}>
+                            <td className="p-4">
+                              <span className="font-mono text-sm">
+                                {link.booking?.booking_code || `#${link.booking_id}`}
+                              </span>
+                            </td>
+                            <td className="p-4 font-medium text-foreground">
+                              {link.booking?.customer_name || "-"}
+                            </td>
+                            <td className="p-4 text-muted-foreground">{formatDate(link.created_at)}</td>
+                            <td className="p-4 text-muted-foreground">
+                              <span className={cn(isExpired && "text-destructive")}>
+                                {formatDate(link.expires_at)}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {link.is_used
+                                  ? <Badge className="bg-success/10 text-success border-success/20">Terisi</Badge>
+                                  : isExpired
+                                    ? <Badge className="bg-destructive/10 text-destructive border-destructive/20">Kadaluarsa</Badge>
+                                    : <Badge className="bg-warning/10 text-warning border-warning/20">Belum Terisi</Badge>
+                                }
+                                {link.sent_at && (
+                                  <Badge variant="outline" className="text-xs">Terkirim</Badge>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                {!link.is_used && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Copy Link"
+                                    onClick={() => handleCopyLink(link.token)}>
+                                    <Copy size={15} />
+                                  </Button>
+                                )}
+                                {!link.is_used && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Regenerate Token"
+                                    onClick={() => handleRegenerateToken(link.id)}>
+                                    <RefreshCw size={15} />
+                                  </Button>
+                                )}
+                                {!link.is_used && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                    title="Hapus" onClick={() => handleDeleteReviewLink(link.id)}>
+                                    <Trash2 size={15} />
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
+              <Pagination
+                currentPage={currentLinkPage}
+                totalPages={totalLinkPages}
+                onPageChange={setCurrentLinkPage}
+                totalEntries={reviewLinks.length}
+                entriesPerPage={ITEMS_PER_PAGE_LINKS}
+                label="link"
+              />
             </div>
           )}
         </TabsContent>

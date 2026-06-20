@@ -100,7 +100,7 @@ export function useBookingEdit() {
       const [projectsRes, categoriesRes, propertiesRes, propCategoriesRes] = await Promise.all([
         projectApi.getAllProjects({ is_published: true, include_photos: true }),
         categoryApi.getAllCategories({ is_active: true }),
-        propertyApi.getAllProperties({ is_available: true, include_images: true }),
+        propertyApi.getAllProperties({ is_available: true }),
         propertyCategoryApi.getAllPropertyCategories({ is_active: true }),
       ]);
       if (projectsRes.success) setProjects(projectsRes.data);
@@ -190,16 +190,10 @@ export function useBookingEdit() {
       return;
     }
 
-    // Validasi: kalau bukan murni custom request, wajib ada model
+    // Validasi: booking non-custom wajib memiliki minimal 1 model dekorasi
+    // Booking pure custom request tidak memerlukan model
     if (!hasCustomRequest && selectedModels.length === 0) {
       Swal.fire('Error', 'Pilih minimal 1 model dekorasi', 'error');
-      setActiveTab('models');
-      return;
-    }
-
-    // Kalau kombinasi (punya custom request DAN model): wajib ada minimal 1 model
-    if (hasCustomRequest && selectedModels.length === 0) {
-      Swal.fire('Error', 'Booking kombinasi wajib memiliki minimal 1 model dekorasi', 'error');
       setActiveTab('models');
       return;
     }
@@ -252,8 +246,7 @@ export function useBookingEdit() {
   };
 
   const getPropertyImage = (property: Property) => {
-    const primaryImg = property.images?.find((img) => img.is_primary);
-    return primaryImg?.url || property.images?.[0]?.url || '';
+    return property.image_url || '';
   };
 
   return {

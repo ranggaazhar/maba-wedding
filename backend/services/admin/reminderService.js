@@ -129,13 +129,13 @@ Segera persiapkan perlengkapan!
     const fullMessage = `${header}\n\n${details}${footer}`;
 
     try {
-  console.log('Mengirim ke:', GROUP_TARGET);
-  console.log('Pesan:', fullMessage);
-  await whatsappService.sendMessage(GROUP_TARGET, fullMessage);
-  console.log(`Reminder H-5 berhasil dikirim ke group.`);
-} catch (err) {
-  console.error(`Gagal kirim reminder H-5:`, err.message);
-}
+      console.log('Mengirim ke:', GROUP_TARGET);
+      console.log('Pesan:', fullMessage);
+      await whatsappService.sendMessage(GROUP_TARGET, fullMessage);
+      console.log(`Reminder H-${daysAhead} berhasil dikirim ke group.`);
+    } catch (err) {
+      console.error(`Gagal kirim reminder H-${daysAhead}:`, err.message);
+    }
   }
 
   initCronJobs() {
@@ -147,7 +147,7 @@ Segera persiapkan perlengkapan!
       timezone: 'Asia/Jakarta'
     });
 
-    console.log('✅ Cron job reminder aktif: H-5 setiap hari jam 10.45 WIB (TEST)');
+    console.log('✅ Cron job reminder aktif: H-5 setiap hari jam 09:00 WIB');
   }
 }
 

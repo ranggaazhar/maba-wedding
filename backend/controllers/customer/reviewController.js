@@ -6,8 +6,6 @@ class ReviewController {
     try {
       const filters = {
         is_approved: req.query.is_approved === 'true' ? true : req.query.is_approved === 'false' ? false : undefined,
-        is_published: req.query.is_published === 'true' ? true : req.query.is_published === 'false' ? false : undefined,
-        is_featured: req.query.is_featured === 'true' ? true : req.query.is_featured === 'false' ? false : undefined,
         rating: req.query.rating ? parseInt(req.query.rating) : undefined,
         min_rating: req.query.min_rating ? parseInt(req.query.min_rating) : undefined,
         search: req.query.search,
@@ -156,52 +154,11 @@ class ReviewController {
     }
   }
   
-  async togglePublishStatus(req, res) {
-    try {
-      const { id } = req.params;
-      const review = await reviewService.togglePublishStatus(id);
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Review publish status toggled successfully',
-        data: review
-      });
-    } catch (error) {
-      const statusCode = error.message === 'Review not found' ? 404 :
-                        error.message.includes('Cannot publish') ? 400 : 500;
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message
-      });
-    }
-  }
-  
-  async toggleFeaturedStatus(req, res) {
-    try {
-      const { id } = req.params;
-      const review = await reviewService.toggleFeaturedStatus(id);
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Review featured status toggled successfully',
-        data: review
-      });
-    } catch (error) {
-      const statusCode = error.message === 'Review not found' ? 404 :
-                        error.message.includes('Cannot feature') ? 400 : 500;
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message
-      });
-    }
-  }
-  
   async getPublishedReviews(req, res) {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit) : null;
-      const featuredOnly = req.query.featured_only === 'true';
       
-      const reviews = await reviewService.getPublishedReviews(limit, featuredOnly);
+      const reviews = await reviewService.getPublishedReviews(limit);
       
       return res.status(200).json({
         success: true,

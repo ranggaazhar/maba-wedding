@@ -20,6 +20,7 @@ interface Testimonial {
   customer_name: string;
   review_text: string;
   rating: number;
+  admin_reply?: string;
 }
 
 // ── Skeleton helpers ──────────────────────────────────────────────────────────
@@ -453,6 +454,15 @@ export function Home() {
                       </Button>
                     </div>
                   </div>
+
+                  {activeTestimonial?.admin_reply && (
+                    <div className="mt-8 p-6 rounded-2xl bg-white/5 border border-white/10 text-left">
+                      <p className="text-xs text-[#A8DADC] font-semibold mb-1 uppercase tracking-wider">Balasan Maba Dekorasi:</p>
+                      <p className="text-base text-white/90 italic leading-relaxed">
+                        "{activeTestimonial.admin_reply}"
+                      </p>
+                    </div>
+                  )}
 
                   {/* Dots */}
                   <div className="flex justify-center gap-2 mt-8">

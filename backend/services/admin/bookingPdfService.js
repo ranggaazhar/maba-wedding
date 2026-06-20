@@ -54,7 +54,22 @@ class BookingPdfService {
           doc.font('Helvetica').text(`   Kategori : ${model.category?.name || '-'}`);
           doc.text(`   Harga    : ${this._formatRupiah(model.price)}`);
           if (model.notes) doc.text(`   Catatan  : ${model.notes}`);
-          doc.moveDown(0.2);
+
+          // Render model photo if available
+          const photo = model.project?.photos?.[0];
+          if (photo && photo.url) {
+            const resolved = this._resolveImagePath(photo.url);
+            if (resolved) {
+              doc.moveDown(0.2);
+              try {
+                doc.image(resolved, { fit: [150, 100] });
+                doc.moveDown(0.2);
+              } catch (imgError) {
+                console.error('Failed to embed model image:', imgError.message);
+              }
+            }
+          }
+          doc.moveDown(0.3);
         });
         doc.moveDown(0.5);
       }
@@ -69,36 +84,75 @@ class BookingPdfService {
           doc.font('Helvetica').text(`   Kategori  : ${prop.property_category}`);
           doc.text(`   Harga     : ${this._formatRupiah(prop.price)} × ${prop.quantity}`);
           doc.text(`   Subtotal  : ${this._formatRupiah(prop.subtotal)}`);
-          doc.moveDown(0.2);
+
+          // Render property image if available
+          const imageUrl = prop.property?.image_url;
+          if (imageUrl) {
+            const resolved = this._resolveImagePath(imageUrl);
+            if (resolved) {
+              doc.moveDown(0.2);
+              try {
+                doc.image(resolved, { fit: [120, 80] });
+                doc.moveDown(0.2);
+              } catch (imgError) {
+                console.error('Failed to embed property image:', imgError.message);
+              }
+            }
+          }
+          doc.moveDown(0.3);
         });
         doc.moveDown(0.5);
       }
 
-      // ── Harga ────────────────────────────────────────
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-      doc.moveDown(0.5);
-      doc.fontSize(13).font('Helvetica-Bold').text('RINCIAN HARGA');
-      doc.moveDown(0.3);
+      // ── Custom Request ──────────────────────────────
+      if (booking.customRequests && booking.customRequests.length > 0) {
+        doc.fontSize(13).font('Helvetica-Bold').text('REQUEST KUSTOM (CUSTOM REQUEST)');
+        doc.moveDown(0.3);
 
-      const totalEstimate = Number(booking.total_estimate || 0);
-      const dpAmount = Number(booking.dp_amount || Math.ceil(totalEstimate * 0.1));
-      const remaining = totalEstimate - dpAmount;
+        booking.customRequests.forEach((req, i) => {
+          doc.fontSize(10).font('Helvetica-Bold').text(`${i + 1}. ${req.title}`);
+          doc.font('Helvetica').text(`   Deskripsi  : ${req.description}`);
+          if (req.color_theme) doc.text(`   Warna Tema : ${req.color_theme}`);
+          if (req.estimated_price) doc.text(`   Estimasi Harga: ${this._formatRupiah(req.estimated_price)}`);
 
-      this._row(doc, 'Total Estimasi', this._formatRupiah(totalEstimate));
-      this._row(doc, 'DP Dibayar (10%)', this._formatRupiah(dpAmount));
+          // Render reference images
+          if (req.reference_images && req.reference_images.length > 0) {
+            doc.text(`   Foto Referensi:`);
+            doc.moveDown(0.2);
+            let startX = doc.x + 15;
+            let startY = doc.y;
+            let currentX = startX;
+            let currentY = startY;
+            let maxImageHeight = 80;
 
-      if (booking.bank_name) {
-        this._row(doc, 'Rekening Pengirim', `${booking.bank_name} - ${booking.account_number} a/n ${booking.account_name}`);
+            req.reference_images.forEach((imgUrl) => {
+              const resolved = this._resolveImagePath(imgUrl);
+              if (resolved) {
+                if (currentX + 110 > 545) { // page width boundary
+                  currentX = startX;
+                  currentY += maxImageHeight + 10;
+                  if (currentY + maxImageHeight > doc.page.height - doc.page.margins.bottom) {
+                    doc.addPage();
+                    currentY = doc.y;
+                  }
+                }
+                try {
+                  doc.image(resolved, currentX, currentY, { fit: [100, maxImageHeight] });
+                  currentX += 110;
+                } catch (imgError) {
+                  console.error('Failed to embed custom request image:', imgError.message);
+                }
+              }
+            });
+            doc.y = currentY + maxImageHeight + 10;
+            if (doc.y > doc.page.height - doc.page.margins.bottom) {
+              doc.addPage();
+            }
+          }
+          doc.moveDown(0.3);
+        });
+        doc.moveDown(0.5);
       }
-
-      doc.moveDown(0.3);
-      doc.fontSize(11).font('Helvetica-Bold').fillColor('#e74c3c')
-        .text(`Sisa Pelunasan: ${this._formatRupiah(remaining)}`, { align: 'right' });
-      doc.fillColor('#000000');
-      doc.moveDown(0.5);
-      doc.fontSize(9).font('Helvetica').fillColor('#666666')
-        .text('* Pelunasan dilakukan sebelum hari acara', { align: 'right' });
-      doc.fillColor('#000000');
 
       // ── Footer ───────────────────────────────────────
       doc.moveDown(2);
@@ -114,6 +168,27 @@ class BookingPdfService {
       stream.on('finish', () => resolve(filePath));
       stream.on('error', reject);
     });
+  }
+
+  _resolveImagePath(imageUrl) {
+    if (!imageUrl) return null;
+    let cleaned = imageUrl.replace(/\\/g, '/');
+    if (cleaned.startsWith('/')) {
+      cleaned = cleaned.substring(1);
+    }
+    if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+      const urlParts = cleaned.split('/uploads/');
+      if (urlParts.length > 1) {
+        cleaned = `uploads/${urlParts[1]}`;
+      } else {
+        return null;
+      }
+    }
+    const fullPath = path.join(process.cwd(), cleaned);
+    if (fs.existsSync(fullPath)) {
+      return fullPath;
+    }
+    return null;
   }
 
   _row(doc, label, value) {

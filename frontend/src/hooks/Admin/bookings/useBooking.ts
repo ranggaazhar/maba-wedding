@@ -46,28 +46,34 @@ export function useBookings() {
     try {
       setIsLoadingBookings(true);
 
-      const filters: Parameters<typeof bookingApi.getAllBookings>[0] = {};
+      const filters: Parameters<typeof bookingApi.getAllBookings>[0] = {
+        include_models: true,
+      };
       if (debouncedSearch.trim()) filters.search = debouncedSearch;
       if (paymentFilter !== 'all') filters.has_payment = paymentFilter === 'with_payment';
 
-      // Filter tipe booking
-      if (bookingTypeFilter === 'custom') {
+      // Kirim filter dasar ke backend
+      if (bookingTypeFilter === 'custom' || bookingTypeFilter === 'combination') {
         filters.has_custom_request = true;
       } else if (bookingTypeFilter === 'catalog') {
         filters.has_custom_request = false;
       }
-      // 'combination' → filter di client side setelah fetch
 
       const response = await bookingApi.getAllBookings(filters);
 
       if (response.success) {
         let data = response.data;
 
-        // Kombinasi: punya custom request DAN models → filter client side
-        if (bookingTypeFilter === 'combination') {
-          data = data.filter(
-            (b) => b.has_custom_request && (b.models?.length ?? 0) > 0
-          );
+        // Filter tipe booking secara akurat di client-side (karena data models sudah di-include)
+        if (bookingTypeFilter === 'custom') {
+          // Pure Custom = punya custom request, tapi tidak punya models
+          data = data.filter(b => b.has_custom_request && (!b.models || b.models.length === 0));
+        } else if (bookingTypeFilter === 'combination') {
+          // Kombinasi = punya custom request DAN punya models
+          data = data.filter(b => b.has_custom_request && b.models && b.models.length > 0);
+        } else if (bookingTypeFilter === 'catalog') {
+          // Katalog = tidak ada custom request
+          data = data.filter(b => !b.has_custom_request);
         }
 
         setBookings(data);

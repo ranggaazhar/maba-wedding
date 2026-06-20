@@ -1,14 +1,5 @@
 // src/types/property.types.ts
 
-export interface PropertyImage {
-  id: number;
-  property_id: number;
-  url: string;
-  is_primary: boolean;
-  display_order: number;
-  created_at: string;
-}
-
 export interface PropertyCategory {
   id: number;
   name: string;
@@ -29,7 +20,6 @@ export interface Property {
   created_at: string;
   updated_at: string;
   category?: PropertyCategory;
-  images?: PropertyImage[];
 }
 
 export interface CreatePropertyData {
@@ -42,7 +32,13 @@ export interface CreatePropertyData {
   image_url?: string;
 }
 
-export interface PropertyFormData extends CreatePropertyData {
-  images: File[];
-  primary_image_index?: number;
+export interface PropertyFormData {
+  name: string;
+  slug: string;
+  category_id: number;
+  description?: string;
+  price: string;
+  is_available?: boolean;
+  image_url?: string;
+  imageFile?: File | null;
 }

@@ -57,14 +57,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
-    is_published: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    is_featured: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
     admin_reply: {
       type: DataTypes.TEXT,
       allowNull: true

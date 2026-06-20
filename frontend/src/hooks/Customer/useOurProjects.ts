@@ -5,7 +5,7 @@ import { categoryApi } from '@/api/categoryApi';
 import type { Project } from '@/types/project.types';
 import type { Category } from '@/types/category.types';
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 6;
 
 export function useOurProjects() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);

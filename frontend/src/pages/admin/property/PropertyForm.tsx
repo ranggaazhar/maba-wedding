@@ -1,4 +1,4 @@
-import { ArrowLeft, Save, Loader2, Upload, X, Star, Package, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Upload, X, Package, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { usePropertyForm } from "@/hooks/Admin/property/usePropertyForm";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 export default function PropertyForm() {
   const {
@@ -22,15 +21,14 @@ export default function PropertyForm() {
     isFetching,
     isEditMode,
     categories,
-    existingImages,
+    existingImage,
+    imageFile,
+    imagePreview,
     formData,
-    imagePreviews,
     handleNameChange,
     handleFileChange,
-    handleRemoveImage,
-    handleDeleteExistingImage,
-    handleSetPrimaryExisting,
-    handleSetPrimaryImage,
+    handleRemovePreview,
+    handleRemoveExistingImage,
     handleSubmit,
     updateFormData,
     navigate,
@@ -44,6 +42,8 @@ export default function PropertyForm() {
       </div>
     );
   }
+
+  const activeImage = imagePreview || existingImage;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -67,42 +67,28 @@ export default function PropertyForm() {
           </p>
         </div>
         <Button 
-        className="gradient-ocean text-primary-foreground h-10 text-base font-medium"
-        type="submit" 
-        disabled={isLoading}>
+          className="gradient-ocean text-primary-foreground h-10 text-base font-medium"
+          type="submit" 
+          disabled={isLoading}
+        >
           {isLoading ? (
             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
           ) : (
             <><Save size={18} className="mr-2" /> Simpan</>
           )}
-          
         </Button>
       </div>
 
-      {/* Form Tabs */}
-      <Tabs defaultValue="property" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="property" className="flex items-center gap-2">
-            <Package size={16} />
-            Data Property
-          </TabsTrigger>
-          <TabsTrigger value="images" className="flex items-center gap-2">
-            <ImageIcon size={16} />
-            Upload Gambar
-            {(imagePreviews.length + existingImages.length) > 0 && (
-              <Badge variant="secondary" className="ml-1">
-                {imagePreviews.length + existingImages.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Property Data Tab */}
-        <TabsContent value="property">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Property Information Fields */}
+        <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Informasi Property</CardTitle>
-              <CardDescription>Lengkapi data property di bawah ini</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Package size={20} className="text-primary" />
+                Informasi Properti
+              </CardTitle>
+              <CardDescription>Lengkapi rincian data dekorasi atau properti di bawah ini</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Name */}
@@ -112,7 +98,7 @@ export default function PropertyForm() {
                   id="name"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="Masukkan nama property"
+                  placeholder="Masukkan nama properti"
                   required
                 />
               </div>
@@ -157,7 +143,7 @@ export default function PropertyForm() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => updateFormData("description", e.target.value)}
-                  placeholder="Masukkan deskripsi property"
+                  placeholder="Masukkan deskripsi properti dekorasi"
                   rows={4}
                 />
               </div>
@@ -165,15 +151,13 @@ export default function PropertyForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Price */}
                 <div className="space-y-2">
-                  <Label htmlFor="price">Harga (Rp) *</Label>
-                  <Input
+                  <Label htmlFor="price">Harga Sewa *</Label>
+                  <CurrencyInput
                     id="price"
-                    type="number"
                     value={formData.price}
-                    onChange={(e) => updateFormData("price", e.target.value)}
-                    placeholder="500000"
+                    onChange={(val) => updateFormData("price", val)}
+                    placeholder="Contoh: 500.000"
                     required
-                    min="0"
                   />
                 </div>
               </div>
@@ -183,7 +167,7 @@ export default function PropertyForm() {
                 <div className="space-y-0.5">
                   <Label htmlFor="available">Status Ketersediaan</Label>
                   <p className="text-sm text-muted-foreground">
-                    Property dapat disewa oleh customer
+                    Tentukan apakah properti ini siap sewa
                   </p>
                 </div>
                 <Switch
@@ -194,139 +178,73 @@ export default function PropertyForm() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </div>
 
-        {/* Images Tab */}
-        <TabsContent value="images">
+        {/* Right: Single Image Upload and Preview */}
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Upload Gambar Property</CardTitle>
-              <CardDescription>Tambahkan foto property (max 10 gambar)</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon size={20} className="text-primary" />
+                Gambar Properti
+              </CardTitle>
+              <CardDescription>Upload foto utama properti di sini</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Existing Images */}
-              {isEditMode && existingImages.length > 0 && (
-                <div className="space-y-3">
-                  <Label>Gambar yang Sudah Ada</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {existingImages.map((img) => (
-                      <div key={img.id} className="relative group">
-                        <div className="aspect-square rounded-lg overflow-hidden border-2 border-border">
-                          <img
-                            src={img.url}
-                            alt="Property"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        {img.is_primary && (
-                          <Badge className="absolute top-2 left-2 bg-amber-500">
-                            <Star size={12} className="mr-1 fill-current" />
-                            Utama
-                          </Badge>
-                        )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          {!img.is_primary && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => handleSetPrimaryExisting(img.id)}
-                            >
-                              <Star size={14} />
-                            </Button>
-                          )}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteExistingImage(img.id)}
-                          >
-                            <X size={14} />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+            <CardContent className="space-y-4">
+              {activeImage ? (
+                <div className="relative group rounded-xl overflow-hidden border-2 border-primary/20 aspect-square">
+                  <img
+                    src={activeImage}
+                    alt="Pratinjau properti"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={imagePreview ? handleRemovePreview : handleRemoveExistingImage}
+                      className="gap-2"
+                    >
+                      <X size={16} />
+                      Ganti Foto
+                    </Button>
                   </div>
                 </div>
-              )}
-
-              {/* Upload New Images */}
-              <div className="space-y-3">
-                <Label>{isEditMode ? "Tambah Gambar Baru" : "Upload Gambar"}</Label>
-                <div className="flex items-center gap-4">
+              ) : (
+                <div 
+                  onClick={() => document.getElementById('file-upload')?.click()}
+                  className="border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 rounded-xl aspect-square flex flex-col items-center justify-center p-6 gap-3 cursor-pointer transition-colors bg-muted/20"
+                >
+                  <div className="p-3 bg-muted rounded-full text-muted-foreground">
+                    <Upload size={24} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold text-sm">Pilih File Gambar</p>
+                    <p className="text-xs text-muted-foreground mt-1">Format: JPG, PNG, WEBP (Maks. 5MB)</p>
+                  </div>
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('file-upload')?.click()}
-                    disabled={imagePreviews.length >= 10}
+                    variant="secondary"
+                    size="sm"
+                    className="mt-2"
                   >
-                    <Upload size={18} className="mr-2" />
-                    Pilih Gambar
+                    Cari File
                   </Button>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    {imagePreviews.length} / 10 gambar
-                  </span>
-                </div>
-              </div>
-
-              {/* Image Previews */}
-              {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden border-2 border-primary/20">
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {index === formData.primary_image_index && (
-                        <Badge className="absolute top-2 left-2 bg-amber-500">
-                          <Star size={12} className="mr-1 fill-current" />
-                          Utama
-                        </Badge>
-                      )}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        {index !== formData.primary_image_index && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => handleSetPrimaryImage(index)}
-                          >
-                            <Star size={14} />
-                          </Button>
-                        )}
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleRemoveImage(index)}
-                        >
-                          <X size={14} />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
-
-              <p className="text-xs text-muted-foreground">
-                * Klik ikon bintang untuk mengatur gambar utama
-              </p>
+              
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </form>
   );
 }

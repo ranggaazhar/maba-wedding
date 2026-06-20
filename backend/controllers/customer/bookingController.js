@@ -10,6 +10,9 @@ class BookingController {
         event_date_from: req.query.event_date_from,
         event_date_to: req.query.event_date_to,
         has_payment: req.query.has_payment === 'true' ? true : req.query.has_payment === 'false' ? false : undefined,
+        payment_status: req.query.payment_status || undefined,          // FIX: teruskan filter payment_status
+        has_custom_request: req.query.has_custom_request === 'true' ? true  // FIX: teruskan filter has_custom_request
+          : req.query.has_custom_request === 'false' ? false : undefined,
         includeModels: req.query.include_models === 'true',
         includeProperties: req.query.include_properties === 'true',
         includeInvoice: req.query.include_invoice === 'true'

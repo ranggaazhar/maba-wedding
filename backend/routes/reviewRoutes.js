@@ -39,7 +39,5 @@ router.put('/:id',                authMiddleware, updateReviewValidation, valida
 router.delete('/:id',             authMiddleware, reviewIdValidation, validate, reviewController.deleteReview);
 router.post('/:id/reply',         authMiddleware, submitReplyValidation, validate, reviewController.submitReply);
 router.post('/:id/moderate',      authMiddleware, moderateReviewValidation, validate, reviewController.moderateReview);
-router.patch('/:id/toggle-publish',  authMiddleware, reviewIdValidation, validate, reviewController.togglePublishStatus);
-router.patch('/:id/toggle-featured', authMiddleware, reviewIdValidation, validate, reviewController.toggleFeaturedStatus);
 
 module.exports = router;

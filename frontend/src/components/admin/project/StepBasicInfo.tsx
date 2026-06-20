@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { CreateCompleteProjectData} from '@/types/project.types';
+import type { CreateCompleteProjectData } from '@/types/project.types';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { categoryApi } from '@/api/categoryApi';
 import type { Category } from '@/types/category.types';
 
@@ -19,26 +20,21 @@ interface StepBasicInfoProps {
   formData: CreateCompleteProjectData;
   updateFormData: (data: Partial<CreateCompleteProjectData>) => void;
   onNext: () => void;
+  errors: Record<string, string>;
+  setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
-interface FormErrors {
-  title?: string;
-  slug?: string;
-  category_id?: string;
-}
-
-export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) {
+export function StepBasicInfo({ formData, updateFormData, errors, setErrors }: StepBasicInfoProps) {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [errors] = useState<FormErrors>({});
   const [isFetching, setIsFetching] = useState(false);
 
   const fetchCategories = useCallback(async (isMounted: boolean) => {
     if (isFetching) return;
-    
+
     try {
       setIsFetching(true);
       const response = await categoryApi.getAllCategories({ is_active: true });
-      
+
       if (response.success && isMounted) {
         setCategories(response.data);
       }
@@ -55,11 +51,11 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
     return () => {
       isMounted = false;
     };
-  }, []); 
+  }, []);
 
   const handleTitleChange = (value: string) => {
     updateFormData({ title: value });
-    
+
     // Auto-generate slug
     const slug = value
       .toLowerCase()
@@ -68,6 +64,8 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
       .replace(/-+/g, '-')
       .trim();
     updateFormData({ slug });
+
+    setErrors((prev) => ({ ...prev, title: '', slug: '' }));
   };
 
 
@@ -77,7 +75,7 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
       <div className="table-container p-6">
         <h2 className="text-lg font-semibold text-foreground mb-4">Informasi Dasar Project</h2>
         <div className="space-y-4">
-          
+
           {/* Judul Project */}
           <div>
             <Label htmlFor="title">
@@ -101,12 +99,14 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
             <Input
               id="slug"
               value={formData.slug}
-              onChange={(e) => updateFormData({ slug: e.target.value })}
+              onChange={(e) => {
+                updateFormData({ slug: e.target.value });
+                setErrors((prev) => ({ ...prev, slug: '' }));
+              }}
               placeholder="ocean-blue-elegance"
               className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
             {errors.slug && <p className="text-sm text-destructive mt-1">{errors.slug}</p>}
-            <p className="text-xs text-muted-foreground mt-1">URL-friendly identifier (auto-generated dari judul)</p>
           </div>
 
           {/* Kategori */}
@@ -116,7 +116,10 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
             </Label>
             <Select
               value={formData.category_id ? String(formData.category_id) : ''}
-              onValueChange={(value) => updateFormData({ category_id: parseInt(value) })}
+              onValueChange={(value) => {
+                updateFormData({ category_id: parseInt(value) });
+                setErrors((prev) => ({ ...prev, category_id: '' }));
+              }}
             >
               <SelectTrigger className="mt-1 w-full bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm">
                 <SelectValue placeholder={isFetching ? "Memuat..." : "Pilih kategori"} />
@@ -134,57 +137,69 @@ export function StepBasicInfo({ formData, updateFormData }: StepBasicInfoProps) 
 
           {/* Harga */}
           <div>
-            <Label htmlFor="price">Harga (Rp)</Label>
-            <Input
+            <Label htmlFor="price">Harga (Rp) <span className="text-destructive">*</span></Label>
+            <CurrencyInput
               id="price"
-              type="number"
               value={formData.price || ''}
-              onChange={(e) => updateFormData({ price: e.target.value })}
-              placeholder="15000000"
-              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
+              onChange={(raw) => {
+                updateFormData({ price: raw });
+                setErrors((prev) => ({ ...prev, price: '' }));
+              }}
+              placeholder="Contoh: 15.000.000"
+              className="w-full bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
-            <p className="text-xs text-muted-foreground mt-1">Kosongkan jika tidak ingin menampilkan harga</p>
+            {errors.price && <p className="text-sm text-destructive mt-1">{errors.price}</p>}
+
           </div>
 
           {/* Tema */}
           <div>
-            <Label htmlFor="theme">Tema</Label>
+            <Label htmlFor="theme">Tema <span className="text-destructive">*</span></Label>
             <Input
               id="theme"
               value={formData.theme || ''}
-              onChange={(e) => updateFormData({ theme: e.target.value })}
+              onChange={(e) => {
+                updateFormData({ theme: e.target.value });
+                setErrors((prev) => ({ ...prev, theme: '' }));
+              }}
               placeholder="Contoh: Oceanic, Rustic, Modern"
               className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
-            <p className="text-xs text-muted-foreground mt-1">Tema utama dekorasi (opsional)</p>
+            {errors.theme && <p className="text-sm text-destructive mt-1">{errors.theme}</p>}
           </div>
 
           {/* Deskripsi */}
           <div>
-            <Label htmlFor="description">Deskripsi Project</Label>
+            <Label htmlFor="description">Deskripsi Project <span className="text-destructive">*</span></Label>
             <Textarea
               id="description"
               value={formData.description || ''}
-              onChange={(e) => updateFormData({ description: e.target.value })}
+              onChange={(e) => {
+                updateFormData({ description: e.target.value });
+                setErrors((prev) => ({ ...prev, description: '' }));
+              }}
               placeholder="Ceritakan tentang konsep dan detail project ini..."
               rows={4}
               className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
-            <p className="text-xs text-muted-foreground mt-1">Deskripsi umum tentang project</p>
+            {errors.description && <p className="text-sm text-destructive mt-1">{errors.description}</p>}
           </div>
 
           {/* Deskripsi Atmosfer */}
           <div>
-            <Label htmlFor="atmosphere_description">Deskripsi Suasana / Atmosfer</Label>
+            <Label htmlFor="atmosphere_description">Deskripsi Suasana / Atmosfer <span className="text-destructive">*</span></Label>
             <Textarea
               id="atmosphere_description"
               value={formData.atmosphere_description || ''}
-              onChange={(e) => updateFormData({ atmosphere_description: e.target.value })}
+              onChange={(e) => {
+                updateFormData({ atmosphere_description: e.target.value });
+                setErrors((prev) => ({ ...prev, atmosphere_description: '' }));
+              }}
               placeholder="Jelaskan suasana yang ingin diciptakan..."
               rows={3}
               className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />
-            <p className="text-xs text-muted-foreground mt-1">Deskripsi mood dan atmosphere yang dirasakan (opsional)</p>
+            {errors.atmosphere_description && <p className="text-sm text-destructive mt-1">{errors.atmosphere_description}</p>}
           </div>
 
           {/* Toggles */}

@@ -20,7 +20,7 @@ export function useProperties() {
   const fetchProperties = useCallback(async () => {
     try {
       setIsLoading(true);
-      const filters: { is_available?: boolean; category_id?: number; search?: string; include_images?: boolean } = { include_images: true };
+      const filters: { is_available?: boolean; category_id?: number; search?: string; include_images?: boolean } = {};
       if (selectedStatus !== 'all') filters.is_available = selectedStatus === 'available';
       if (selectedCategory !== 'all') filters.category_id = parseInt(selectedCategory);
       if (searchQuery.trim()) filters.search = searchQuery.trim();
@@ -81,8 +81,7 @@ export function useProperties() {
   };
 
   const getPrimaryImage = (property: Property) => {
-    const primaryImg = property.images?.find(img => img.is_primary);
-    return primaryImg?.url || property.images?.[0]?.url || property.image_url ||
+    return property.image_url ||
       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop';
   };
 

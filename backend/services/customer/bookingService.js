@@ -9,7 +9,6 @@ const {
   Project,
   ProjectPhoto,
   Property,
-  PropertyImage,
   Invoice
 } = require('../../models');
 const { sequelize } = require('../../models');
@@ -63,6 +62,11 @@ class BookingService {
     // ← filter payment_status
     if (filters.payment_status) {
       where.payment_status = filters.payment_status;
+    }
+
+    // ← filter has_custom_request (FIX: tambahkan support filter ini)
+    if (filters.has_custom_request !== undefined) {
+      where.has_custom_request = filters.has_custom_request;
     }
     
     const include = [
@@ -129,8 +133,7 @@ class BookingService {
           include: [
             { 
               model: Property, 
-              as: 'property',
-              include: [{ model: PropertyImage, as: 'images' }]
+              as: 'property'
             }
           ],
           separate: true
@@ -165,7 +168,11 @@ class BookingService {
           as: 'models',
           include: [
             { model: Category, as: 'category' },
-            { model: Project, as: 'project' }
+            { 
+              model: Project, 
+              as: 'project',
+              include: [{ model: ProjectPhoto, as: 'photos' }]
+            }
           ],
           separate: true,
           order: [['display_order', 'ASC']]
@@ -176,7 +183,12 @@ class BookingService {
           include: [{ model: Property, as: 'property' }],
           separate: true
         },
-        { model: Invoice, as: 'invoice' }
+        { model: Invoice, as: 'invoice' },
+        {
+          model: BookingCustomRequest,
+          as: 'customRequests',
+          order: [['created_at', 'DESC']]
+        }
       );
     }
     
@@ -365,8 +377,19 @@ class BookingService {
 
   async deleteBooking(id) {
     const booking = await this.getBookingById(id, true);
-    if (booking.invoice) throw new Error('Cannot delete booking with existing invoice');
-    if (booking.payment_proof_url) await FileHelper.deleteFile(booking.payment_proof_url);
+    
+    if (booking.invoice) {
+      const { Invoice } = require('../../models');
+      await Invoice.update(
+        { booking_id: null },
+        { where: { id: booking.invoice.id } }
+      );
+    }
+    
+    if (booking.payment_proof_url) {
+      await FileHelper.deleteFile(booking.payment_proof_url);
+    }
+    
     await booking.destroy();
     return { message: 'Booking deleted successfully' };
   }
@@ -465,7 +488,8 @@ class BookingService {
       bank_name:         paymentData.bank_name,
       account_number:    paymentData.account_number,
       account_name:      paymentData.account_name,
-      payment_date:      new Date()
+      payment_date:      new Date(),
+      payment_status:    'WAITING_CONFIRMATION', // FIX: harus berubah status saat submit URL bukti bayar
     });
     return booking;
   }

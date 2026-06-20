@@ -1,4 +1,4 @@
-const { Property, PropertyCategory, PropertyImage, Admin } = require('../../models');
+const { Property, PropertyCategory, Admin } = require('../../models');
 const { Op } = require('sequelize');
 
 class PropertyService {
@@ -35,14 +35,7 @@ class PropertyService {
       { model: PropertyCategory, as: 'category' }
     ];
     
-    if (filters.includeImages) {
-      include.push({ 
-        model: PropertyImage, 
-        as: 'images',
-        separate: true,
-        order: [['display_order', 'ASC'], ['created_at', 'ASC']]
-      });
-    }
+
     
     if (filters.includeCreator) {
       include.push({
@@ -71,12 +64,6 @@ class PropertyService {
     
     if (includeRelations) {
       include.push(
-        { 
-          model: PropertyImage, 
-          as: 'images',
-          separate: true,
-          order: [['display_order', 'ASC'], ['created_at', 'ASC']]
-        },
         {
           model: Admin,
           as: 'creator',
@@ -101,12 +88,6 @@ class PropertyService {
     
     if (includeRelations) {
       include.push(
-        { 
-          model: PropertyImage, 
-          as: 'images',
-          separate: true,
-          order: [['display_order', 'ASC'], ['created_at', 'ASC']]
-        },
         {
           model: Admin,
           as: 'creator',
@@ -168,20 +149,35 @@ class PropertyService {
       }
     }
     
+    if (data.image_url && property.image_url && data.image_url !== property.image_url) {
+      const FileHelper = require('../../utils/fileHelper');
+      await FileHelper.deleteFile(property.image_url);
+    }
+    
     await property.update(data);
     return await this.getPropertyById(id);
   }
   
   async deleteProperty(id) {
-    const property = await this.getPropertyById(id, true);
+    const property = await this.getPropertyById(id, false);
     
-    // Check associations
-    if (property.bookingProperties && property.bookingProperties.length > 0) {
+    // FIX BUG-3: Cek asosiasi dengan COUNT langsung ke DB
+    // (bookingProperties & invoiceItems tidak di-include di getPropertyById)
+    const { BookingProperty, InvoiceItem } = require('../../models');
+    
+    const bookingCount = await BookingProperty.count({ where: { property_id: id } });
+    if (bookingCount > 0) {
       throw new Error('Cannot delete property with existing bookings');
     }
     
-    if (property.invoiceItems && property.invoiceItems.length > 0) {
+    const invoiceCount = await InvoiceItem.count({ where: { property_id: id } });
+    if (invoiceCount > 0) {
       throw new Error('Cannot delete property with existing invoices');
+    }
+    
+    if (property.image_url) {
+      const FileHelper = require('../../utils/fileHelper');
+      await FileHelper.deleteFile(property.image_url);
     }
     
     await property.destroy();
@@ -207,14 +203,7 @@ class PropertyService {
     return await Property.findAll({
       where,
       include: [
-        { model: PropertyCategory, as: 'category' },
-        { 
-          model: PropertyImage, 
-          as: 'images',
-          where: { is_primary: true },
-          required: false,
-          limit: 1
-        }
+        { model: PropertyCategory, as: 'category' }
       ],
       order: [['name', 'ASC']]
     });

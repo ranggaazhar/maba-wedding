@@ -23,12 +23,14 @@ interface Step4Props {
     account_name: string;
   }) => void;
   totalEstimate: number; 
+  dpAmount: number;
+  bookingMode: 'catalog' | 'custom' | 'combination' | null;
+  eventType: string;
+  customRequestFee: number;
   onBack: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
 }
-
-const DP_PERCENTAGE = 0.1; 
 
 export default function Step4Payment({
   paymentFile,
@@ -36,16 +38,22 @@ export default function Step4Payment({
   paymentData,
   setPaymentData,
   totalEstimate,
+  dpAmount,
+  bookingMode,
+  eventType,
+  customRequestFee,
   onBack,
   onSubmit,
   isSubmitting,
 }: Step4Props) {
   const [preview, setPreview] = useState<string>("");
 
-  const dpAmount = Math.ceil(totalEstimate * DP_PERCENTAGE);
-
   const formatRupiah = (amount: number) =>
     new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
+
+  const catalogTotalEstimate = bookingMode === 'catalog' ? totalEstimate 
+    : Math.max(0, totalEstimate - customRequestFee);
+  const dpCatalogAmount = Math.ceil(catalogTotalEstimate * 0.1);
 
   // Validasi: semua field wajib diisi
   const isPaymentComplete =
@@ -118,14 +126,76 @@ export default function Step4Payment({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total Estimasi Dekorasi</span>
-              <span className="font-medium">{formatRupiah(totalEstimate)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Persentase DP</span>
-              <Badge variant="outline">10%</Badge>
-            </div>
+            {bookingMode === 'catalog' && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Estimasi Dekorasi</span>
+                  <span className="font-medium">{formatRupiah(totalEstimate)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Persentase DP</span>
+                  <Badge variant="outline">10%</Badge>
+                </div>
+                <Alert className="py-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    Keterangan: DP untuk booking katalog dihitung sebesar 10% dari total estimasi dekorasi.
+                  </AlertDescription>
+                </Alert>
+              </>
+            )}
+
+            {bookingMode === 'custom' && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">DP Flat Custom Request ({eventType})</span>
+                  <span className="font-medium">{formatRupiah(customRequestFee)}</span>
+                </div>
+                {catalogTotalEstimate > 0 && (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Estimasi Properti Tambahan</span>
+                      <span className="font-medium">{formatRupiah(catalogTotalEstimate)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">DP Properti Tambahan (10%)</span>
+                      <span className="font-medium">{formatRupiah(dpCatalogAmount)}</span>
+                    </div>
+                  </>
+                )}
+                <Alert className="py-2 border-orange-200 bg-orange-50 text-orange-800">
+                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                  <AlertDescription className="text-xs text-orange-800">
+                    Keterangan: Booking kustom <strong>{eventType}</strong> dikenakan biaya DP flat sebesar <strong>{formatRupiah(customRequestFee)}</strong> untuk mengkonfirmasi antrean & pengerjaan request dekorasi.
+                    {catalogTotalEstimate > 0 && ` Ditambah 10% DP dari properti tambahan (${formatRupiah(dpCatalogAmount)}).`}
+                  </AlertDescription>
+                </Alert>
+              </>
+            )}
+
+            {bookingMode === 'combination' && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Estimasi Katalog & Properti</span>
+                  <span className="font-medium">{formatRupiah(catalogTotalEstimate)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">DP Katalog & Properti (10%)</span>
+                  <span className="font-medium">{formatRupiah(dpCatalogAmount)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">DP Flat Custom Request ({eventType})</span>
+                  <span className="font-medium">{formatRupiah(customRequestFee)}</span>
+                </div>
+                <Alert className="py-2 border-purple-200 bg-purple-50 text-purple-800">
+                  <AlertCircle className="h-4 w-4 text-purple-600" />
+                  <AlertDescription className="text-xs text-purple-800">
+                    Keterangan: DP booking kombinasi terdiri dari 10% dekorasi katalog & properti (<strong>{formatRupiah(dpCatalogAmount)}</strong>) ditambah DP flat custom request <strong>{eventType}</strong> (<strong>{formatRupiah(customRequestFee)}</strong>).
+                  </AlertDescription>
+                </Alert>
+              </>
+            )}
+
             <Separator />
             <div className="flex justify-between items-center">
               <span className="font-semibold text-base">Total DP yang Harus Dibayar</span>

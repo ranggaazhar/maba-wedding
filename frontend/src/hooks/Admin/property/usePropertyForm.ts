@@ -1,9 +1,9 @@
-// src/hooks/usePropertyForm.ts
+// src/hooks/Admin/property/usePropertyForm.ts
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { propertyApi } from '@/api/propertyApi';
 import { propertyCategoryApi } from '@/api/propertyCategoryApi';
-import type { PropertyFormData, Property, PropertyImage } from '@/types/property.types';
+import type { PropertyFormData, Property } from '@/types/property.types';
 import type { PropertyCategory } from '@/types/propertyCategory.types';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -16,18 +16,19 @@ export const usePropertyForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(isEditMode);
   const [categories, setCategories] = useState<PropertyCategory[]>([]);
-  const [existingImages, setExistingImages] = useState<PropertyImage[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  
+  // Single image states
+  const [existingImage, setExistingImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<PropertyFormData>({
+  const [formData, setFormData] = useState<Omit<PropertyFormData, 'imageFile'>>({
     name: '',
     slug: '',
     category_id: 0,
     description: '',
     price: '',
     is_available: true,
-    images: [],
-    primary_image_index: 0,
   });
 
   // Fetch categories
@@ -59,10 +60,10 @@ export const usePropertyForm = () => {
             description: property.description || '',
             price: property.price,
             is_available: property.is_available,
-            images: [],
-            primary_image_index: 0,
           });
-          if (property.images) setExistingImages(property.images);
+          if (property.image_url) {
+            setExistingImage(property.image_url);
+          }
         }
       } catch (error: unknown) {
         const message = axios.isAxiosError(error)
@@ -84,54 +85,46 @@ export const usePropertyForm = () => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    setImagePreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
-    setFormData(prev => ({ ...prev, images: [...prev.images, ...files] }));
-  };
-
-  const handleRemoveImage = (index: number) => {
-    URL.revokeObjectURL(imagePreviews[index]);
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-      primary_image_index: prev.primary_image_index === index ? 0 : prev.primary_image_index,
-    }));
-  };
-
-  const handleDeleteExistingImage = async (imageId: number) => {
-    const result = await Swal.fire({
-      title: 'Hapus gambar?', text: 'Gambar akan dihapus permanen!', icon: 'warning',
-      showCancelButton: true, confirmButtonColor: '#d33',
-      confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
-    });
-    if (result.isConfirmed) {
-      try {
-        await propertyApi.deleteImage(imageId);
-        setExistingImages(prev => prev.filter(img => img.id !== imageId));
-        Swal.fire('Terhapus!', 'Gambar berhasil dihapus.', 'success');
-      } catch (error: unknown) {
-        Swal.fire('Gagal!', axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menghapus gambar', 'error');
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      
+      // 1. Validasi Tipe File (hanya gambar)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        Swal.fire('Format Tidak Sesuai', 'Hanya berkas gambar yang diperbolehkan (JPG, JPEG, PNG, GIF, WEBP)!', 'error');
+        e.target.value = ''; // Reset input
+        return;
       }
+      
+      // 2. Validasi Ukuran File (Maks. 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        Swal.fire('File Terlalu Besar', 'Ukuran gambar maksimal adalah 5MB!', 'error');
+        e.target.value = ''; // Reset input
+        return;
+      }
+
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      // Clear existing image so the preview takes precedence
+      setExistingImage(null);
     }
   };
 
-  const handleSetPrimaryExisting = async (imageId: number) => {
-    try {
-      await propertyApi.setPrimaryImage(imageId);
-      setExistingImages(prev => prev.map(img => ({ ...img, is_primary: img.id === imageId })));
-      Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Gambar utama diubah', timer: 1500, showConfirmButton: false });
-    } catch (error: unknown) {
-      Swal.fire('Gagal!', axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal mengubah gambar utama', 'error');
+  const handleRemovePreview = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
     }
+    setImageFile(null);
+    setImagePreview(null);
   };
 
-  const handleSetPrimaryImage = (index: number) => {
-    setFormData(prev => ({ ...prev, primary_image_index: index }));
+  const handleRemoveExistingImage = () => {
+    setExistingImage(null);
   };
 
-  const updateFormData = (field: keyof PropertyFormData, value: unknown) => {
+  const updateFormData = (field: keyof Omit<PropertyFormData, 'imageFile'>, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -143,18 +136,25 @@ export const usePropertyForm = () => {
     }
     try {
       setIsLoading(true);
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('slug', formData.slug);
+      submitData.append('category_id', String(formData.category_id));
+      submitData.append('description', formData.description || '');
+      submitData.append('price', formData.price);
+      submitData.append('is_available', String(formData.is_available));
+      
+      if (imageFile) {
+        submitData.append('image', imageFile);
+      } else if (!existingImage) {
+        submitData.append('image_url', '');
+      }
+
       if (isEditMode && id) {
-        await propertyApi.updateProperty(Number(id), {
-          name: formData.name, slug: formData.slug,
-          category_id: formData.category_id, description: formData.description,
-          price: formData.price, is_available: formData.is_available,
-        });
-        if (formData.images.length > 0) {
-          await propertyApi.uploadImages(Number(id), formData.images, formData.primary_image_index);
-        }
+        await propertyApi.updateProperty(Number(id), submitData);
         Swal.fire('Berhasil!', 'Property berhasil diupdate.', 'success');
       } else {
-        await propertyApi.createProperty(formData);
+        await propertyApi.createProperty(submitData);
         Swal.fire('Berhasil!', 'Property berhasil dibuat.', 'success');
       }
       navigate('/admin/properties');
@@ -166,10 +166,20 @@ export const usePropertyForm = () => {
   };
 
   return {
-    isLoading, isFetching, isEditMode,
-    categories, existingImages, formData, imagePreviews,
-    handleNameChange, handleFileChange, handleRemoveImage,
-    handleDeleteExistingImage, handleSetPrimaryExisting,
-    handleSetPrimaryImage, handleSubmit, updateFormData, navigate,
+    isLoading,
+    isFetching,
+    isEditMode,
+    categories,
+    existingImage,
+    imageFile,
+    imagePreview,
+    formData,
+    handleNameChange,
+    handleFileChange,
+    handleRemovePreview,
+    handleRemoveExistingImage,
+    handleSubmit,
+    updateFormData,
+    navigate,
   };
 };

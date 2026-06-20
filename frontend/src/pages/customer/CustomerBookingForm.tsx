@@ -24,9 +24,10 @@ const CATALOG_STEPS = [
   { id: 4, title: "Pembayaran",     icon: CreditCard,   description: "Bayar DP 10%" },
 ];
 const CUSTOM_STEPS = [
-  { id: 1, title: "Data Diri",      icon: User,     description: "Informasi customer" },
-  { id: 2, title: "Custom Request", icon: Sparkles, description: "Ajukan request" },
-  { id: 3, title: "Konfirmasi",     icon: CreditCard, description: "Kirim booking" },
+  { id: 1, title: "Data Diri",      icon: User,         description: "Informasi customer" },
+  { id: 2, title: "Custom Request", icon: Sparkles,     description: "Ajukan request" },
+  { id: 3, title: "Pilih Property", icon: ShoppingCart, description: "Properti tambahan" },
+  { id: 4, title: "Pembayaran",     icon: CreditCard,   description: "Bayar DP Flat" },
 ];
 const COMBINATION_STEPS = [
   { id: 1, title: "Data Diri",      icon: User,         description: "Informasi customer" },
@@ -136,7 +137,7 @@ export default function CustomerBookingForm() {
     handleRemoveCustomRequest, handleSetCustomRequestFiles,
     paymentFile, setPaymentFile,
     paymentData, setPaymentData,
-    totalEstimate,
+    totalEstimate, customRequestFee, dpAmount,
     handleNextFromStep1, handleNext, handleBack, handleSubmitBooking,
   } = useCustomerBookingForm();
 
@@ -226,41 +227,28 @@ export default function CustomerBookingForm() {
               />
             )}
 
-            {/* Step 3 — Custom: Konfirmasi */}
+            {/* Step 3 — Custom: Pilih Property (opsional) */}
             {currentStep === 3 && bookingMode === 'custom' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Konfirmasi Custom Request</h3>
-                  <p className="text-sm text-muted-foreground">Tinjau kembali request Anda sebelum dikirim ke admin.</p>
-                </div>
-                <Alert className="border-orange-200 bg-orange-50">
-                  <Sparkles className="h-4 w-4 text-orange-600" />
-                  <AlertDescription className="text-orange-800 text-sm">
-                    <strong>Booking Custom Request</strong> — Estimasi harga ditentukan admin. Tidak perlu bayar DP sekarang.
-                  </AlertDescription>
-                </Alert>
-                <Card className="bg-muted/30">
-                  <CardContent className="pt-6 space-y-3">
-                    <p className="text-sm font-medium">Ringkasan:</p>
-                    {customRequests.map((cr, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm">
-                        <Sparkles size={14} className="text-orange-500 mt-0.5 shrink-0" />
-                        <div>
-                          <p className="font-medium">{cr.title || `Request #${i + 1}`}</p>
-                          {cr.description && <p className="text-muted-foreground text-xs line-clamp-2">{cr.description}</p>}
-                          {customRequestFiles[i]?.length > 0 && <p className="text-xs text-muted-foreground">{customRequestFiles[i].length} foto referensi</p>}
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-                <div className="flex justify-between pt-4 border-t">
-                  <Button variant="outline" onClick={handleBack}><ArrowLeft size={16} className="mr-2" /> Kembali</Button>
-                  <Button onClick={handleSubmitBooking} disabled={isSubmitting} className="gap-2">
-                    {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Menyimpan...</> : <>Kirim Booking <ArrowRight size={16} /></>}
-                  </Button>
-                </div>
-              </div>
+              <Step3Properties
+                properties={formData.properties || []}
+                setProperties={(properties) => setFormData((prev) => ({ ...prev, properties }))}
+                onNext={handleNext}
+                onBack={handleBack}
+              />
+            )}
+
+            {/* Step 4 — Custom: Payment */}
+            {currentStep === 4 && bookingMode === 'custom' && (
+              <Step4Payment
+                paymentFile={paymentFile} setPaymentFile={setPaymentFile}
+                paymentData={paymentData} setPaymentData={setPaymentData}
+                totalEstimate={totalEstimate}
+                dpAmount={dpAmount}
+                bookingMode={bookingMode}
+                eventType={formData.event_type}
+                customRequestFee={customRequestFee}
+                onBack={handleBack} onSubmit={handleSubmitBooking} isSubmitting={isSubmitting}
+              />
             )}
 
             {/* Step 4 — Combination: Custom Request (opsional) */}
@@ -284,6 +272,10 @@ export default function CustomerBookingForm() {
                 paymentFile={paymentFile} setPaymentFile={setPaymentFile}
                 paymentData={paymentData} setPaymentData={setPaymentData}
                 totalEstimate={totalEstimate}
+                dpAmount={dpAmount}
+                bookingMode={bookingMode}
+                eventType={formData.event_type}
+                customRequestFee={customRequestFee}
                 onBack={handleBack} onSubmit={handleSubmitBooking} isSubmitting={isSubmitting}
               />
             )}
@@ -294,6 +286,10 @@ export default function CustomerBookingForm() {
                 paymentFile={paymentFile} setPaymentFile={setPaymentFile}
                 paymentData={paymentData} setPaymentData={setPaymentData}
                 totalEstimate={totalEstimate}
+                dpAmount={dpAmount}
+                bookingMode={bookingMode}
+                eventType={formData.event_type}
+                customRequestFee={customRequestFee}
                 onBack={handleBack} onSubmit={handleSubmitBooking} isSubmitting={isSubmitting}
               />
             )}

@@ -1,21 +1,24 @@
 // src/hooks/customer/useProperties.ts
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { propertyApi } from '@/api/propertyApi';
 import { propertyCategoryApi } from '@/api/propertyCategoryApi';
 import type { Property } from '@/types/property.types';
+
+const PAGE_SIZE = 8;
 
 export function useProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadAll() {
       const [propsResult, catsResult] = await Promise.allSettled([
-        propertyApi.getAllProperties({ is_available: true, include_images: true }),
+        propertyApi.getAllProperties({ is_available: true }),
         propertyCategoryApi.getAllPropertyCategories(),
       ]);
 
@@ -34,6 +37,11 @@ export function useProperties() {
     return () => { cancelled = true; };
   }, []);
 
+  const handleSetSearchQuery = useCallback((q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(1);
+  }, []);
+
   const filteredProperties = useMemo(() => {
     return properties.filter(p =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -42,9 +50,15 @@ export function useProperties() {
     );
   }, [properties, searchQuery]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredProperties.length / PAGE_SIZE));
+
+  const paginatedProperties = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredProperties.slice(start, start + PAGE_SIZE);
+  }, [filteredProperties, currentPage]);
+
   const getPrimaryImage = (property: Property): string => {
-    const primary = property.images?.find(i => i.is_primary) ?? property.images?.[0];
-    return primary?.url ?? '/placeholder.png';
+    return property.image_url ?? '/placeholder.png';
   };
 
   const formatPrice = (price: string | number | null | undefined): string => {
@@ -55,11 +69,15 @@ export function useProperties() {
   };
 
   return {
-    properties: filteredProperties,
+    properties: paginatedProperties,
+    totalProperties: filteredProperties.length,
     categories,
     isLoading,
     searchQuery,
-    setSearchQuery,
+    setSearchQuery: handleSetSearchQuery,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     getPrimaryImage,
     formatPrice,
   };

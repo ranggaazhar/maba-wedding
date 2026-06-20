@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useInvoices } from '@/hooks/Admin/invoices/useInvoices';
 import { Plus, Search, Eye, Edit, Trash2, FileText, Filter, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import type { InvoiceStatus } from '@/types/invoice.types';
+import { Pagination } from '@/components/admin/Pagination';
 
 const formatCurrency = (val: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
@@ -29,6 +31,19 @@ export default function Invoices() {
     isDeleting, navigate,
     handleDelete,
   } = useInvoices();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
+  const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
+  const paginatedInvoices = invoices.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
 
   return (
@@ -117,96 +132,106 @@ export default function Invoices() {
             </Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">No. Invoice</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Acara</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tgl Acara</th>
-                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">Total</th>
-                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">Sisa</th>
-                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((inv, index) => {
-                  const remaining = inv.total - inv.down_payment;
-                  const cfg = statusConfig[inv.status];
-                  return (
-                    <tr
-                      key={inv.id}
-                      className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <td className="p-4">
-                        <span className="font-mono text-sm font-medium text-foreground">
-                          {inv.invoice_number}
-                        </span>
-                        {inv.booking && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {inv.booking.booking_code}
-                          </p>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        <p className="font-medium text-foreground">{inv.customer_name}</p>
-                        <p className="text-sm text-muted-foreground">{inv.customer_phone}</p>
-                      </td>
-                      <td className="p-4">
-                        <p className="text-foreground">{inv.event_type || "-"}</p>
-                        <p className="text-sm text-muted-foreground truncate max-w-[160px]">{inv.event_venue}</p>
-                      </td>
-                      <td className="p-4 text-sm text-muted-foreground whitespace-nowrap">
-                        {formatDate(inv.event_date)}
-                      </td>
-                      <td className="p-4 text-right font-medium text-foreground whitespace-nowrap">
-                        {formatCurrency(inv.total)}
-                      </td>
-                      <td className="p-4 text-right text-sm whitespace-nowrap">
-                        {inv.status === "PAID" ? (
-                          <span className="text-green-600 font-medium">Lunas</span>
-                        ) : (
-                          <span className="text-destructive">{formatCurrency(remaining)}</span>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        <Badge className={cfg.className}>{cfg.label}</Badge>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost" size="icon" className="h-8 w-8"
-                            title="Lihat Detail"
-                            onClick={() => navigate(`/admin/invoices/${inv.id}`)}
-                          >
-                            <Eye size={16} />
-                          </Button>
-                          <Button
-                            variant="ghost" size="icon" className="h-8 w-8"
-                            title="Edit"
-                            onClick={() => navigate(`/admin/invoices/${inv.id}/edit`)}
-                            disabled={inv.status === "PAID"}
-                          >
-                            <Edit size={16} />
-                          </Button>
-                          <Button
-                            variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                            title="Hapus"
-                            onClick={() => setDeleteId(inv.id)}
-                            disabled={inv.status === "PAID"}
-                          >
-                            <Trash2 size={16} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">No. Invoice</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Customer</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Acara</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tgl Acara</th>
+                    <th className="text-right p-4 text-sm font-medium text-muted-foreground">Total</th>
+                    <th className="text-right p-4 text-sm font-medium text-muted-foreground">Sisa</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
+                    <th className="text-right p-4 text-sm font-medium text-muted-foreground">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedInvoices.map((inv, index) => {
+                    const remaining = inv.total - inv.down_payment;
+                    const cfg = statusConfig[inv.status];
+                    return (
+                      <tr
+                        key={inv.id}
+                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors animate-fade-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <td className="p-4">
+                          <span className="font-mono text-sm font-medium text-foreground">
+                            {inv.invoice_number}
+                          </span>
+                          {inv.booking && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {inv.booking.booking_code}
+                            </p>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <p className="font-medium text-foreground">{inv.customer_name}</p>
+                          <p className="text-sm text-muted-foreground">{inv.customer_phone}</p>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-foreground">{inv.event_type || "-"}</p>
+                          <p className="text-sm text-muted-foreground truncate max-w-[160px]">{inv.event_venue}</p>
+                        </td>
+                        <td className="p-4 text-sm text-muted-foreground whitespace-nowrap">
+                          {formatDate(inv.event_date)}
+                        </td>
+                        <td className="p-4 text-right font-medium text-foreground whitespace-nowrap">
+                          {formatCurrency(inv.total)}
+                        </td>
+                        <td className="p-4 text-right text-sm whitespace-nowrap">
+                          {inv.status === "PAID" ? (
+                            <span className="text-green-600 font-medium">Lunas</span>
+                          ) : (
+                            <span className="text-destructive">{formatCurrency(remaining)}</span>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <Badge className={cfg.className}>{cfg.label}</Badge>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost" size="icon" className="h-8 w-8"
+                              title="Lihat Detail"
+                              onClick={() => navigate(`/admin/invoices/${inv.id}`)}
+                            >
+                              <Eye size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost" size="icon" className="h-8 w-8"
+                              title="Edit"
+                              onClick={() => navigate(`/admin/invoices/${inv.id}/edit`)}
+                              disabled={inv.status === "PAID"}
+                            >
+                              <Edit size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              title="Hapus"
+                              onClick={() => setDeleteId(inv.id)}
+                              disabled={inv.status === "PAID"}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalEntries={invoices.length}
+              entriesPerPage={ITEMS_PER_PAGE}
+              label="invoice"
+            />
           </div>
         )}
       </div>

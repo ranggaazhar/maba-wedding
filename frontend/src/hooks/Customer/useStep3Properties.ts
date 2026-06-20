@@ -56,9 +56,9 @@ export function useStep3Properties(properties: BookingProperty[], setProperties:
 
   const handleRemoveProperty = (index: number) => setProperties(properties.filter((_, i) => i !== index));
 
+  // FIX: Property sekarang pakai single image_url, bukan array images[]
   const getPrimaryImage = (property: Property) => {
-    const primaryImg = property.images?.find(img => img.is_primary);
-    return primaryImg?.url || property.images?.[0]?.url || '';
+    return property.image_url || '';
   };
 
   const calculateTotal = () => properties.reduce((sum, prop) => sum + Number(prop.subtotal), 0);

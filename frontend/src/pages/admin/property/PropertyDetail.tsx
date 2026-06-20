@@ -107,37 +107,7 @@ export default function PropertyDetail() {
             </CardContent>
           </Card>
 
-          {property.images && property.images.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <ImageIcon size={18} /> Gallery ({property.images.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                  {property.images.map((img) => (
-                    <button
-                      key={img.id}
-                      onClick={() => setSelectedImage(img.url)}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
-                        selectedImage === img.url
-                          ? 'border-primary ring-2 ring-primary/20 scale-105'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <img src={img.url} alt={`${property.name} ${img.id}`} className="w-full h-full object-cover" />
-                      {img.is_primary && (
-                        <div className="absolute top-1 right-1 bg-amber-500 rounded-full p-1 shadow-md">
-                          <Star size={10} className="text-white fill-current" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
           {property.description && (
             <Card>

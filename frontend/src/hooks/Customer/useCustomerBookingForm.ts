@@ -56,20 +56,57 @@ export function useCustomerBookingForm() {
     account_name: '',
   });
 
-  // ── Total hanya dari katalog ──────────────────────────────────────────────
+  // ── Biaya dasar custom request berdasarkan jenis acara ──────────────────
+  const CUSTOM_REQUEST_FEES: Record<string, number> = {
+    Wedding:    1_000_000,
+    Engagement:   300_000,
+  };
+
+  // Fee ini berlaku jika booking memiliki custom request
+  const customRequestFee = (() => {
+    const hasCustomMode = bookingMode === 'custom' || bookingMode === 'combination';
+    if (!hasCustomMode) return 0;
+    return CUSTOM_REQUEST_FEES[formData.event_type] ?? 0;
+  })();
+
+  // ── Total: katalog + properti + biaya custom request ─────────────────────
   const totalEstimate = (() => {
-    if (bookingMode === 'custom') return 0;
     let total = 0;
     formData.models?.forEach((m) => { total += Number(m.price || 0); });
     formData.properties?.forEach((p) => { total += Number(p.subtotal || 0); });
+    // Tambahkan biaya base custom request jika ada
+    total += customRequestFee;
     return total;
   })();
 
-  const dpAmount = totalEstimate > 0 ? Math.ceil(totalEstimate * 0.1) : 0;
+  const dpAmount = (() => {
+    // 1. Hitung total katalog (models + properties)
+    let catalogTotal = 0;
+    formData.models?.forEach((m) => { catalogTotal += Number(m.price || 0); });
+    formData.properties?.forEach((p) => { catalogTotal += Number(p.subtotal || 0); });
+    const dpCatalog = Math.ceil(catalogTotal * 0.1);
+
+    if (bookingMode === 'catalog') {
+      return dpCatalog;
+    }
+
+    // Untuk custom & kombinasi, DP flat custom request sesuai jenis acara
+    const dpCustomRequest = customRequestFee; // 1.000.000 (Wedding) / 300.000 (Engagement)
+
+    if (bookingMode === 'custom') {
+      // DP = flat DP custom request + 10% properti (jika ada)
+      return dpCustomRequest + dpCatalog;
+    }
+    if (bookingMode === 'combination') {
+      // DP = 10% katalog (model + properti) + flat DP custom request
+      return dpCatalog + dpCustomRequest;
+    }
+    return 0;
+  })();
 
   const totalSteps = !bookingMode ? 99 
     : bookingMode === 'catalog'     ? 4  // CATALOG_STEPS has 4 steps
-    : bookingMode === 'custom'      ? 3  // CUSTOM_STEPS has 3 steps
+    : bookingMode === 'custom'      ? 4  // CUSTOM_STEPS now has 4 steps (+ property)
     : 5;                                 // COMBINATION_STEPS has 5 steps
   useEffect(() => {
     const validateLink = async () => {
@@ -260,6 +297,7 @@ export function useCustomerBookingForm() {
 
     // Payment
     totalEstimate,
+    customRequestFee,
     dpAmount,
     paymentFile,
     setPaymentFile,

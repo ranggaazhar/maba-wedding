@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { propertyApi } from '@/api/propertyApi';
-import type { Property, PropertyImage } from '@/types/property.types';
+import type { Property } from '@/types/property.types';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
@@ -20,8 +20,7 @@ export function usePropertyDetail() {
       const response = await propertyApi.getPropertyById(Number(id));
       if (response.success) {
         setProperty(response.data);
-        const primaryImg = response.data.images?.find((p: PropertyImage) => p.is_primary);
-        setSelectedImage(primaryImg?.url || response.data.images?.[0]?.url || '');
+        setSelectedImage(response.data.image_url || '');
       }
     } catch (error: unknown) {
       const message = axios.isAxiosError(error) ? error.response?.data?.message : 'Terjadi kesalahan saat memuat data';

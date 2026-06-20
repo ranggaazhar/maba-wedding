@@ -191,7 +191,8 @@ class InvoiceService {
     const booking = await Booking.findByPk(bookingId, {
       include: [
         { model: require('../../models').BookingModel,    as: 'models',     include: [{ model: Project,  as: 'project'  }] },
-        { model: require('../../models').BookingProperty, as: 'properties', include: [{ model: Property, as: 'property' }] }
+        { model: require('../../models').BookingProperty, as: 'properties', include: [{ model: Property, as: 'property' }] },
+        { model: require('../../models').BookingCustomRequest, as: 'customRequests' }
       ]
     });
 
@@ -235,6 +236,21 @@ class InvoiceService {
         });
       }
 
+      // Import custom requests
+      for (const req of booking.customRequests || []) {
+        const price = parseFloat(req.estimated_price || 0);
+        items.push({
+          item_name:     `Custom Request: ${req.title}`,
+          item_type:     'item',
+          description:   req.description || null,
+          quantity:      1,
+          unit_price:    price,
+          subtotal:      price,
+          display_order: order++
+        });
+        total += price;
+      }
+
       const invoice = await Invoice.create({
         invoice_number:   await this._generateUniqueNumber(),
         booking_id:       bookingId,
@@ -276,10 +292,7 @@ class InvoiceService {
   }
 
   async deleteInvoice(id) {
-    const invoice = await this.getInvoiceById(id);
-    if (invoice.status === 'PAID') throw new Error('Invoice yang sudah lunas tidak bisa dihapus');
-    await invoice.destroy();
-    return { message: 'Invoice deleted successfully' };
+    throw new Error('Data invoice penting dan tidak diperbolehkan untuk dihapus demi menjaga integritas data keuangan.');
   }
 
   async markAsSent(id) {
@@ -497,7 +510,8 @@ class InvoiceService {
     const waResult = await whatsappService.sendInvoice(invoice, pdfRelative);
 
     // 5. Update status → SENT kalau masih DRAFT
-    if (invoice.status === 'DRAFT') {
+    const wasUpdated = invoice.status === 'DRAFT';
+    if (wasUpdated) {
       await Invoice.update({ status: 'SENT' }, { where: { id: invoiceId } });
     }
 
@@ -507,7 +521,7 @@ class InvoiceService {
       message: waResult.message,
       pdf_url: `${BASE_URL}/${pdfRelative}`,
       whatsapp_sent: waResult.success,
-      status_updated: invoice.status === 'DRAFT',
+      status_updated: wasUpdated,
     };
   }
 }

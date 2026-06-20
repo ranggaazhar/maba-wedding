@@ -203,7 +203,7 @@ export function StepReview({ formData, goToStep, isEdit = false, existingPhotos 
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="bg-card border rounded-lg p-4 text-center">
           <p className="text-2xl font-bold text-primary">{formData.photos?.length || 0}</p>
           <p className="text-xs text-muted-foreground mt-1">Foto Baru</p>
