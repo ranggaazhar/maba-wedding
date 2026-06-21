@@ -330,7 +330,7 @@ export function Home() {
                 >
                   {featuredProjects.map((project) => (
                     <div key={project.id} className="w-1/3 flex-shrink-0 px-4">
-                      <Link to={`/projects/${project.id}`}>
+                      <Link to={`/projects/${project.slug}`}>
                         <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-2 border-transparent hover:border-[#A8DADC]">
                           <div className="aspect-[4/5] overflow-hidden relative">
                             <img

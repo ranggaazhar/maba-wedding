@@ -234,7 +234,7 @@ export default function Step4Payment({
               <Input
                 id="bank_name"
                 value={paymentData.bank_name}
-                onChange={(e) => setPaymentData({ ...paymentData, bank_name: e.target.value })}
+                onChange={(e) => setPaymentData({ ...paymentData, bank_name: e.target.value.replace(/[^a-zA-Z\s]/g, '') })}
                 placeholder="Contoh: BCA, Mandiri, BRI"
               />
             </div>
@@ -246,7 +246,7 @@ export default function Step4Payment({
               <Input
                 id="account_number"
                 value={paymentData.account_number}
-                onChange={(e) => setPaymentData({ ...paymentData, account_number: e.target.value })}
+                onChange={(e) => setPaymentData({ ...paymentData, account_number: e.target.value.replace(/[^0-9]/g, '') })}
                 placeholder="1234567890"
               />
             </div>
@@ -258,7 +258,7 @@ export default function Step4Payment({
               <Input
                 id="account_name"
                 value={paymentData.account_name}
-                onChange={(e) => setPaymentData({ ...paymentData, account_name: e.target.value })}
+                onChange={(e) => setPaymentData({ ...paymentData, account_name: e.target.value.replace(/[^a-zA-Z\s]/g, '') })}
                 placeholder="Nama sesuai rekening"
               />
             </div>

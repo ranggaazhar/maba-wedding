@@ -49,6 +49,6 @@ router.post('/:id/payment-proof/upload',
 );
 router.post('/:id/submit-payment',   bookingIdValidation, submitPaymentValidation, validate, bookingController.submitPayment);
 router.post('/:id/confirm-payment',  authMiddleware, bookingIdValidation, validate, bookingController.confirmPayment);
-router.post('/:id/reject-payment',   authMiddleware, bookingIdValidation, validate, bookingController.rejectPayment);
+router.delete('/:id/payment-proof',   authMiddleware, bookingIdValidation, validate, bookingController.deletePaymentProof);
 
 module.exports = router;

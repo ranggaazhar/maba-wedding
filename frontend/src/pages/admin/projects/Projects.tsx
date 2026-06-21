@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, MoreHorizontal, Eye, Edit, Trash2, ImageIcon, Loader2, Star } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Eye, Edit, Trash2, ImageIcon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -91,7 +91,7 @@ export default function Projects() {
       {/* Content */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-           <div className="flex flex-col items-center justify-center py-12 gap-3">
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
             <p className="text-sm text-muted-foreground">Memuat data...</p>
           </div>
@@ -144,6 +144,7 @@ export default function Projects() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-destructive"
+                          disabled={project.is_deletable === false}
                           onClick={() => handleDelete(project.id, project.title)}
                         >
                           <Trash2 size={14} className="mr-2" /> Hapus

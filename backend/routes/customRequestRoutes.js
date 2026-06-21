@@ -8,7 +8,6 @@ const { processMultipleImages } = require('../middleware/imageProcessor');
 const {
   createCustomRequestValidation,
   updateCustomRequestValidation,
-  reviewCustomRequestValidation,
   customRequestIdValidation,
   validate,
 } = require('../validators/customRequestValidator');
@@ -25,13 +24,6 @@ router.get(
   customRequestController.getAll
 );
 
-// PATCH /api/admin/custom-requests/:id/review
-router.patch(
-  '/admin/custom-requests/:id/review',
-  authMiddleware,
-  reviewCustomRequestValidation, validate,
-  customRequestController.review
-);
 
 // =============================================================================
 // CUSTOMER ROUTES (public)

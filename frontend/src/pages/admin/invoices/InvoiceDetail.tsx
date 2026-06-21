@@ -22,7 +22,6 @@ const statusConfig: Record<InvoiceStatus, { label: string; className: string; ic
   DRAFT:   { label: 'Draft',     className: 'bg-muted text-muted-foreground border-border',    icon: <Clock size={14} /> },
   SENT:    { label: 'Terkirim',  className: 'bg-blue-100 text-blue-700 border-blue-200',       icon: <Send size={14} /> },
   PAID:    { label: 'Lunas',     className: 'bg-green-100 text-green-700 border-green-200',    icon: <CheckCircle size={14} /> },
-  OVERDUE: { label: 'Terlambat', className: 'bg-red-100 text-red-700 border-red-200',          icon: <AlertTriangle size={14} /> },
 };
 
 const itemTypeLabel: Record<string, { label: string; className: string }> = {
@@ -38,7 +37,6 @@ export default function InvoiceDetail() {
     isActionLoading,
     calculatedTotal, navigate,
     handleSendWhatsapp, handleMarkAsPaid,
-    handleMarkAsOverdue,
   } = useInvoiceDetail();
 
   if (isLoading) {
@@ -251,7 +249,7 @@ export default function InvoiceDetail() {
               </div>
             </div>
 
-            {(invoice.status === 'SENT' || invoice.status === 'OVERDUE') && (
+            {invoice.status === 'SENT' && (
               <Button
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
                 size="sm"
@@ -263,17 +261,6 @@ export default function InvoiceDetail() {
                   : <CheckCircle size={16} className="mr-2" />
                 }
                 Tandai Lunas
-              </Button>
-            )}
-            {invoice.status === 'SENT' && (
-              <Button
-                variant="outline" size="sm"
-                className="w-full text-destructive hover:bg-destructive/10"
-                onClick={handleMarkAsOverdue}
-                disabled={isActionLoading}
-              >
-                <AlertTriangle size={16} className="mr-2" />
-                Tandai Terlambat
               </Button>
             )}
           </div>

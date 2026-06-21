@@ -34,6 +34,7 @@ export interface Project {
   category?: { id: number; name: string };
   photos?: ProjectPhoto[];
   includes?: ProjectInclude[];
+  is_deletable?: boolean;
 }
 
 export interface PhotoWithMetadata {

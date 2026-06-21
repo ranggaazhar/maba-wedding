@@ -20,6 +20,7 @@ export interface Property {
   created_at: string;
   updated_at: string;
   category?: PropertyCategory;
+  is_deletable?: boolean;
 }
 
 export interface CreatePropertyData {

@@ -82,7 +82,7 @@ export default function PropertyDetail() {
     >
       <Edit size={16} className="mr-2" /> Edit
     </Button>
-    <Button variant="destructive" size="sm" onClick={handleDelete}>
+    <Button variant="destructive" size="sm" onClick={handleDelete} disabled={property.is_deletable === false}>
       <Trash2 size={16} className="mr-2" /> Hapus
     </Button>
   </div>

@@ -92,37 +92,36 @@ class InvoiceService {
   }
 
   async getStatistics() {
-  const total = await Invoice.count();
-  const draft   = await Invoice.count({ where: { status: 'DRAFT' } });
-  const sent    = await Invoice.count({ where: { status: 'SENT' } });
-  const paid    = await Invoice.count({ where: { status: 'PAID' } });
-  const overdue = await Invoice.count({ where: { status: 'OVERDUE' } });
-  const thisMonth = await Invoice.count({
-    where: { created_at: { [Op.gte]: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } }
-  });
+    const total = await Invoice.count();
+    const draft   = await Invoice.count({ where: { status: 'DRAFT' } });
+    const sent    = await Invoice.count({ where: { status: 'SENT' } });
+    const paid    = await Invoice.count({ where: { status: 'PAID' } });
+    const thisMonth = await Invoice.count({
+      where: { created_at: { [Op.gte]: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } }
+    });
 
-  const totalAmount      = parseFloat(await Invoice.sum('total') || 0);
-  const totalDownPayment = parseFloat(await Invoice.sum('down_payment') || 0);
+    const totalAmount      = parseFloat(await Invoice.sum('total') || 0);
+    const totalDownPayment = parseFloat(await Invoice.sum('down_payment') || 0);
 
-  // Hanya hitung sisa dari invoice yang BELUM lunas (bukan PAID)
-  const unpaidTotal = parseFloat(
-    await Invoice.sum('total', {
-      where: { status: { [Op.notIn]: ['PAID'] } }
-    }) || 0
-  );
-  const unpaidDP = parseFloat(
-    await Invoice.sum('down_payment', {
-      where: { status: { [Op.notIn]: ['PAID'] } }
-    }) || 0
-  );
+    // Hanya hitung sisa dari invoice yang BELUM lunas (bukan PAID)
+    const unpaidTotal = parseFloat(
+      await Invoice.sum('total', {
+        where: { status: { [Op.notIn]: ['PAID'] } }
+      }) || 0
+    );
+    const unpaidDP = parseFloat(
+      await Invoice.sum('down_payment', {
+        where: { status: { [Op.notIn]: ['PAID'] } }
+      }) || 0
+    );
 
-  return {
-    total, draft, sent, paid, overdue, thisMonth,
-    totalAmount:      totalAmount.toFixed(2),
-    totalDownPayment: totalDownPayment.toFixed(2),
-    remainingAmount:  Math.max(0, unpaidTotal - unpaidDP).toFixed(2)  // ← hanya unpaid
-  };
-}
+    return {
+      total, draft, sent, paid, thisMonth,
+      totalAmount:      totalAmount.toFixed(2),
+      totalDownPayment: totalDownPayment.toFixed(2),
+      remainingAmount:  Math.max(0, unpaidTotal - unpaidDP).toFixed(2)  // ← hanya unpaid
+    };
+  }
   async _generateUniqueNumber() {
     let number = this.generateInvoiceNumber();
     while (await Invoice.findOne({ where: { invoice_number: number } })) {
@@ -238,7 +237,7 @@ class InvoiceService {
 
       // Import custom requests
       for (const req of booking.customRequests || []) {
-        const price = parseFloat(req.estimated_price || 0);
+        const price = 0;
         items.push({
           item_name:     `Custom Request: ${req.title}`,
           item_type:     'item',
@@ -350,13 +349,6 @@ class InvoiceService {
 
   return await this.getInvoiceById(id);
 }
-
-  async markAsOverdue(id) {
-    const invoice = await this.getInvoiceById(id, false);
-    if (invoice.status === 'PAID') throw new Error('Invoice sudah lunas');
-    await invoice.update({ status: 'OVERDUE' });
-    return await this.getInvoiceById(id);
-  }
 
   async updatePdfUrl(id, pdfUrl) {
     const invoice = await this.getInvoiceById(id, false);

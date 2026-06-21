@@ -155,7 +155,7 @@ export function OurProjects() {
               {/* Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {projects.map(project => (
-                  <Link key={project.id} to={`/projects/${project.id}`} className="group">
+                  <Link key={project.id} to={`/projects/${project.slug}`} className="group">
                     <Card className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-0 rounded-2xl">
                       <div className="aspect-[4/3] overflow-hidden relative">
                         <ImageWithFallback

@@ -17,10 +17,6 @@ const createPropertyCategoryValidation = [
     .optional()
     .trim(),
   
-  body('display_order')
-    .optional()
-    .isInt({ min: 0 }).withMessage('Display order must be a positive integer'),
-  
   body('is_active')
     .optional()
     .isBoolean().withMessage('is_active must be a boolean')
@@ -46,10 +42,6 @@ const updatePropertyCategoryValidation = [
   body('description')
     .optional()
     .trim(),
-  
-  body('display_order')
-    .optional()
-    .isInt({ min: 0 }).withMessage('Display order must be a positive integer'),
   
   body('is_active')
     .optional()

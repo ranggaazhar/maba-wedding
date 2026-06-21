@@ -11,7 +11,6 @@ import type {
   UpdateBookingData,
   CreateCustomRequestData,
   UpdateCustomRequestData,
-  ReviewCustomRequestData,
   CustomRequestStats,
   CustomRequestFilters,
   PaymentStatus,
@@ -273,14 +272,6 @@ class BookingApi {
     return response.data;
   }
 
-  async rejectPayment(id: number, reason?: string): Promise<ApiResponse<Booking>> {
-    const response = await axios.post(
-      `${API_URL}/bookings/${id}/reject-payment`,
-      { reason: reason || '' },
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
 
   async getStatistics(): Promise<ApiResponse<BookingStats>> {
     const response = await axios.get(`${API_URL}/bookings/statistics`, this.getAuthHeaders());
@@ -364,7 +355,6 @@ class CustomRequestApi {
 
   async getAll(filters?: CustomRequestFilters): Promise<ApiResponse<BookingCustomRequest[]>> {
     const params = new URLSearchParams();
-    if (filters?.status) params.append('status', filters.status);
     if (filters?.booking_id) params.append('booking_id', String(filters.booking_id));
     if (filters?.search) params.append('search', filters.search);
     const response = await axios.get(
@@ -374,17 +364,6 @@ class CustomRequestApi {
     return response.data;
   }
 
-  async review(
-    id: number,
-    data: ReviewCustomRequestData
-  ): Promise<ApiResponse<BookingCustomRequest>> {
-    const response = await axios.patch(
-      `${API_URL}/admin/custom-requests/${id}/review`,
-      data,
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
 
   async getStatistics(): Promise<ApiResponse<CustomRequestStats>> {
     const response = await axios.get(

@@ -100,8 +100,19 @@ export function StepBasicInfo({ formData, updateFormData, errors, setErrors }: S
               id="slug"
               value={formData.slug}
               onChange={(e) => {
-                updateFormData({ slug: e.target.value });
+                const sanitized = e.target.value
+                  .toLowerCase()
+                  .replace(/[^a-z0-9\s-]/g, '');
+                updateFormData({ slug: sanitized });
                 setErrors((prev) => ({ ...prev, slug: '' }));
+              }}
+              onBlur={(e) => {
+                const cleaned = e.target.value
+                  .trim()
+                  .replace(/\s+/g, '-')
+                  .replace(/-+/g, '-')
+                  .replace(/^-+|-+$/g, '');
+                updateFormData({ slug: cleaned });
               }}
               placeholder="ocean-blue-elegance"
               className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"

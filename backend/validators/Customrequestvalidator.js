@@ -49,27 +49,6 @@ const updateCustomRequestValidation = [
     .isArray().withMessage('Reference images harus berupa array URL'),
 ];
 
-const reviewCustomRequestValidation = [
-  param('id')
-    .isInt({ min: 1 }).withMessage('Invalid request ID'),
-
-  body('status')
-    .notEmpty().withMessage('Status wajib diisi')
-    .isIn(['REVIEWED', 'APPROVED', 'REJECTED']).withMessage('Status tidak valid'),
-
-  body('estimated_price')
-    .optional()
-    .isFloat({ min: 0 }).withMessage('Estimasi harga tidak boleh negatif'),
-
-  body('admin_notes')
-    .optional()
-    .trim(),
-
-  body('rejection_reason')
-    .if(body('status').equals('REJECTED'))
-    .notEmpty().withMessage('Alasan penolakan wajib diisi jika status REJECTED'),
-];
-
 const customRequestIdValidation = [
   param('id')
     .isInt({ min: 1 }).withMessage('Invalid request ID'),
@@ -90,7 +69,6 @@ const validate = (req, res, next) => {
 module.exports = {
   createCustomRequestValidation,
   updateCustomRequestValidation,
-  reviewCustomRequestValidation,
   customRequestIdValidation,
   validate,
 };

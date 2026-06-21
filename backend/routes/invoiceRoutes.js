@@ -23,7 +23,6 @@ router.patch('/:id/update-pdf',           authMiddleware, invoiceIdValidation, v
 router.patch('/:id/recalculate',          authMiddleware, invoiceIdValidation, validate, invoiceController.recalculateTotal);
 router.patch('/:id/mark-sent',            authMiddleware, invoiceIdValidation, validate, invoiceController.markAsSent);
 router.patch('/:id/mark-paid',            authMiddleware, invoiceIdValidation, validate, invoiceController.markAsPaid);
-router.patch('/:id/mark-overdue',         authMiddleware, invoiceIdValidation, validate, invoiceController.markAsOverdue);
 router.post('/:id/send-whatsapp',         authMiddleware, invoiceIdValidation, validate, invoiceController.sendInvoiceWhatsapp);
 
 // Invoice Items — static sub-paths MUST come before dynamic /:invoiceId/items

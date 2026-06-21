@@ -54,7 +54,13 @@ class PropertyService {
       order: [[orderBy, orderDir]]
     });
     
-    return properties;
+    const results = [];
+    for (const prop of properties) {
+      const propData = prop.toJSON();
+      propData.is_deletable = await this.isPropertyDeletable(prop.id);
+      results.push(propData);
+    }
+    return results;
   }
   
   async getPropertyById(id, includeRelations = true) {
@@ -78,7 +84,9 @@ class PropertyService {
       throw new Error('Property not found');
     }
     
-    return property;
+    const propData = property.toJSON();
+    propData.is_deletable = await this.isPropertyDeletable(id);
+    return propData;
   }
   
   async getPropertyBySlug(slug, includeRelations = true) {
@@ -105,7 +113,9 @@ class PropertyService {
       throw new Error('Property not found');
     }
     
-    return property;
+    const propData = property.toJSON();
+    propData.is_deletable = await this.isPropertyDeletable(propData.id);
+    return propData;
   }
   
   async createProperty(data) {
@@ -158,30 +168,90 @@ class PropertyService {
     return await this.getPropertyById(id);
   }
   
+  async isPropertyDeletable(id) {
+    const { BookingProperty, Booking, InvoiceItem, Invoice } = require('../../models');
+    
+    // Check if there are any associated bookings (whether confirmed or not)
+    // whose invoice is NOT paid (or doesn't exist).
+    const bookings = await BookingProperty.findAll({
+      where: { property_id: id },
+      include: [{
+        model: Booking,
+        as: 'booking',
+        include: [{
+          model: Invoice,
+          as: 'invoice'
+        }]
+      }]
+    });
+
+    for (const bp of bookings) {
+      const booking = bp.booking;
+      if (!booking) continue;
+      
+      const invoice = booking.invoice;
+      if (!invoice || invoice.status !== 'PAID') {
+        return false;
+      }
+    }
+
+    // Also check direct InvoiceItems
+    const invoiceItems = await InvoiceItem.findAll({
+      where: { property_id: id },
+      include: [{
+        model: Invoice,
+        as: 'invoice'
+      }]
+    });
+
+    for (const item of invoiceItems) {
+      const invoice = item.invoice;
+      if (!invoice || invoice.status !== 'PAID') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   async deleteProperty(id) {
-    const property = await this.getPropertyById(id, false);
-    
-    // FIX BUG-3: Cek asosiasi dengan COUNT langsung ke DB
-    // (bookingProperties & invoiceItems tidak di-include di getPropertyById)
+    const deletable = await this.isPropertyDeletable(id);
+    if (!deletable) {
+      throw new Error('Properti tidak dapat dihapus karena masih memiliki booking atau invoice yang belum lunas.');
+    }
+
     const { BookingProperty, InvoiceItem } = require('../../models');
+    const { sequelize } = require('../../models');
+    const transaction = await sequelize.transaction();
     
-    const bookingCount = await BookingProperty.count({ where: { property_id: id } });
-    if (bookingCount > 0) {
-      throw new Error('Cannot delete property with existing bookings');
+    try {
+      const property = await Property.findByPk(id, { transaction });
+      if (!property) throw new Error('Property not found');
+      
+      // Update associated BookingProperty and InvoiceItem property_id to NULL to preserve invoice history!
+      await BookingProperty.update(
+        { property_id: null },
+        { where: { property_id: id }, transaction }
+      );
+      
+      await InvoiceItem.update(
+        { property_id: null },
+        { where: { property_id: id }, transaction }
+      );
+
+      if (property.image_url) {
+        const FileHelper = require('../../utils/fileHelper');
+        await FileHelper.deleteFile(property.image_url).catch(() => {});
+      }
+      
+      await property.destroy({ transaction });
+      await transaction.commit();
+      
+      return { message: 'Property deleted successfully' };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-    
-    const invoiceCount = await InvoiceItem.count({ where: { property_id: id } });
-    if (invoiceCount > 0) {
-      throw new Error('Cannot delete property with existing invoices');
-    }
-    
-    if (property.image_url) {
-      const FileHelper = require('../../utils/fileHelper');
-      await FileHelper.deleteFile(property.image_url);
-    }
-    
-    await property.destroy();
-    return { message: 'Property deleted successfully' };
   }
   
   async toggleAvailability(id) {

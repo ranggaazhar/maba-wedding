@@ -99,6 +99,7 @@ export default function ProjectDetailPage() {
           <Button
             variant="destructive"
             className="h-9 px-4 text-sm font-medium"
+            disabled={project.is_deletable === false}
             onClick={handleDelete}
           >
             <Trash2 size={16} className="mr-2" />

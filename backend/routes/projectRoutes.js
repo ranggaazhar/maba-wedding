@@ -9,6 +9,7 @@ const {
   updateProjectValidation,
   projectIdValidation,
   projectSlugValidation,
+  photoIdValidation,
   validate,
 } = require('../validators/projectValidator');
 
@@ -39,12 +40,13 @@ router.patch('/:id/toggle-featured',authMiddleware, projectIdValidation, validat
 router.put('/:id/photos/:photoId',
   authMiddleware,
   upload.projectPhoto.single('photo'),
-  processImage({ width: 1920, quality: 85 }), // FIX: pakai processImage (single) bukan processMultipleImages
+  processImage({ width: 1920, quality: 85 }),
+  photoIdValidation, validate,
   projectController.updatePhoto
 );
 router.delete('/:id/photos/:photoId',
   authMiddleware,
-  projectIdValidation, validate,
+  projectIdValidation, photoIdValidation, validate,
   projectController.deletePhoto
 );
 

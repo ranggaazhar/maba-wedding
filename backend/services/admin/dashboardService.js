@@ -29,7 +29,6 @@ class DashboardService {
       pending,
       waitingConfirmation,
       confirmed,
-      rejected,
     ] = await Promise.all([
       Booking.count(),
       Booking.count({ where: { submitted_at: { [Op.gte]: thisMonthStart } } }),
@@ -37,7 +36,6 @@ class DashboardService {
       Booking.count({ where: { payment_status: 'PENDING' } }),
       Booking.count({ where: { payment_status: 'WAITING_CONFIRMATION' } }),
       Booking.count({ where: { payment_status: 'CONFIRMED' } }),
-      Booking.count({ where: { payment_status: 'REJECTED' } }),
     ]);
 
     // ── Revenue (dp_amount from CONFIRMED bookings) ────────────────
@@ -93,7 +91,7 @@ class DashboardService {
         total: totalBookings,
         thisMonth: bookingsThisMonth,
         trend: this._calcTrend(bookingsThisMonth, bookingsLastMonth),
-        byStatus: { pending, waitingConfirmation, confirmed, rejected },
+        byStatus: { pending, waitingConfirmation, confirmed },
       },
       revenue: {
         thisMonth: revenueThisMonth || 0,

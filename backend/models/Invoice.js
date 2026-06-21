@@ -76,10 +76,10 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0
     },
     status: {
-      type: DataTypes.ENUM('DRAFT', 'SENT', 'PAID', 'OVERDUE'),
+      type: DataTypes.ENUM('DRAFT', 'SENT', 'PAID'),
       allowNull: false,
       defaultValue: 'DRAFT',
-      comment: 'DRAFT=belum dikirim, SENT=sudah dikirim ke customer, PAID=lunas, OVERDUE=lewat jatuh tempo'
+      comment: 'DRAFT=belum dikirim, SENT=sudah dikirim ke customer, PAID=lunas'
     },
     paid_at: {
       type: DataTypes.DATE,

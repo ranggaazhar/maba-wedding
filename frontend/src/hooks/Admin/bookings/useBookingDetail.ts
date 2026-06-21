@@ -1,14 +1,10 @@
-// src/hooks/admin/bookings/useBookingDetail.ts
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, AlertCircle, Check, X } from 'lucide-react';
-import { bookingApi, customRequestApi } from '@/api/bookingApi';
+import { Clock, AlertCircle, Check } from 'lucide-react';
+import { bookingApi } from '@/api/bookingApi';
 import type {
   Booking,
   PaymentStatus,
-  BookingCustomRequest,
-  CustomRequestStatus,
-  ReviewCustomRequestData,
 } from '@/types/booking.types';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -34,36 +30,8 @@ export const paymentStatusConfig: Record<
     style: 'bg-success/10 text-success border-success/20',
     icon: Check,
   },
-  REJECTED: {
-    label: 'Ditolak',
-    style: 'bg-destructive/10 text-destructive border-destructive/20',
-    icon: X,
-  },
 };
 
-// ── Custom request status config ──────────────────────────────────────────────
-
-export const customRequestStatusConfig: Record<
-  CustomRequestStatus,
-  { label: string; style: string }
-> = {
-  PENDING: {
-    label: 'Menunggu Review',
-    style: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  },
-  REVIEWED: {
-    label: 'Sudah Direview',
-    style: 'bg-blue-50 text-blue-700 border-blue-200',
-  },
-  APPROVED: {
-    label: 'Disetujui',
-    style: 'bg-green-50 text-green-700 border-green-200',
-  },
-  REJECTED: {
-    label: 'Ditolak',
-    style: 'bg-red-50 text-red-700 border-red-200',
-  },
-};
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
@@ -74,8 +42,6 @@ export function useBookingDetail() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
-  const [isReviewingRequest, setIsReviewingRequest] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
 
   // ── Fetch detail booking ──────────────────────────────────────────────────
@@ -125,9 +91,9 @@ export function useBookingDetail() {
           title: 'Berhasil!',
           html: `Pembayaran dikonfirmasi.<br/>
                  <small>${response.data.whatsapp_sent
-                   ? '✅ Notifikasi WA terkirim ke customer.'
-                   : '⚠️ WA gagal dikirim, tapi konfirmasi tetap tersimpan.'
-                 }</small>`,
+              ? '✅ Notifikasi WA terkirim ke customer.'
+              : '⚠️ WA gagal dikirim, tapi konfirmasi tetap tersimpan.'
+            }</small>`,
           icon: 'success',
         });
         fetchBookingDetail();
@@ -143,107 +109,7 @@ export function useBookingDetail() {
     }
   };
 
-  const handleRejectPayment = async () => {
-    const { value: reason, isConfirmed } = await Swal.fire({
-      title: 'Tolak Pembayaran?',
-      input: 'textarea',
-      inputLabel: 'Alasan penolakan (opsional)',
-      inputPlaceholder: 'Contoh: Bukti transfer tidak jelas, nominal tidak sesuai...',
-      inputAttributes: { rows: '3' },
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      confirmButtonText: 'Ya, Tolak!',
-      cancelButtonText: 'Batal',
-    });
-    if (!isConfirmed) return;
 
-    try {
-      setIsRejecting(true);
-      await bookingApi.rejectPayment(Number(id), reason || '');
-      Swal.fire('Ditolak', 'Pembayaran telah ditolak', 'info');
-      fetchBookingDetail();
-    } catch (error: unknown) {
-      Swal.fire(
-        'Gagal!',
-        axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menolak pembayaran',
-        'error'
-      );
-    } finally {
-      setIsRejecting(false);
-    }
-  };
-
-  // ── Custom request review ─────────────────────────────────────────────────
-
-  const handleReviewCustomRequest = async (
-    request: BookingCustomRequest,
-    action: 'APPROVED' | 'REJECTED' | 'REVIEWED'
-  ) => {
-    // Kalau REJECTED → minta alasan
-    let rejectionReason = '';
-    if (action === 'REJECTED') {
-      const { value, isConfirmed } = await Swal.fire({
-        title: 'Tolak Custom Request?',
-        input: 'textarea',
-        inputLabel: 'Alasan penolakan',
-        inputPlaceholder: 'Jelaskan alasan penolakan request ini...',
-        inputAttributes: { rows: '3' },
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        confirmButtonText: 'Tolak Request',
-        cancelButtonText: 'Batal',
-      });
-      if (!isConfirmed) return;
-      rejectionReason = value || '';
-    }
-
-    // Kalau APPROVED → minta estimasi harga
-    let estimatedPrice: number | undefined;
-    if (action === 'APPROVED') {
-      const { value, isConfirmed } = await Swal.fire({
-        title: 'Setujui Custom Request',
-        html: `<p class="mb-3">Request: <strong>${request.title}</strong></p>
-               <label class="block text-sm text-left mb-1">Estimasi Harga (opsional)</label>
-               <input id="swal-price" type="number" min="0" step="1000"
-                 class="swal2-input" placeholder="Contoh: 500000" style="width:100%">`,
-        showCancelButton: true,
-        confirmButtonColor: '#22c55e',
-        confirmButtonText: 'Setujui',
-        cancelButtonText: 'Batal',
-        preConfirm: () => {
-          const val = (document.getElementById('swal-price') as HTMLInputElement)?.value;
-          return val ? Number(val) : undefined;
-        },
-      });
-      if (!isConfirmed) return;
-      estimatedPrice = value;
-    }
-
-    try {
-      setIsReviewingRequest(true);
-      const reviewData: ReviewCustomRequestData = {
-        status: action,
-        ...(rejectionReason && { rejection_reason: rejectionReason }),
-        ...(estimatedPrice !== undefined && { estimated_price: estimatedPrice }),
-      };
-      await customRequestApi.review(request.id, reviewData);
-      Swal.fire({
-        icon: action === 'REJECTED' ? 'info' : 'success',
-        title: action === 'APPROVED' ? 'Request Disetujui' : action === 'REJECTED' ? 'Request Ditolak' : 'Request Direview',
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      fetchBookingDetail();
-    } catch (error: unknown) {
-      Swal.fire(
-        'Gagal!',
-        axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal memproses review',
-        'error'
-      );
-    } finally {
-      setIsReviewingRequest(false);
-    }
-  };
 
   // ── Delete booking ────────────────────────────────────────────────────────
 
@@ -296,20 +162,14 @@ export function useBookingDetail() {
   const totalModelCost =
     booking?.models?.reduce((sum, m) => sum + parseFloat(m.price || '0'), 0) || 0;
 
-  const totalCustomEstimate =
-    booking?.customRequests?.reduce((sum, r) => sum + parseFloat(r.estimated_price || '0'), 0) || 0;
+  const totalCustomEstimate = 0;
 
-  // Pending custom requests yang butuh review
-  const pendingCustomRequests =
-    booking?.customRequests?.filter((r) => r.status === 'PENDING') || [];
 
   return {
     // State
     booking,
     isLoading,
     isConfirming,
-    isRejecting,
-    isReviewingRequest,
     adminNotes,
     setAdminNotes,
 
@@ -317,8 +177,6 @@ export function useBookingDetail() {
     navigate,
     fetchBookingDetail,
     handleConfirmPayment,
-    handleRejectPayment,
-    handleReviewCustomRequest,
     handleDelete,
 
     // Helpers
@@ -330,10 +188,8 @@ export function useBookingDetail() {
     totalPropertyCost,
     totalModelCost,
     totalCustomEstimate,
-    pendingCustomRequests,
 
     // Config
     paymentStatusConfig,
-    customRequestStatusConfig,
   };
 }

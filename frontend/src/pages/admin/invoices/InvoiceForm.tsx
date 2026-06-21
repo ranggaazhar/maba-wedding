@@ -21,9 +21,9 @@ import {
 import type { InvoiceItemType } from '@/types/invoice.types';
 
 const itemTypeOptions: { value: InvoiceItemType; label: string; description: string }[] = [
-  { value: 'item',       label: 'Item',    description: 'Item dekorasi / jasa normal' },
-  { value: 'discount',   label: 'Diskon',  description: 'Potongan / diskon harga' },
-  { value: 'penalty',    label: 'Denda',   description: 'Denda kerusakan / penggantian' },
+  { value: 'item', label: 'Item', description: 'Item dekorasi / jasa normal' },
+  { value: 'discount', label: 'Diskon', description: 'Potongan / diskon harga' },
+  { value: 'penalty', label: 'Denda', description: 'Denda kerusakan / penggantian' },
   { value: 'adjustment', label: 'Koreksi', description: 'Koreksi harga manual' },
 ];
 
@@ -221,12 +221,7 @@ export default function InvoiceForm() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Wedding">Pernikahan (Wedding)</SelectItem>
-                  <SelectItem value="Wedding Reception">Wedding Reception</SelectItem>
-                  <SelectItem value="Akad Nikah">Akad Nikah</SelectItem>
                   <SelectItem value="Engagement">Lamaran (Engagement)</SelectItem>
-                  <SelectItem value="Birthday">Ulang Tahun (Birthday)</SelectItem>
-                  <SelectItem value="Corporate">Corporate Event</SelectItem>
-                  <SelectItem value="Other">Lainnya</SelectItem>
                 </SelectContent>
               </Select>
             </div>

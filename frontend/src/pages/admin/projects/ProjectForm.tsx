@@ -82,6 +82,8 @@ export default function ProjectForm() {
       }
       if (!formData.slug?.trim()) {
         newErrors.slug = 'Slug harus diisi.';
+      } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
+        newErrors.slug = 'Slug hanya boleh berisi huruf kecil, angka, dan tanda hubung (-).';
       }
       if (!formData.category_id) {
         newErrors.category_id = 'Kategori harus dipilih.';
@@ -173,17 +175,17 @@ export default function ProjectForm() {
   };
 
   const handleSubmit = async () => {
+    if (!validateStep(1)) {
+      setCurrentStep(1);
+      return;
+    }
+    if (!validateStep(2)) {
+      setCurrentStep(2);
+      return;
+    }
+
     try {
       setSaving(true);
-      if (!validateStep(1)) {
-        setCurrentStep(1);
-        return;
-      }
-      if (!validateStep(2)) {
-        setCurrentStep(2);
-        return;
-      }
-
       let response;
       if (isEdit && id) {
         const updatePayload: Partial<CreateCompleteProjectData> = {

@@ -116,15 +116,6 @@ class InvoiceController {
     }
   }
 
-  async markAsOverdue(req, res) {
-    try {
-      const invoice = await invoiceService.markAsOverdue(req.params.id);
-      return res.status(200).json({ success: true, message: 'Invoice ditandai sebagai overdue', data: invoice });
-    } catch (error) {
-      return res.status(error.message === 'Invoice not found' ? 404 : 400).json({ success: false, message: error.message });
-    }
-  }
-
   async updatePdfUrl(req, res) {
     try {
       const { pdf_url } = req.body;

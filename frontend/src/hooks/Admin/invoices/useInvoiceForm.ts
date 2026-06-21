@@ -93,7 +93,6 @@ export function useInvoiceForm() {
           setNotes(inv.notes || '');
           setAdminNotes(inv.admin_notes || '');
           setBookingId(inv.booking_id ? String(inv.booking_id) : '');
-          if (inv.items?.length > 0) {
             setItems(inv.items.map((item: ItemRow & { id: number }, i: number) => ({
               _tempId: item.id || i,
               item_name: item.item_name,
@@ -103,8 +102,9 @@ export function useInvoiceForm() {
               unit_price: Number(item.unit_price) || 0,
               subtotal: Number(item.subtotal) || 0,
               display_order: i,
+              project_id: item.project_id,
+              property_id: item.property_id,
             })));
-          }
         }
       } catch {
         Swal.fire('Error', 'Gagal memuat data invoice', 'error');
@@ -144,16 +144,36 @@ export function useInvoiceForm() {
       let order = 0;
       for (const model of detail.models || []) {
         const price = parseFloat(model.price || '0');
-        newItems.push({ _tempId: Date.now() + order, item_name: model.project_title, item_type: 'item', description: model.notes || '', quantity: 1, unit_price: price, subtotal: price, display_order: order++ });
+        newItems.push({
+          _tempId: Date.now() + order,
+          item_name: model.project_title,
+          item_type: 'item',
+          description: model.notes || '',
+          quantity: 1,
+          unit_price: price,
+          subtotal: price,
+          display_order: order++,
+          project_id: model.project_id
+        });
       }
       for (const prop of detail.properties || []) {
         const subtotal = parseFloat(prop.subtotal || '0');
-        newItems.push({ _tempId: Date.now() + order, item_name: prop.property_name, item_type: 'item', description: `Kategori: ${prop.property_category}`, quantity: prop.quantity, unit_price: parseFloat(prop.price || '0'), subtotal, display_order: order++ });
+        newItems.push({
+          _tempId: Date.now() + order,
+          item_name: prop.property_name,
+          item_type: 'item',
+          description: `Kategori: ${prop.property_category}`,
+          quantity: prop.quantity,
+          unit_price: parseFloat(prop.price || '0'),
+          subtotal,
+          display_order: order++,
+          property_id: prop.property_id
+        });
       }
 
       // Import custom requests
       for (const req of detail.customRequests || []) {
-        const price = parseFloat(req.estimated_price || '0');
+        const price = 0;
         newItems.push({
           _tempId: Date.now() + order,
           item_name: `Custom Request: ${req.title}`,
@@ -248,6 +268,8 @@ export function useInvoiceForm() {
         description: item.description || undefined,
         quantity: item.quantity, unit_price: item.unit_price,
         subtotal: item.subtotal, display_order: i,
+        project_id: item.project_id || undefined,
+        property_id: item.property_id || undefined,
       })),
     };
 

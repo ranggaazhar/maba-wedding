@@ -120,6 +120,12 @@ class ProjectApi {
     return response.data;
   }
 
+  // Public endpoint — dipakai di halaman publik, tidak butuh token
+  async getProjectBySlug(slug: string): Promise<ApiResponse<Project>> {
+    const response = await axios.get(`${API_URL}/projects/slug/${slug}`);
+    return response.data;
+  }
+
   async deleteProject(id: number): Promise<ApiResponse<null>> {
     const response = await axios.delete(`${API_URL}/projects/${id}`, this.getAuthHeaders());
     return response.data;

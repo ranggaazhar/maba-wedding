@@ -2,11 +2,11 @@
 import {
   ArrowLeft, Calendar, MapPin, Phone,
   User, X, Send, FileText, Edit, MessageSquare,
-  Package, Palette, Loader2, 
-  CheckCircle2, XCircle, AlertCircle,
+  Package, Palette, Loader2,
+  CheckCircle2, AlertCircle,
   Sparkles, Layers, BookOpen,
   Image as ImageIcon,
-  DollarSign, ChevronDown, ChevronUp
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -24,12 +24,12 @@ import {
 
 export default function BookingDetail() {
   const {
-    booking, isLoading, isConfirming, isRejecting,
+    booking, isLoading, isConfirming,
     navigate,
-    handleConfirmPayment, handleRejectPayment,
+    handleConfirmPayment,
     handleDelete,
     formatDate, formatDateTime, formatCurrency,
-    totalPropertyCost, totalModelCost, totalCustomEstimate,
+    totalPropertyCost, totalModelCost,
   } = useBookingDetail();
 
   if (isLoading) {
@@ -110,19 +110,14 @@ export default function BookingDetail() {
                   <AlertCircle className="text-blue-500 mt-0.5 shrink-0" size={20} />
                   <div>
                     <p className="font-semibold text-blue-700">Bukti Pembayaran Diterima</p>
-                    <p className="text-sm text-blue-600">Customer telah mengupload bukti transfer. Silakan verifikasi dan konfirmasi atau tolak.</p>
+                    <p className="text-sm text-blue-600">Customer telah mengupload bukti transfer. Silakan verifikasi pembayaran lalu klik tombol Konfirmasi.</p>
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50"
-                    onClick={handleRejectPayment} disabled={isRejecting || isConfirming}>
-                    {isRejecting ? <Loader2 size={16} className="mr-2 animate-spin" /> : <XCircle size={16} className="mr-2" />}
-                    Tolak
-                  </Button>
                   <Button className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={handleConfirmPayment} disabled={isConfirming || isRejecting}>
+                    onClick={handleConfirmPayment} disabled={isConfirming}>
                     {isConfirming ? <Loader2 size={16} className="mr-2 animate-spin" /> : <CheckCircle2 size={16} className="mr-2" />}
-                    Konfirmasi
+                    Konfirmasi Pembayaran
                   </Button>
                 </div>
               </div>
@@ -137,21 +132,6 @@ export default function BookingDetail() {
               <div className="flex items-center gap-3 text-green-700">
                 <CheckCircle2 size={18} />
                 <p className="text-sm">Dikonfirmasi pada <strong>{formatDateTime(booking.confirmed_at)}</strong>. PDF telah dikirim ke WhatsApp customer.</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Banner: rejected */}
-        {paymentStatus === 'REJECTED' && (
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="py-3">
-              <div className="flex items-center gap-3 text-red-700">
-                <XCircle size={18} />
-                <p className="text-sm">
-                  Pembayaran ditolak.
-                  {booking.rejection_reason && <> Alasan: <strong>{booking.rejection_reason}</strong></>}
-                </p>
               </div>
             </CardContent>
           </Card>
@@ -415,7 +395,6 @@ export default function BookingDetail() {
                     <CustomRequestCard
                       key={cr.id}
                       request={cr}
-                      formatCurrency={formatCurrency}
                       formatDateTime={formatDateTime}
                     />
                   ))
@@ -428,18 +407,7 @@ export default function BookingDetail() {
                   </Card>
                 )}
 
-                {totalCustomEstimate > 0 && (
-                  <Card className="border-orange-200 bg-orange-50/50">
-                    <CardContent className="py-4">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-orange-800 flex items-center gap-2">
-                          <DollarSign size={16} /> Total Estimasi Custom Request
-                        </span>
-                        <span className="text-lg font-bold text-orange-700">{formatCurrency(totalCustomEstimate)}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+
               </TabsContent>
             )}
           </Tabs>
@@ -494,10 +462,9 @@ export default function BookingDetail() {
 }
 
 function CustomRequestCard({
-  request, formatCurrency, formatDateTime,
+  request, formatDateTime,
 }: {
   request: BookingCustomRequest;
-  formatCurrency: (v?: string | number) => string;
   formatDateTime: (v: string) => string;
 }) {
   const [showImages, setShowImages] = useState(false);
@@ -507,11 +474,6 @@ function CustomRequestCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            {request.estimated_price && (
-              <Badge variant="outline" className="text-xs gap-1 mb-1">
-                <DollarSign size={11} /> {formatCurrency(request.estimated_price)}
-              </Badge>
-            )}
             <h4 className="font-semibold text-foreground">{request.title}</h4>
           </div>
           <Badge className="bg-orange-50 text-orange-700 border-orange-200 text-xs shrink-0">

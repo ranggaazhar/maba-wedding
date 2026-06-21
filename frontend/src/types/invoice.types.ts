@@ -1,4 +1,4 @@
-export type InvoiceStatus = 'DRAFT' | 'SENT' | 'PAID' | 'OVERDUE';
+export type InvoiceStatus = 'DRAFT' | 'SENT' | 'PAID';
 export type InvoiceItemType = 'item' | 'discount' | 'penalty' | 'adjustment';
 
 export interface InvoiceItem {
@@ -51,7 +51,6 @@ export interface InvoiceStatistics {
   draft: number;
   sent: number;
   paid: number;
-  overdue: number;
   thisMonth: number;
   totalAmount: string;
   totalDownPayment: string;

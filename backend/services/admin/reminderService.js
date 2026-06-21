@@ -17,7 +17,7 @@ class ReminderService {
     return await Booking.findAll({
       where: {
         event_date: dateStr,
-        payment_status: { [Op.notIn]: ['REJECTED'] }
+        payment_status: 'CONFIRMED'
       },
       include: [
         {

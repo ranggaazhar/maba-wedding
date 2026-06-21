@@ -100,6 +100,11 @@ const projectIdValidation = [
     .isInt({ min: 1 }).withMessage('Invalid project ID')
 ];
 
+const photoIdValidation = [
+  param('photoId')
+    .isInt({ min: 1 }).withMessage('Invalid photo ID')
+];
+
 const projectSlugValidation = [
   param('slug')
     .trim()
@@ -175,6 +180,7 @@ module.exports = {
   createProjectValidation,
   updateProjectValidation,
   projectIdValidation,
+  photoIdValidation,
   projectSlugValidation,
   createProjectPhotoValidation,
   createProjectIncludeValidation,

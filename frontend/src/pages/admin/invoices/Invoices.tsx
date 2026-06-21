@@ -19,7 +19,6 @@ const statusConfig: Record<InvoiceStatus, { label: string; className: string }> 
   DRAFT:   { label: 'Draft',     className: 'bg-muted text-muted-foreground border-border' },
   SENT:    { label: 'Terkirim',  className: 'bg-blue-100 text-blue-700 border-blue-200' },
   PAID:    { label: 'Lunas',     className: 'bg-green-100 text-green-700 border-green-200' },
-  OVERDUE: { label: 'Terlambat', className: 'bg-red-100 text-red-700 border-red-200' },
 };
 
 export default function Invoices() {
@@ -80,7 +79,6 @@ export default function Invoices() {
             <SelectItem value="DRAFT">Draft</SelectItem>
             <SelectItem value="SENT">Terkirim</SelectItem>
             <SelectItem value="PAID">Lunas</SelectItem>
-            <SelectItem value="OVERDUE">Terlambat</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="icon">

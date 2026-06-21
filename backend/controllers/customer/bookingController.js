@@ -325,17 +325,6 @@ class BookingController {
     }
   }
 
-  async rejectPayment(req, res) {
-    try {
-      const { id } = req.params;
-      const { reason } = req.body;
-      const booking = await bookingService.rejectPayment(id, reason);
-      return res.status(200).json({ success: true, message: 'Pembayaran ditolak', data: booking });
-    } catch (error) {
-      return res.status(error.message === 'Booking not found' ? 404 : 500)
-        .json({ success: false, message: error.message });
-    }
-  }
 }
 
 module.exports = new BookingController();

@@ -50,13 +50,6 @@ class InvoiceApi {
     return response.data;
   }
 
-  async getInvoicesByDateRange(startDate: string, endDate: string) {
-    const response = await axios.get(
-      `${API_URL}/invoices/date-range?start_date=${startDate}&end_date=${endDate}`,
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
 
   async createInvoice(data: CreateInvoiceData) {
     const response = await axios.post(`${API_URL}/invoices`, data, this.getAuthHeaders());
@@ -88,11 +81,6 @@ class InvoiceApi {
     return response.data;
   }
 
-  async markAsOverdue(id: number) {
-    const response = await axios.patch(`${API_URL}/invoices/${id}/mark-overdue`, {}, this.getAuthHeaders());
-    return response.data;
-  }
-
   async recalculateTotal(id: number) {
     const response = await axios.patch(`${API_URL}/invoices/${id}/recalculate`, {}, this.getAuthHeaders());
     return response.data;
@@ -108,40 +96,6 @@ class InvoiceApi {
     return response.data;
   }
 
-  async getItemById(id: number) {
-    const response = await axios.get(`${API_URL}/invoice-items/${id}`, this.getAuthHeaders());
-    return response.data;
-  }
-
-  async createItem(invoiceId: number, data: CreateInvoiceItemData) {
-    const response = await axios.post(`${API_URL}/invoices/${invoiceId}/items`, data, this.getAuthHeaders());
-    return response.data;
-  }
-
-  async bulkCreateItems(invoiceId: number, items: CreateInvoiceItemData[]) {
-    const response = await axios.post(`${API_URL}/invoices/${invoiceId}/items/bulk`, { items }, this.getAuthHeaders());
-    return response.data;
-  }
-
-  async updateItem(id: number, data: Partial<CreateInvoiceItemData>) {
-    const response = await axios.put(`${API_URL}/invoice-items/${id}`, data, this.getAuthHeaders());
-    return response.data;
-  }
-
-  async deleteItem(id: number) {
-    const response = await axios.delete(`${API_URL}/invoice-items/${id}`, this.getAuthHeaders());
-    return response.data;
-  }
-
-  async reorderItems(invoiceId: number, itemIds: number[]) {
-    const response = await axios.post(`${API_URL}/invoices/${invoiceId}/items/reorder`, { itemIds }, this.getAuthHeaders());
-    return response.data;
-  }
-
-  async calculateItemsTotal(invoiceId: number) {
-    const response = await axios.get(`${API_URL}/invoices/${invoiceId}/items/calculate-total`, this.getAuthHeaders());
-    return response.data;
-  }
 
   async sendInvoiceWhatsapp(id: number) {
     const response = await axios.post(`${API_URL}/invoices/${id}/send-whatsapp`, {}, this.getAuthHeaders());

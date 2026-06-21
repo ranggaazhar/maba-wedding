@@ -106,20 +106,6 @@ export function useInvoiceDetail() {
     }
   };
 
-  const handleMarkAsOverdue = async () => {
-    if (!invoice) return;
-    try {
-      setIsActionLoading(true);
-      await invoiceApi.markAsOverdue(invoice.id);
-      Swal.fire({ icon: 'warning', title: 'Ditandai Terlambat', timer: 1500, showConfirmButton: false });
-      fetchInvoice();
-    } catch {
-      Swal.fire('Error', 'Gagal mengubah status', 'error');
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
   const handleSaveNotes = async () => {
     if (!invoice) return;
     try {
@@ -143,6 +129,6 @@ export function useInvoiceDetail() {
     adminNotes, setAdminNotes,
     isSavingNotes, isActionLoading,
     calculatedTotal, navigate,
-    handleSendWhatsapp, handleMarkAsPaid, handleMarkAsOverdue, handleSaveNotes,
+    handleSendWhatsapp, handleMarkAsPaid, handleSaveNotes,
   };
 }

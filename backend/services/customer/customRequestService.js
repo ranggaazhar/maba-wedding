@@ -11,14 +11,7 @@ class CustomRequestService {
       include.push({
         model: Booking,
         as: 'booking',
-        attributes: ['id', 'booking_code', 'customer_name', 'customer_phone', 'event_date', 'event_venue']
-      });
-    }
-    if (includeReviewer) {
-      include.push({
-        model: Admin,
-        as: 'reviewer',
-        attributes: ['id', 'name', 'email']
+        attributes: ['id', 'booking_code', 'customer_name', 'customer_phone', 'event_date', 'event_venue', 'payment_status']
       });
     }
     return include;
@@ -26,7 +19,6 @@ class CustomRequestService {
   async getAllRequests(filters = {}) {
     const where = {};
 
-    if (filters.status) where.status = filters.status;
     if (filters.booking_id) where.booking_id = filters.booking_id;
 
     if (filters.search) {
@@ -74,16 +66,18 @@ class CustomRequestService {
       description:      data.description,
       color_theme:      data.color_theme || null,
       reference_images: allImages.length > 0 ? allImages : null,
-      status:           'PENDING',
     });
+
+    // Sync flag has_custom_request pada booking
+    await booking.update({ has_custom_request: true });
 
     return await this.getRequestById(request.id);
   }
   async updateRequest(id, data, files = []) {
     const request = await this.getRequestById(id);
 
-    if (request.status !== 'PENDING') {
-      throw new Error('Request yang sudah diproses admin tidak dapat diedit');
+    if (request.booking && request.booking.payment_status !== 'PENDING') {
+      throw new Error('Request tidak dapat diedit karena booking sudah diproses');
     }
     const newUploads = files.map(f => f.path.replace(/\\/g, '/'));
 
@@ -117,8 +111,8 @@ class CustomRequestService {
   async deleteRequest(id) {
     const request = await this.getRequestById(id);
 
-    if (request.status !== 'PENDING') {
-      throw new Error('Request yang sudah diproses admin tidak dapat dihapus');
+    if (request.booking && request.booking.payment_status !== 'PENDING') {
+      throw new Error('Request tidak dapat dihapus karena booking sudah diproses');
     }
 
     // Hapus semua file referensi dari disk
@@ -128,6 +122,14 @@ class CustomRequestService {
     }
 
     await request.destroy();
+
+    // Sync flag has_custom_request pada booking
+    const remainingCount = await BookingCustomRequest.count({ where: { booking_id: request.booking_id } });
+    await Booking.update(
+      { has_custom_request: remainingCount > 0 },
+      { where: { id: request.booking_id } }
+    );
+
     return { message: 'Custom request berhasil dihapus' };
   }
 
@@ -151,37 +153,9 @@ class CustomRequestService {
     return await this.getRequestById(id);
   }
 
-  async reviewRequest(id, adminId, data) {
-    const request = await this.getRequestById(id);
-
-    const updateData = {
-      status:           data.status,
-      admin_notes:      data.admin_notes      || request.admin_notes,
-      reviewed_by:      adminId,
-      reviewed_at:      new Date(),
-    };
-
-    if (data.status === 'REJECTED') {
-      updateData.rejection_reason = data.rejection_reason || null;
-    }
-
-    if (data.estimated_price !== undefined) {
-      updateData.estimated_price = data.estimated_price;
-    }
-
-    await request.update(updateData);
-    return await this.getRequestById(id);
-  }
   async getStatistics() {
-    const [total, pending, reviewed, approved, rejected] = await Promise.all([
-      BookingCustomRequest.count(),
-      BookingCustomRequest.count({ where: { status: 'PENDING' } }),
-      BookingCustomRequest.count({ where: { status: 'REVIEWED' } }),
-      BookingCustomRequest.count({ where: { status: 'APPROVED' } }),
-      BookingCustomRequest.count({ where: { status: 'REJECTED' } }),
-    ]);
-
-    return { total, pending, reviewed, approved, rejected };
+    const total = await BookingCustomRequest.count();
+    return { total };
   }
 }
 

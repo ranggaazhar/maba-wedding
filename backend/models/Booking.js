@@ -118,7 +118,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     // ── Field baru ──────────────────────────────────────
     payment_status: {
-      type: DataTypes.ENUM('PENDING', 'WAITING_CONFIRMATION', 'CONFIRMED', 'REJECTED'),
+      type: DataTypes.ENUM('PENDING', 'WAITING_CONFIRMATION', 'CONFIRMED'),
       defaultValue: 'PENDING',
       allowNull: false
     },

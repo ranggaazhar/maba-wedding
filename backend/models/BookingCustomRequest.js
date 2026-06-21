@@ -8,10 +8,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'booking_id',
         as: 'booking'
       });
-      BookingCustomRequest.belongsTo(models.Admin, {
-        foreignKey: 'reviewed_by',
-        as: 'reviewer'
-      });
     }
   }
 
@@ -63,46 +59,6 @@ module.exports = (sequelize, DataTypes) => {
         }
         return raw;
       }
-    },
-
-    estimated_price: {
-      type: DataTypes.DECIMAL(15, 2),
-      allowNull: true,
-      validate: {
-        min: { args: [0], msg: 'Estimasi harga tidak boleh negatif' }
-      }
-    },
-
-    admin_notes: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-
-    reviewed_by: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-
-    reviewed_at: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
-
-    status: {
-      type: DataTypes.ENUM('PENDING', 'REVIEWED', 'APPROVED', 'REJECTED'),
-      defaultValue: 'PENDING',
-      allowNull: false,
-      validate: {
-        isIn: {
-          args: [['PENDING', 'REVIEWED', 'APPROVED', 'REJECTED']],
-          msg: 'Status tidak valid'
-        }
-      }
-    },
-
-    rejection_reason: {
-      type: DataTypes.TEXT,
-      allowNull: true
     }
 
   }, {

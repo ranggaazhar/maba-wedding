@@ -46,14 +46,6 @@ class PropertyCategoryApi {
     return response.data;
   }
 
-  async getPropertyCategoryBySlug(slug: string, includeRelations = false): Promise<ApiResponse<PropertyCategory>> {
-    const params = includeRelations ? '?include_relations=true' : '';
-    const response = await axios.get(
-      `${API_URL}/property-categories/slug/${slug}${params}`,
-      this.getAuthHeaders()
-    );
-    return response.data;
-  }
 
   async createPropertyCategory(data: CreatePropertyCategoryData): Promise<ApiResponse<PropertyCategory>> {
     const response = await axios.post(

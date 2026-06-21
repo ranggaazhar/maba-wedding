@@ -19,15 +19,26 @@ class ReviewLinkService {
       if (filters.is_expired) {
         where.expires_at = { [Op.lt]: new Date() };
       } else {
-        where[Op.or] = [
-          { expires_at: null },
-          { expires_at: { [Op.gte]: new Date() } }
-        ];
+        // Wrap in Op.and to avoid conflict with search Op.or
+        const notExpiredCondition = {
+          [Op.or]: [
+            { expires_at: null },
+            { expires_at: { [Op.gte]: new Date() } }
+          ]
+        };
+        where[Op.and] = where[Op.and] || [];
+        where[Op.and].push(notExpiredCondition);
       }
     }
     
     if (filters.search) {
-      where.token = { [Op.like]: `%${filters.search}%` };
+      const searchCondition = {
+        [Op.or]: [
+          { token: { [Op.like]: `%${filters.search}%` } }
+        ]
+      };
+      where[Op.and] = where[Op.and] || [];
+      where[Op.and].push(searchCondition);
     }
     
     const include = [

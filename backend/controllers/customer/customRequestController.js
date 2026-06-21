@@ -120,20 +120,6 @@ class CustomRequestController {
     }
   }
 
-  async review(req, res) {
-    try {
-      const adminId = req.admin?.id || null;
-      const request = await customRequestService.reviewRequest(req.params.id, adminId, req.body);
-      return res.status(200).json({
-        success: true,
-        message: `Request berhasil di-${req.body.status.toLowerCase()}`,
-        data: this._addImageUrls(request, req),
-      });
-    } catch (error) {
-      return res.status(error.message.includes('tidak ditemukan') ? 404 : 500)
-        .json({ success: false, message: error.message });
-    }
-  }
 
   async getStatistics(req, res) {
     try {

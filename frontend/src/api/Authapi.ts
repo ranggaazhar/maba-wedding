@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -22,16 +23,36 @@ api.interceptors.request.use(
   }
 );
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('admin');
+const handle401Error = async (error: any) => {
+  if (error.response?.status === 401) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('admin');
+    
+    // Prevent multiple alert popups when concurrent requests fail
+    if (!window.location.pathname.includes('/login') && !window.hasOwnProperty('__sessionExpiredAlertActive')) {
+      (window as any).__sessionExpiredAlertActive = true;
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Sesi Berakhir',
+        text: 'Sesi login Anda telah habis. Silakan login kembali.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3b82f6',
+      });
+      delete (window as any).__sessionExpiredAlertActive;
       window.location.href = '/login';
     }
-    return Promise.reject(error);
   }
+  return Promise.reject(error);
+};
+
+api.interceptors.response.use(
+  (response) => response,
+  handle401Error
+);
+
+axios.interceptors.response.use(
+  (response) => response,
+  handle401Error
 );
 
 

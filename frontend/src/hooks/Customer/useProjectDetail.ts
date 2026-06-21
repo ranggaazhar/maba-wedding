@@ -3,17 +3,17 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { projectApi } from '@/api/projectApi';
 import type { Project } from '@/types/project.types';
 
-export function useProjectDetail(id: string | undefined) {
+export function useProjectDetail(slug: string | undefined) {
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   const fetchProject = useCallback(async () => {
-    if (!id) return;
+    if (!slug) return;
     setIsLoading(true);
     setNotFound(false);
     try {
-      const res = await projectApi.getProjectById(Number(id));
+      const res = await projectApi.getProjectBySlug(slug);
       if (res.success) {
         setProject(res.data);
       } else {
@@ -24,7 +24,7 @@ export function useProjectDetail(id: string | undefined) {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [slug]);
 
   useEffect(() => {
     fetchProject();
@@ -41,16 +41,6 @@ export function useProjectDetail(id: string | undefined) {
     [project]
   );
 
-  const uniqueColors = useMemo(() => {
-    const all = project?.photos?.flatMap(p => p.colors ?? []) ?? [];
-    return all.filter((c, i, arr) => arr.findIndex(x => x.color_name === c.color_name) === i);
-  }, [project]);
-
-  const uniqueFlowers = useMemo(() => {
-    const all = project?.photos?.flatMap(p => p.flowers ?? []) ?? [];
-    return all.filter((f, i, arr) => arr.findIndex(x => x.flower_name === f.flower_name) === i);
-  }, [project]);
-
   // ── Helpers ───────────────────────────────────────────────────
   const formatPrice = (price: string | number | null | undefined): string => {
     if (!price) return 'Hubungi Kami';
@@ -65,8 +55,6 @@ export function useProjectDetail(id: string | undefined) {
     notFound,
     heroPhoto,
     otherPhotos,
-    uniqueColors,
-    uniqueFlowers,
     formatPrice,
   };
 }

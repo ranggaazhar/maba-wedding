@@ -68,7 +68,7 @@ function App() {
           <Route element={<PublicLayout />}>
             <Route path="/"              element={<Home />} />
             <Route path="/projects"      element={<OurProjects />} />
-            <Route path="/projects/:id"  element={<PublicProjectDetail />} />
+            <Route path="/projects/:slug" element={<PublicProjectDetail />} />
             <Route path="/properties"    element={<PublicProperties />} />
           </Route>
 

@@ -37,17 +37,15 @@ function NotFound() {
 }
 
 export function ProjectDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const {
     project,
     isLoading,
     notFound,
     heroPhoto,
     otherPhotos,
-    uniqueColors,
-    uniqueFlowers,
     formatPrice,
-  } = useProjectDetail(id);
+  } = useProjectDetail(slug);
 
   if (isLoading) return <Skeleton />;
   if (notFound || !project) return <NotFound />;
@@ -121,7 +119,7 @@ export function ProjectDetail() {
                       <Palette className="w-8 h-8 text-white" />
                     </div>
                     <h3>Detail Image 1</h3>
-                   <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed">
                       {otherPhotos[0].caption}
                     </p>
                   </div>
@@ -140,7 +138,7 @@ export function ProjectDetail() {
                       <Sparkles className="w-8 h-8 text-white" />
                     </div>
                     <h3>Detail Image 2</h3>
-                   <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed">
                       {otherPhotos[1].caption}
                     </p>
                   </div>
@@ -198,74 +196,6 @@ export function ProjectDetail() {
                   </p>
                 </div>
               ) : null}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Colors & Flowers Summary */}
-      {(uniqueColors.length > 0 || uniqueFlowers.length > 0) ? (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-12">
-              {uniqueColors.length > 0 ? (
-                <div className="bg-[#F8F9FA] rounded-2xl p-8 border border-[#A8DADC]/20">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-gradient-to-br from-[#A8DADC] to-[#457B9D] rounded-xl">
-                      <Palette className="w-5 h-5 text-white" />
-                    </div>
-                    <h4 className="text-[#1D3557]">Palet Warna</h4>
-                  </div>
-                  <div className="space-y-3">
-                    {uniqueColors.map((c, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        {c.color_hex ? (
-                          <div
-                            className="w-6 h-6 rounded-full border border-gray-200 shadow-sm flex-shrink-0"
-                            style={{ backgroundColor: c.color_hex }}
-                          />
-                        ) : (
-                          <div className="w-6 h-6 flex-shrink-0" />
-                        )}
-                        <div>
-                          <p className="text-[#1D3557] text-sm font-medium">{c.color_name}</p>
-                          {c.description ? (
-                            <p className="text-[#6B7280] text-xs">{c.description}</p>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div />
-              )}
-
-              {uniqueFlowers.length > 0 ? (
-                <div className="bg-[#F8F9FA] rounded-2xl p-8 border border-[#A8DADC]/20">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-gradient-to-br from-[#457B9D] to-[#1D3557] rounded-xl">
-                      <Sparkles className="w-5 h-5 text-white" />
-                    </div>
-                    <h4 className="text-[#1D3557]">Jenis Bunga</h4>
-                  </div>
-                  <div className="space-y-3">
-                    {uniqueFlowers.map((f, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-[#457B9D] rounded-full mt-2 flex-shrink-0" />
-                        <div>
-                          <p className="text-[#1D3557] text-sm font-medium">{f.flower_name}</p>
-                          {f.description ? (
-                            <p className="text-[#6B7280] text-xs">{f.description}</p>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div />
-              )}
             </div>
           </div>
         </section>

@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useBookings } from "@/hooks/Admin/bookings/useBooking";
 import {
   Search, Eye, Trash2, Calendar, Loader2,
-  CheckCircle2, XCircle, Filter,
-  Link2, RefreshCw, BookOpen, Sparkles, Layers
+  CheckCircle2, Filter,
+  Link2, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,23 +37,21 @@ function BookingTypeBadge({ booking }: { booking: Booking }) {
     );
   }
   return (
-   <Badge variant="secondary" className="text-xs">
+    <Badge variant="secondary" className="text-xs">
       Katalog
     </Badge>
   );
 }
 const paymentStatusStyles: Record<string, string> = {
-  PENDING:              'bg-warning/10 text-warning border-warning/20',
+  PENDING: 'bg-warning/10 text-warning border-warning/20',
   WAITING_CONFIRMATION: 'bg-blue-50 text-blue-600 border-blue-200',
-  CONFIRMED:            'bg-success/10 text-success border-success/20',
-  REJECTED:             'bg-destructive/10 text-destructive border-destructive/20',
+  CONFIRMED: 'bg-success/10 text-success border-success/20',
 };
 
 const paymentStatusLabels: Record<string, string> = {
-  PENDING:              'Belum Bayar',
+  PENDING: 'Belum Bayar',
   WAITING_CONFIRMATION: 'Menunggu Konfirmasi',
-  CONFIRMED:            'DP Dikonfirmasi',
-  REJECTED:             'Ditolak',
+  CONFIRMED: 'DP Dikonfirmasi',
 };
 
 export default function Bookings() {
@@ -177,17 +175,17 @@ export default function Bookings() {
                 <SelectItem value="all">Semua Tipe</SelectItem>
                 <SelectItem value="catalog">
                   <div className="flex items-center gap-2">
-                     Katalog
+                    Katalog
                   </div>
                 </SelectItem>
                 <SelectItem value="custom">
                   <div className="flex items-center gap-2">
-                     Custom
+                    Custom
                   </div>
                 </SelectItem>
                 <SelectItem value="combination">
                   <div className="flex items-center gap-2">
-                     Kombinasi
+                    Kombinasi
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -273,7 +271,8 @@ export default function Bookings() {
                                 <Eye size={16} />
                               </Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}>
+                                onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}
+                                disabled={booking.is_deletable === false}>
                                 <Trash2 size={16} />
                               </Button>
                             </div>

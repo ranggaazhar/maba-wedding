@@ -9,7 +9,8 @@ const {
   Project,
   ProjectPhoto,
   Property,
-  Invoice
+  Invoice,
+  ReviewLink
 } = require('../../models');
 const { sequelize } = require('../../models');
 const { Op } = require('sequelize');
@@ -37,10 +38,6 @@ class BookingService {
       ];
     }
     
-    if (filters.event_date) {
-      where.event_date = filters.event_date;
-    }
-    
     if (filters.event_date_from && filters.event_date_to) {
       where.event_date = {
         [Op.between]: [filters.event_date_from, filters.event_date_to]
@@ -49,6 +46,8 @@ class BookingService {
       where.event_date = { [Op.gte]: filters.event_date_from };
     } else if (filters.event_date_to) {
       where.event_date = { [Op.lte]: filters.event_date_to };
+    } else if (filters.event_date) {
+      where.event_date = filters.event_date;
     }
     
     if (filters.has_payment !== undefined) {
@@ -95,7 +94,9 @@ class BookingService {
       });
     }
     
-    if (filters.includeInvoice) {
+    // Make sure invoice is included for is_deletable calculation
+    const hasInvoiceInclude = include.some(inc => inc.model === Invoice);
+    if (!hasInvoiceInclude) {
       include.push({ model: Invoice, as: 'invoice' });
     }
     
@@ -104,12 +105,19 @@ class BookingService {
       include,
       order: [['submitted_at', 'DESC']]
     });
+
+    for (const booking of bookings) {
+      booking.dataValues.is_deletable = !booking.invoice || booking.invoice.status === 'PAID';
+    }
     
     return bookings;
   }
   
   async getBookingById(id, includeAll = true) {
-    const include = [{ model: BookingLink, as: 'bookingLink' }];
+    const include = [
+      { model: BookingLink, as: 'bookingLink' },
+      { model: Invoice, as: 'invoice' }
+    ];
     
     if (includeAll) {
       include.push(
@@ -138,7 +146,7 @@ class BookingService {
           ],
           separate: true
         },
-        { model: Invoice, as: 'invoice' },
+
         {
           model: BookingCustomRequest,
           as: 'customRequests',
@@ -152,13 +160,16 @@ class BookingService {
     if (!booking) {
       throw new Error('Booking not found');
     }
+
+    booking.dataValues.is_deletable = !booking.invoice || booking.invoice.status === 'PAID';
     
     return booking;
   }
   
   async getBookingByCode(code, includeAll = true) {
     const include = [
-      { model: BookingLink, as: 'bookingLink' }
+      { model: BookingLink, as: 'bookingLink' },
+      { model: Invoice, as: 'invoice' }
     ];
     
     if (includeAll) {
@@ -183,7 +194,7 @@ class BookingService {
           include: [{ model: Property, as: 'property' }],
           separate: true
         },
-        { model: Invoice, as: 'invoice' },
+
         {
           model: BookingCustomRequest,
           as: 'customRequests',
@@ -200,6 +211,8 @@ class BookingService {
     if (!booking) {
       throw new Error('Booking not found');
     }
+
+    booking.dataValues.is_deletable = !booking.invoice || booking.invoice.status === 'PAID';
     
     return booking;
   }
@@ -289,7 +302,6 @@ class BookingService {
       description:      cr.description,
       color_theme:      cr.color_theme || null,
       reference_images: uploadedImages.length > 0 ? uploadedImages : null,
-      status:           'PENDING',
     };
   });
 
@@ -378,19 +390,58 @@ class BookingService {
   async deleteBooking(id) {
     const booking = await this.getBookingById(id, true);
     
-    if (booking.invoice) {
-      const { Invoice } = require('../../models');
-      await Invoice.update(
+    if (booking.invoice && booking.invoice.status !== 'PAID') {
+      throw new Error('Booking tidak dapat dihapus karena invoice belum lunas.');
+    }
+
+    const transaction = await sequelize.transaction();
+    try {
+      // 1. Lepas referensi invoice agar data keuangan tetap utuh
+      if (booking.invoice) {
+        await Invoice.update(
+          { booking_id: null },
+          { where: { id: booking.invoice.id }, transaction }
+        );
+      }
+
+      // 2. Lepas referensi review_link agar data review tetap ada
+      await ReviewLink.update(
         { booking_id: null },
-        { where: { id: booking.invoice.id } }
+        { where: { booking_id: id }, transaction }
       );
+
+      // 3. Hapus custom requests
+      if (booking.customRequests && booking.customRequests.length > 0) {
+        await BookingCustomRequest.destroy({ where: { booking_id: id }, transaction });
+      }
+
+      // 4. Hapus detail model dan properti
+      await BookingModel.destroy({ where: { booking_id: id }, transaction });
+      await BookingProperty.destroy({ where: { booking_id: id }, transaction });
+
+      // 5. Hapus booking
+      await booking.destroy({ transaction });
+
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-    
+
+    // Hapus file dari disk SETELAH transaction berhasil (tidak bisa di-rollback)
     if (booking.payment_proof_url) {
-      await FileHelper.deleteFile(booking.payment_proof_url);
+      await FileHelper.deleteFile(booking.payment_proof_url).catch(() => {});
     }
-    
-    await booking.destroy();
+    if (booking.customRequests && booking.customRequests.length > 0) {
+      for (const cr of booking.customRequests) {
+        if (cr.reference_images && Array.isArray(cr.reference_images)) {
+          for (const imgPath of cr.reference_images) {
+            await FileHelper.deleteFile(imgPath).catch(() => {});
+          }
+        }
+      }
+    }
+
     return { message: 'Booking deleted successfully' };
   }
   
@@ -469,18 +520,6 @@ class BookingService {
     };
   }
 
-  async rejectPayment(id, reason = '') {
-    const booking = await this.getBookingById(id, false);
-    if (!booking) throw new Error('Booking not found');
-
-    await Booking.update(
-      { payment_status: 'REJECTED', rejection_reason: reason || null },
-      { where: { id } }
-    );
-
-    return await this.getBookingById(id, false);
-  }
-  
   async submitPayment(id, paymentData) {
     const booking = await this.getBookingById(id, false);
     await booking.update({
@@ -504,7 +543,8 @@ class BookingService {
       bank_name:         null,
       account_number:    null,
       account_name:      null,
-      payment_date:      null
+      payment_date:      null,
+      payment_status:    'PENDING'
     });
     return { message: 'Payment proof deleted successfully' };
   }

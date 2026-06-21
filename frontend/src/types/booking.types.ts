@@ -56,11 +56,9 @@ export interface BookingProperty {
   display_image?: string;
 }
 
-export type PaymentStatus = 'PENDING' | 'WAITING_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+export type PaymentStatus = 'PENDING' | 'WAITING_CONFIRMATION' | 'CONFIRMED';
 
 // ── Custom Request ────────────────────────────────────────────────────────────
-
-export type CustomRequestStatus = 'PENDING' | 'REVIEWED' | 'APPROVED' | 'REJECTED';
 
 export interface BookingCustomRequest {
   id: number;
@@ -70,23 +68,12 @@ export interface BookingCustomRequest {
   color_theme?: string;
   reference_images?: string[];
   reference_images_urls?: string[];
-  estimated_price?: string;
-  admin_notes?: string;
-  reviewed_by?: number;
-  reviewed_at?: string;
-  status: CustomRequestStatus;
-  rejection_reason?: string;
   created_at: string;
   updated_at: string;
   booking?: Pick<
     Booking,
     'id' | 'booking_code' | 'customer_name' | 'customer_phone' | 'event_date' | 'event_venue'
   >;
-  reviewer?: {
-    id: number;
-    name: string;
-    email: string;
-  };
 }
 
 export interface CreateCustomRequestData {
@@ -104,23 +91,11 @@ export interface UpdateCustomRequestData {
   replace_images?: boolean;
 }
 
-export interface ReviewCustomRequestData {
-  status: 'REVIEWED' | 'APPROVED' | 'REJECTED';
-  estimated_price?: number;
-  admin_notes?: string;
-  rejection_reason?: string;
-}
-
 export interface CustomRequestStats {
   total: number;
-  pending: number;
-  reviewed: number;
-  approved: number;
-  rejected: number;
 }
 
 export interface CustomRequestFilters {
-  status?: CustomRequestStatus;
   booking_id?: number;
   search?: string;
 }
@@ -168,6 +143,7 @@ export interface Booking {
     status: string;
     total_amount: string;
   };
+  is_deletable?: boolean;
 }
 
 // ── Booking tipe helper ───────────────────────────────────────────────────────

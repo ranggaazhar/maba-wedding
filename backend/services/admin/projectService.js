@@ -224,19 +224,59 @@ class ProjectService {
     }
   }
 
-  async deleteProject(id) {
-    const { BookingModel, InvoiceItem } = require('../../models');
+  async isProjectDeletable(id) {
+    const { BookingModel, Booking, InvoiceItem, Invoice } = require('../../models');
     
-    const bookingCount = await BookingModel.count({ where: { project_id: id } });
-    if (bookingCount > 0) {
-      throw new Error('Cannot delete project with existing bookings');
-    }
-    
-    const invoiceCount = await InvoiceItem.count({ where: { project_id: id } });
-    if (invoiceCount > 0) {
-      throw new Error('Cannot delete project with existing invoices');
+    // Check if there are any associated bookings (whether confirmed or not)
+    // whose invoice is NOT paid (or doesn't exist).
+    const bookings = await BookingModel.findAll({
+      where: { project_id: id },
+      include: [{
+        model: Booking,
+        as: 'booking',
+        include: [{
+          model: Invoice,
+          as: 'invoice'
+        }]
+      }]
+    });
+
+    for (const bm of bookings) {
+      const booking = bm.booking;
+      if (!booking) continue;
+      
+      const invoice = booking.invoice;
+      if (!invoice || invoice.status !== 'PAID') {
+        return false;
+      }
     }
 
+    // Also check direct InvoiceItems
+    const invoiceItems = await InvoiceItem.findAll({
+      where: { project_id: id },
+      include: [{
+        model: Invoice,
+        as: 'invoice'
+      }]
+    });
+
+    for (const item of invoiceItems) {
+      const invoice = item.invoice;
+      if (!invoice || invoice.status !== 'PAID') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  async deleteProject(id) {
+    const deletable = await this.isProjectDeletable(id);
+    if (!deletable) {
+      throw new Error('Project tidak dapat dihapus karena masih memiliki booking atau invoice yang belum lunas.');
+    }
+
+    const { BookingModel, InvoiceItem } = require('../../models');
     const transaction = await sequelize.transaction();
     
     try {
@@ -248,6 +288,17 @@ class ProjectService {
         attributes: ['url'],
         transaction
       });
+
+      // Update associated BookingModel and InvoiceItem project_id to NULL to preserve invoice history!
+      await BookingModel.update(
+        { project_id: null },
+        { where: { project_id: id }, transaction }
+      );
+      
+      await InvoiceItem.update(
+        { project_id: null },
+        { where: { project_id: id }, transaction }
+      );
 
       await ProjectInclude.destroy({ where: { project_id: id }, transaction });
       await ProjectPhoto.destroy({ where: { project_id: id }, transaction });
@@ -312,6 +363,7 @@ class ProjectService {
       }));
     }
     
+    projectData.is_deletable = await this.isProjectDeletable(id);
     return projectData;
   }
 
@@ -350,6 +402,7 @@ class ProjectService {
       }));
     }
     
+    projectData.is_deletable = await this.isProjectDeletable(projectData.id);
     return projectData;
   }
 
@@ -382,7 +435,7 @@ class ProjectService {
     const projects = await Project.findAll({ where, include, order: [[orderBy, orderDir]] });
     const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
     
-    return projects.map(project => {
+    const results = await Promise.all(projects.map(async project => {
       const projectData = project.toJSON();
       if (projectData.photos && Array.isArray(projectData.photos)) {
         projectData.photos = projectData.photos.map(photo => ({
@@ -390,8 +443,10 @@ class ProjectService {
           url: photo.url && photo.url.startsWith('http') ? photo.url : `${BASE_URL}/${photo.url}`
         }));
       }
+      projectData.is_deletable = await this.isProjectDeletable(project.id);
       return projectData;
-    });
+    }));
+    return results;
   }
 
   async updateProjectPhoto(photoId, { caption, position, is_hero, file }) {

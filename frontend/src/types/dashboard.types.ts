@@ -4,7 +4,6 @@ export interface BookingByStatus {
   pending: number;
   waitingConfirmation: number;
   confirmed: number;
-  rejected: number;
 }
 
 export interface MonthlyBookingChart {
@@ -54,7 +53,7 @@ export interface DashboardRecentBooking {
   event_type: string;
   total_estimate: number | null;
   dp_amount: number | null;
-  payment_status: 'PENDING' | 'WAITING_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+  payment_status: 'PENDING' | 'WAITING_CONFIRMATION' | 'CONFIRMED';
   submitted_at: string;
 }
 

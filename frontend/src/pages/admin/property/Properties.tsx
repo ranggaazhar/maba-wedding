@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Plus, Search, Filter, MoreHorizontal, Edit, Trash2,
-  Package, Loader2, Eye, EyeOff,
+  Package, Eye, EyeOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,11 +89,11 @@ export default function Properties() {
       {/* Content */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-         <div className="flex flex-col items-center justify-center py-12 gap-3">
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
             <p className="text-sm text-muted-foreground">Memuat data...</p>
           </div>
-        </div>  
+        </div>
       ) : properties.length === 0 ? (
         <div className="border rounded-lg p-12 text-center bg-card">
           <Package size={48} className="mx-auto text-muted-foreground mb-4" />
@@ -137,7 +137,11 @@ export default function Properties() {
                             : <><Eye size={14} className="mr-2" /> Set Tersedia</>
                           }
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(property.id, property.name)}>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          disabled={property.is_deletable === false}
+                          onClick={() => handleDelete(property.id, property.name)}
+                        >
                           <Trash2 size={14} className="mr-2" /> Hapus
                         </DropdownMenuItem>
                       </DropdownMenuContent>

@@ -111,7 +111,6 @@ export function useDashboard() {
     PENDING: { label: 'Menunggu Bayar', className: 'bg-gray-100 text-gray-600' },
     WAITING_CONFIRMATION: { label: 'Menunggu Konfirmasi', className: 'bg-yellow-100 text-yellow-700' },
     CONFIRMED: { label: 'Dikonfirmasi', className: 'bg-green-100 text-green-700' },
-    REJECTED: { label: 'Ditolak', className: 'bg-red-100 text-red-700' },
   };
 
   return {
