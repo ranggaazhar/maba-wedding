@@ -26,7 +26,6 @@ async function connectDatabase() {
     }
 
     try {
-      await db.sequelize.query("UPDATE bookings SET payment_status = 'PENDING', rejection_reason = NULL WHERE payment_status = 'REJECTED'");
       await db.sequelize.query("ALTER TABLE bookings MODIFY COLUMN payment_status ENUM('PENDING', 'WAITING_CONFIRMATION', 'CONFIRMED') NOT NULL DEFAULT 'PENDING'");
       console.log('✅ Database bookings.payment_status column altered to remove REJECTED');
     } catch (queryErr) {

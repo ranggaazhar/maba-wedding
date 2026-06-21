@@ -38,7 +38,9 @@ class BookingService {
       ];
     }
     
-    if (filters.event_date_from && filters.event_date_to) {
+    if (filters.event_date) {
+      where.event_date = filters.event_date;
+    } else if (filters.event_date_from && filters.event_date_to) {
       where.event_date = {
         [Op.between]: [filters.event_date_from, filters.event_date_to]
       };
@@ -46,8 +48,6 @@ class BookingService {
       where.event_date = { [Op.gte]: filters.event_date_from };
     } else if (filters.event_date_to) {
       where.event_date = { [Op.lte]: filters.event_date_to };
-    } else if (filters.event_date) {
-      where.event_date = filters.event_date;
     }
     
     if (filters.has_payment !== undefined) {
@@ -331,6 +331,12 @@ class BookingService {
         ? parseFloat(data.dp_amount)
         : Math.ceil(totalEstimate * 0.1);
 
+      // Sync has_custom_request flag based on actual custom requests count
+      const customRequestsCount = await BookingCustomRequest.count({
+        where: { booking_id: id },
+        transaction
+      });
+
       await booking.update({
         customer_name:   data.customer_name,
         customer_phone:  data.customer_phone,
@@ -343,6 +349,7 @@ class BookingService {
         total_estimate:  totalEstimate || null,
         dp_amount:       dpAmount || null,       // ← FIX: update dp_amount juga
         customer_notes:  data.customer_notes,
+        has_custom_request: customRequestsCount > 0
       }, { transaction });
 
       if (data.models) {

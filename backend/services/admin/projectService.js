@@ -384,11 +384,6 @@ class ProjectService {
     });
     
     if (!project) throw new Error('Project not found');
-    
-    if (incrementView) {
-      await project.increment('view_count');
-      await project.reload();
-    }
 
     const projectData = project.toJSON();
     const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';

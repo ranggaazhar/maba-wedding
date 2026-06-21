@@ -53,9 +53,10 @@ class InvoiceService {
     }
 
     if (filters.status) where.status = filters.status;
-    if (filters.event_date) where.event_date = filters.event_date;
-
-    if (filters.event_date_from && filters.event_date_to) {
+    
+    if (filters.event_date) {
+      where.event_date = filters.event_date;
+    } else if (filters.event_date_from && filters.event_date_to) {
       where.event_date = { [Op.between]: [filters.event_date_from, filters.event_date_to] };
     } else if (filters.event_date_from) {
       where.event_date = { [Op.gte]: filters.event_date_from };

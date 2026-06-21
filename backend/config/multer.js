@@ -80,7 +80,7 @@ const uploadConfigs = {
     fileFilter: imageFilter,
     limits: {
       fileSize: 10 * 1024 * 1024,  // 10MB per file
-      files: 7                      // maksimal 5 foto referensi
+      files: 5                      // maksimal 5 foto referensi
     }
   }),
 };

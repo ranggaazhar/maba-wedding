@@ -130,10 +130,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
-    rejection_reason: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
     has_custom_request: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

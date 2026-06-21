@@ -19,26 +19,29 @@ class ReviewLinkService {
       if (filters.is_expired) {
         where.expires_at = { [Op.lt]: new Date() };
       } else {
-        // Wrap in Op.and to avoid conflict with search Op.or
-        const notExpiredCondition = {
-          [Op.or]: [
-            { expires_at: null },
-            { expires_at: { [Op.gte]: new Date() } }
-          ]
-        };
-        where[Op.and] = where[Op.and] || [];
-        where[Op.and].push(notExpiredCondition);
+        where[Op.and] = [
+          {
+            [Op.or]: [
+              { expires_at: null },
+              { expires_at: { [Op.gte]: new Date() } }
+            ]
+          }
+        ];
       }
     }
     
     if (filters.search) {
-      const searchCondition = {
-        [Op.or]: [
-          { token: { [Op.like]: `%${filters.search}%` } }
-        ]
-      };
-      where[Op.and] = where[Op.and] || [];
-      where[Op.and].push(searchCondition);
+      const searchOr = [
+        { token: { [Op.like]: `%${filters.search}%` } },
+        { '$booking.customer_name$': { [Op.like]: `%${filters.search}%` } },
+        { '$booking.customer_phone$': { [Op.like]: `%${filters.search}%` } }
+      ];
+      
+      if (where[Op.and]) {
+        where[Op.and].push({ [Op.or]: searchOr });
+      } else {
+        where[Op.and] = [{ [Op.or]: searchOr }];
+      }
     }
     
     const include = [

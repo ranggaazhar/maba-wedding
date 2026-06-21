@@ -15,6 +15,7 @@ const invoiceRoutes          = require('./invoiceRoutes');
 const invoiceItemRoutes      = require('./invoiceItemRoutes');
 const dashboardRoutes        = require('./dashboardRoutes');
 const customRequestRoutes    = require('./customRequestRoutes');
+const authMiddleware         = require('../middleware/auth');
 
 // ── Misc ───────────────────────────────────────────────────────
 router.post('/wa-webhook', (req, res) => {
@@ -22,7 +23,7 @@ router.post('/wa-webhook', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-router.get('/test-reminder', async (req, res) => {
+router.get('/test-reminder', authMiddleware, async (req, res) => {
   const reminderService = require('../services/admin/reminderService');
   await reminderService.sendReminder(5);
   res.json({ success: true, message: 'Reminder dikirim' });

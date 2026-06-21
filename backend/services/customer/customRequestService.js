@@ -68,7 +68,7 @@ class CustomRequestService {
       reference_images: allImages.length > 0 ? allImages : null,
     });
 
-    // Sync flag has_custom_request pada booking
+    // Update parent booking custom request flag
     await booking.update({ has_custom_request: true });
 
     return await this.getRequestById(request.id);
@@ -121,13 +121,14 @@ class CustomRequestService {
       await FileHelper.deleteFile(imgPath);
     }
 
+    const bookingId = request.booking_id;
     await request.destroy();
 
-    // Sync flag has_custom_request pada booking
-    const remainingCount = await BookingCustomRequest.count({ where: { booking_id: request.booking_id } });
+    // Sync parent booking custom request flag
+    const remainingCount = await BookingCustomRequest.count({ where: { booking_id: bookingId } });
     await Booking.update(
       { has_custom_request: remainingCount > 0 },
-      { where: { id: request.booking_id } }
+      { where: { id: bookingId } }
     );
 
     return { message: 'Custom request berhasil dihapus' };

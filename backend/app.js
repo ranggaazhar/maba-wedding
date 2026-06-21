@@ -125,9 +125,8 @@ const generalLimiter = rateLimit({
   }
 });
 
-app.use('/api/auth/login', loginLimiter);
-
 if (process.env.NODE_ENV === 'production' || process.env.ENABLE_RATE_LIMIT === 'true') {
+  app.use('/api/auth/login', loginLimiter);
   app.use('/api', generalLimiter);
   console.log('✅ Rate limiting enabled');
 } else {

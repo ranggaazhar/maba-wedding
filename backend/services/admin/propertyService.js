@@ -84,6 +84,10 @@ class PropertyService {
       throw new Error('Property not found');
     }
     
+    if (!includeRelations) {
+      return property;
+    }
+    
     const propData = property.toJSON();
     propData.is_deletable = await this.isPropertyDeletable(id);
     return propData;
@@ -257,7 +261,7 @@ class PropertyService {
   async toggleAvailability(id) {
     const property = await this.getPropertyById(id, false);
     await property.update({ is_available: !property.is_available });
-    return property;
+    return await this.getPropertyById(id);
   }
   
   

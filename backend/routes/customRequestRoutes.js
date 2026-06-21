@@ -38,7 +38,7 @@ router.get(
 // POST /api/bookings/:bookingId/custom-requests
 router.post(
   '/bookings/:bookingId/custom-requests',
-  upload.customRequestImages.array('reference_images', 7),
+  upload.customRequestImages.array('reference_images', 5),
   processMultipleImages({ width: 1280, quality: 80, format: 'jpeg' }),
   createCustomRequestValidation, validate,
   customRequestController.create
@@ -54,7 +54,7 @@ router.get(
 // PUT  /api/custom-requests/:id
 router.put(
   '/custom-requests/:id',
-  upload.customRequestImages.array('reference_images', 7),
+  upload.customRequestImages.array('reference_images', 5),
   processMultipleImages({ width: 1280, quality: 80, format: 'jpeg' }),
   updateCustomRequestValidation, validate,
   customRequestController.update
