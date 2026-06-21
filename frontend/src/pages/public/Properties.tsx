@@ -1,6 +1,6 @@
 // src/pages/Properties.tsx
 import { ImageWithFallback } from '@/components/fallbackimage/ImageWithFallback';
-import { Search } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { useProperties } from '@/hooks/Customer/useProperties';
 import { Button } from '@/components/ui/button';
 
@@ -28,9 +28,12 @@ export function Properties() {
   const {
     properties,
     totalProperties,
+    categories,
     isLoading,
     searchQuery,
     setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
     currentPage,
     setCurrentPage,
     totalPages,
@@ -73,18 +76,51 @@ export function Properties() {
         </div>
       </section>
 
-      {/* Search Section */}
-      <section className="bg-white border-b border-[#E5E7EB] py-8 -mt-16 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="relative max-w-xl mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B7280]" />
-            <input
-              type="text"
-              placeholder="Cari properti atau kategori..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border-2 border-[#A8DADC]/30 rounded-full focus:outline-none focus:border-[#457B9D] transition-colors"
-            />
+      {/* Search & Filter Section */}
+      <section className="bg-white border-b border-[#E5E7EB] sticky top-20 z-40 shadow-sm -mt-16 relative">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+            {/* Search Bar */}
+            <div className="relative flex-1 w-full max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B7280]" />
+              <input
+                type="text"
+                placeholder="Cari properti..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border-2 border-[#A8DADC]/30 rounded-full focus:outline-none focus:border-[#457B9D] transition-colors"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <Filter className="w-5 h-5 text-[#6B7280] flex-shrink-0" />
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedCategory('All')}
+                className={`px-5 py-2 h-auto rounded-full transition-all text-sm font-light ${
+                  selectedCategory === 'All'
+                    ? 'bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white shadow-lg hover:text-white hover:opacity-90'
+                    : 'bg-[#F8F9FA] text-[#6B7280] hover:bg-[#A8DADC]/20 hover:text-[#1D3557]'
+                }`}
+              >
+                All
+              </Button>
+              {categories.map(cat => (
+                <Button
+                  key={cat.id}
+                  variant="ghost"
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className={`px-5 py-2 h-auto rounded-full transition-all text-sm font-sans font-light ${
+                    selectedCategory === cat.name
+                      ? 'bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white shadow-lg hover:text-white hover:opacity-90'
+                      : 'bg-[#F8F9FA] text-[#6B7280] hover:bg-[#A8DADC]/20 hover:text-[#1D3557]'
+                  }`}
+                >
+                  {cat.name}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </section>

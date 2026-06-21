@@ -22,7 +22,6 @@ export default function PropertyForm() {
     isEditMode,
     categories,
     existingImage,
-    imageFile,
     imagePreview,
     formData,
     handleNameChange,

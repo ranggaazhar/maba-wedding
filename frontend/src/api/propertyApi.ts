@@ -1,11 +1,7 @@
 // src/api/propertyApi.ts
 import axios from 'axios';
 import type { ApiResponse } from '@/types/common.types';
-import type {
-  Property,
-  CreatePropertyData,
-  PropertyFormData,
-} from '@/types/property.types';
+import type { Property } from '@/types/property.types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 

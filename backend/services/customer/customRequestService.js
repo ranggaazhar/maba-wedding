@@ -1,5 +1,5 @@
 // services/customer/customRequestService.js
-const { BookingCustomRequest, Booking, Admin } = require('../../models');
+const { BookingCustomRequest, Booking, Admin, Invoice } = require('../../models');
 const { Op } = require('sequelize');
 const FileHelper = require('../../utils/fileHelper');
 
@@ -11,7 +11,12 @@ class CustomRequestService {
       include.push({
         model: Booking,
         as: 'booking',
-        attributes: ['id', 'booking_code', 'customer_name', 'customer_phone', 'event_date', 'event_venue', 'payment_status']
+        attributes: ['id', 'booking_code', 'customer_name', 'customer_phone', 'event_date', 'event_venue', 'payment_status'],
+        include: [{
+          model: Invoice,
+          as: 'invoice',
+          attributes: ['id', 'status']
+        }]
       });
     }
     return include;
@@ -76,8 +81,8 @@ class CustomRequestService {
   async updateRequest(id, data, files = []) {
     const request = await this.getRequestById(id);
 
-    if (request.booking && request.booking.payment_status !== 'PENDING') {
-      throw new Error('Request tidak dapat diedit karena booking sudah diproses');
+    if (request.booking && request.booking.invoice) {
+      throw new Error('Request tidak dapat diedit karena booking sudah memiliki invoice');
     }
     const newUploads = files.map(f => f.path.replace(/\\/g, '/'));
 
@@ -111,8 +116,8 @@ class CustomRequestService {
   async deleteRequest(id) {
     const request = await this.getRequestById(id);
 
-    if (request.booking && request.booking.payment_status !== 'PENDING') {
-      throw new Error('Request tidak dapat dihapus karena booking sudah diproses');
+    if (request.booking && request.booking.invoice) {
+      throw new Error('Request tidak dapat dihapus karena booking sudah memiliki invoice');
     }
 
     // Hapus semua file referensi dari disk

@@ -93,18 +93,18 @@ export function useInvoiceForm() {
           setNotes(inv.notes || '');
           setAdminNotes(inv.admin_notes || '');
           setBookingId(inv.booking_id ? String(inv.booking_id) : '');
-            setItems(inv.items.map((item: ItemRow & { id: number }, i: number) => ({
-              _tempId: item.id || i,
-              item_name: item.item_name,
-              item_type: item.item_type || 'item',
-              description: item.description || '',
-              quantity: item.quantity || 1,
-              unit_price: Number(item.unit_price) || 0,
-              subtotal: Number(item.subtotal) || 0,
-              display_order: i,
-              project_id: item.project_id,
-              property_id: item.property_id,
-            })));
+          setItems(inv.items.map((item: ItemRow & { id: number }, i: number) => ({
+            _tempId: item.id || i,
+            item_name: item.item_name,
+            item_type: item.item_type || 'item',
+            description: item.description || '',
+            quantity: item.quantity || 1,
+            unit_price: Number(item.unit_price) || 0,
+            subtotal: Number(item.subtotal) || 0,
+            display_order: i,
+            project_id: item.project_id,
+            property_id: item.property_id,
+          })));
         }
       } catch {
         Swal.fire('Error', 'Gagal memuat data invoice', 'error');

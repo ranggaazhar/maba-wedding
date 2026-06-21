@@ -1,6 +1,6 @@
 // src/pages/admin/reviews/Reviews.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Star, Check, X, Search, Eye, MessageSquare, ThumbsUp, Award, Loader2, Trash2, RefreshCw, Copy } from "lucide-react";
+import { Star, Check, X, Search, Eye, MessageSquare, Loader2, Trash2, RefreshCw, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -231,10 +231,10 @@ export default function Reviews() {
       <Tabs defaultValue="pending" className="space-y-6">
         <TabsList className="bg-muted/50">
           <TabsTrigger value="pending" className="data-[state=active]:bg-card">
-            Menunggu 
+            Menunggu
           </TabsTrigger>
           <TabsTrigger value="approved" className="data-[state=active]:bg-card">
-            Disetujui 
+            Disetujui
           </TabsTrigger>
           <TabsTrigger value="links" className="data-[state=active]:bg-card">
             Review Links

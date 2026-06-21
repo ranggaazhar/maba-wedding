@@ -27,7 +27,7 @@ const handle401Error = async (error: any) => {
   if (error.response?.status === 401) {
     localStorage.removeItem('token');
     localStorage.removeItem('admin');
-    
+
     // Prevent multiple alert popups when concurrent requests fail
     if (!window.location.pathname.includes('/login') && !window.hasOwnProperty('__sessionExpiredAlertActive')) {
       (window as any).__sessionExpiredAlertActive = true;
@@ -109,13 +109,13 @@ export const authApi = {
   },
 
   changePassword: async (data: ChangePasswordData) => {
-  const response = await api.post<{ success: boolean; message: string }>('/auth/change-password', {
-    currentPassword: data.currentPassword,
-    newPassword: data.newPassword,
-    confirmPassword: data.newPassword, // tambah ini
-  });
-  return response.data;
-},
+    const response = await api.post<{ success: boolean; message: string }>('/auth/change-password', {
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+      confirmPassword: data.newPassword, // tambah ini
+    });
+    return response.data;
+  },
 
   logout: async () => {
     const response = await api.post<{ success: boolean; message: string }>('/auth/logout');

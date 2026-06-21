@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sparkles, Users, Award, DollarSign, Heart, CheckCircle,
@@ -24,9 +24,9 @@ interface Testimonial {
 }
 
 // ── Skeleton helpers ──────────────────────────────────────────────────────────
-function SkeletonCard() {
+function SkeletonCard({ visibleCount }: { visibleCount: number }) {
   return (
-    <div className="w-1/3 flex-shrink-0 px-4">
+    <div className="flex-shrink-0 px-4" style={{ width: `${100 / visibleCount}%` }}>
       <Card className="overflow-hidden">
         <Skeleton className="aspect-[4/5] w-full" />
         <CardContent className="p-6 space-y-3">
@@ -97,7 +97,23 @@ export function Home() {
     formatPrice,
   } = useHome();
 
-  const visibleCount = 3;
+  const [visibleCount, setVisibleCount] = useState(3);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setVisibleCount(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(2);
+      } else {
+        setVisibleCount(3);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const maxPortfolio = Math.max(0, featuredProjects.length - visibleCount);
   const activeTestimonial: Testimonial | undefined = testimonials[currentTestimonial];
 
@@ -319,7 +335,7 @@ export function Home() {
             <div className="overflow-hidden">
               {isLoadingProjects ? (
                 <div className="flex">
-                  {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
+                  {Array.from({ length: visibleCount }).map((_, i) => <SkeletonCard key={i} visibleCount={visibleCount} />)}
                 </div>
               ) : featuredProjects.length === 0 ? (
                 <p className="text-center text-[#6B7280] py-20">Belum ada project unggulan</p>
@@ -329,7 +345,7 @@ export function Home() {
                   style={{ transform: `translateX(-${currentPortfolio * (100 / visibleCount)}%)` }}
                 >
                   {featuredProjects.map((project) => (
-                    <div key={project.id} className="w-1/3 flex-shrink-0 px-4">
+                    <div key={project.id} className="flex-shrink-0 px-4" style={{ width: `${100 / visibleCount}%` }}>
                       <Link to={`/projects/${project.slug}`}>
                         <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-2 border-transparent hover:border-[#A8DADC]">
                           <div className="aspect-[4/5] overflow-hidden relative">

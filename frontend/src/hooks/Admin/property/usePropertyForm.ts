@@ -16,7 +16,7 @@ export const usePropertyForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(isEditMode);
   const [categories, setCategories] = useState<PropertyCategory[]>([]);
-  
+
   // Single image states
   const [existingImage, setExistingImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -88,7 +88,7 @@ export const usePropertyForm = () => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      
+
       // 1. Validasi Tipe File (hanya gambar)
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
@@ -96,7 +96,7 @@ export const usePropertyForm = () => {
         e.target.value = ''; // Reset input
         return;
       }
-      
+
       // 2. Validasi Ukuran File (Maks. 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
@@ -143,7 +143,7 @@ export const usePropertyForm = () => {
       submitData.append('description', formData.description || '');
       submitData.append('price', formData.price);
       submitData.append('is_available', String(formData.is_available));
-      
+
       if (imageFile) {
         submitData.append('image', imageFile);
       } else if (!existingImage) {

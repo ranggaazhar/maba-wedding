@@ -91,12 +91,29 @@ export default function BookingDetail() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" onClick={() => navigate(`/admin/bookings/edit/${booking.id}`)}>
-              <Edit size={16} className="mr-2" /> Edit
-            </Button>
-            <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={handleDelete}>
-              <X size={16} className="mr-2" /> Hapus
-            </Button>
+            {booking.invoice ? (
+              <span title="Edit tidak dapat dilakukan karena invoice sudah diterbitkan" className="cursor-not-allowed">
+                <Button variant="outline" disabled>
+                  <Edit size={16} className="mr-2" /> Edit
+                </Button>
+              </span>
+            ) : (
+              <Button variant="outline" onClick={() => navigate(`/admin/bookings/edit/${booking.id}`)}>
+                <Edit size={16} className="mr-2" /> Edit
+              </Button>
+            )}
+
+            {booking.is_deletable === false ? (
+              <span title="Booking tidak dapat dihapus karena invoice belum lunas" className="cursor-not-allowed">
+                <Button variant="outline" className="text-destructive border-destructive/30" disabled>
+                  <X size={16} className="mr-2" /> Hapus
+                </Button>
+              </span>
+            ) : (
+              <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={handleDelete}>
+                <X size={16} className="mr-2" /> Hapus
+              </Button>
+            )}
           </div>
         </div>
 

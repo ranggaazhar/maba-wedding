@@ -137,13 +137,20 @@ export default function Properties() {
                             : <><Eye size={14} className="mr-2" /> Set Tersedia</>
                           }
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          disabled={property.is_deletable === false}
-                          onClick={() => handleDelete(property.id, property.name)}
-                        >
-                          <Trash2 size={14} className="mr-2" /> Hapus
-                        </DropdownMenuItem>
+                        {property.is_deletable === false ? (
+                          <div title="Properti tidak dapat dihapus karena masih memiliki booking atau invoice yang belum lunas">
+                            <DropdownMenuItem className="text-destructive opacity-50 cursor-not-allowed" disabled>
+                              <Trash2 size={14} className="mr-2" /> Hapus
+                            </DropdownMenuItem>
+                          </div>
+                        ) : (
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDelete(property.id, property.name)}
+                          >
+                            <Trash2 size={14} className="mr-2" /> Hapus
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

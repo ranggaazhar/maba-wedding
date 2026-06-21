@@ -66,10 +66,10 @@ function App() {
 
           {/* ── Public Website (Navbar + Footer) ──────────────── */}
           <Route element={<PublicLayout />}>
-            <Route path="/"              element={<Home />} />
-            <Route path="/projects"      element={<OurProjects />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/projects" element={<OurProjects />} />
             <Route path="/projects/:slug" element={<PublicProjectDetail />} />
-            <Route path="/properties"    element={<PublicProperties />} />
+            <Route path="/properties" element={<PublicProperties />} />
           </Route>
 
           {/* ── Auth ──────────────────────────────────────────── */}
@@ -80,7 +80,7 @@ function App() {
 
           {/* ── Customer Forms (standalone, no layout) ─────────── */}
           <Route path="/booking/:token" element={<CustomerBookingForm />} />
-          <Route path="/review/:token"  element={<ReviewForm />} />
+          <Route path="/review/:token" element={<ReviewForm />} />
 
           {/* ── Admin ─────────────────────────────────────────── */}
 
@@ -91,41 +91,41 @@ function App() {
           <Route path="/admin/profile" element={<Admin><Profile /></Admin>} />
 
           {/* Categories */}
-          <Route path="/admin/categories"          element={<Admin><Categories /></Admin>} />
+          <Route path="/admin/categories" element={<Admin><Categories /></Admin>} />
           <Route path="/admin/property-categories" element={<Admin><PropertyCategories /></Admin>} />
 
           {/* Projects */}
-          <Route path="/admin/projects"          element={<Admin><Projects /></Admin>} />
-          <Route path="/admin/projects/new"      element={<Admin><ProjectForm /></Admin>} />
+          <Route path="/admin/projects" element={<Admin><Projects /></Admin>} />
+          <Route path="/admin/projects/new" element={<Admin><ProjectForm /></Admin>} />
           <Route path="/admin/projects/edit/:id" element={<Admin><ProjectForm /></Admin>} />
-          <Route path="/admin/projects/:id"      element={<Admin><ProjectDetail /></Admin>} />
+          <Route path="/admin/projects/:id" element={<Admin><ProjectDetail /></Admin>} />
 
           {/* Properties */}
-          <Route path="/admin/properties"          element={<Admin><AdminProperties /></Admin>} />
-          <Route path="/admin/properties/new"      element={<Admin><PropertyForm /></Admin>} />
+          <Route path="/admin/properties" element={<Admin><AdminProperties /></Admin>} />
+          <Route path="/admin/properties/new" element={<Admin><PropertyForm /></Admin>} />
           <Route path="/admin/properties/edit/:id" element={<Admin><PropertyForm /></Admin>} />
-          <Route path="/admin/properties/:id"      element={<Admin><PropertyDetail /></Admin>} />
+          <Route path="/admin/properties/:id" element={<Admin><PropertyDetail /></Admin>} />
 
           {/* Bookings */}
-          <Route path="/admin/bookings"          element={<Admin><Bookings /></Admin>} />
+          <Route path="/admin/bookings" element={<Admin><Bookings /></Admin>} />
           <Route path="/admin/bookings/edit/:id" element={<Admin><BookingEdit /></Admin>} />
-          <Route path="/admin/bookings/:id"      element={<Admin><BookingDetail /></Admin>} />
+          <Route path="/admin/bookings/:id" element={<Admin><BookingDetail /></Admin>} />
           <Route path="/admin/booking-links/new" element={<Admin><CreateBookingLink /></Admin>} />
 
           {/* Invoices */}
-          <Route path="/admin/invoices"          element={<Admin><Invoices /></Admin>} />
-          <Route path="/admin/invoices/new"      element={<Admin><InvoiceForm /></Admin>} />
-          <Route path="/admin/invoices/:id"      element={<Admin><InvoiceDetail /></Admin>} />
+          <Route path="/admin/invoices" element={<Admin><Invoices /></Admin>} />
+          <Route path="/admin/invoices/new" element={<Admin><InvoiceForm /></Admin>} />
+          <Route path="/admin/invoices/:id" element={<Admin><InvoiceDetail /></Admin>} />
           <Route path="/admin/invoices/:id/edit" element={<Admin><InvoiceForm /></Admin>} />
 
           {/* Reviews */}
-          <Route path="/admin/reviews"     element={<Admin><Reviews /></Admin>} />
+          <Route path="/admin/reviews" element={<Admin><Reviews /></Admin>} />
           <Route path="/admin/reviews/:id" element={<Admin><ReviewDetail /></Admin>} />
 
           {/* ── Redirects ─────────────────────────────────────── */}
           <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin"     element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="*"          element={<Navigate to="/" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
         <Toaster />

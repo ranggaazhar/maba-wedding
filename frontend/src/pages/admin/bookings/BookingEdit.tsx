@@ -142,12 +142,21 @@ export default function BookingEdit() {
 
                 <div className="space-y-2">
                   <Label htmlFor="theme_color">Warna Tema</Label>
-                  <Input
-                    id="theme_color"
-                    value={formData.theme_color}
-                    onChange={(e) => setFormData(prev => ({ ...prev, theme_color: e.target.value }))}
-                    placeholder="Gold & Cream"
-                  />
+                  <div className="flex items-center gap-3">
+                    <input
+                      id="theme_color"
+                      type="color"
+                      value={formData.theme_color || '#d4a017'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, theme_color: e.target.value }))}
+                      className="w-12 h-10 rounded-md border cursor-pointer p-0.5 bg-transparent"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {formData.theme_color || '#d4a017'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Klik kotak untuk memilih warna tema acara
+                  </p>
                 </div>
               </div>
 

@@ -15,8 +15,13 @@ const invoiceItemRoutes      = require('./invoiceItemRoutes');
 const dashboardRoutes        = require('./dashboardRoutes');
 const customRequestRoutes    = require('./customRequestRoutes');
 const authMiddleware         = require('../middleware/auth');
+const searchController       = require('../controllers/admin/searchController');
+const notificationController = require('../controllers/admin/notificationController');
 
 // ── Misc ───────────────────────────────────────────────────────
+router.get('/search', authMiddleware, searchController.globalSearch);
+router.get('/notifications', authMiddleware, notificationController.getNotifications);
+
 router.post('/wa-webhook', (req, res) => {
   console.log('📩 WA Webhook:', JSON.stringify(req.body, null, 2));
   res.json({ status: 'ok' });

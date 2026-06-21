@@ -11,6 +11,7 @@ export function useProperties() {
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -42,13 +43,22 @@ export function useProperties() {
     setCurrentPage(1);
   }, []);
 
+  const handleSetSelectedCategory = useCallback((cat: string) => {
+    setSelectedCategory(cat);
+    setCurrentPage(1);
+  }, []);
+
   const filteredProperties = useMemo(() => {
-    return properties.filter(p =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.category?.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.description ?? '').toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [properties, searchQuery]);
+    return properties.filter(p => {
+      const matchSearch =
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.category?.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.description ?? '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCategory =
+        selectedCategory === 'All' || p.category?.name === selectedCategory;
+      return matchSearch && matchCategory;
+    });
+  }, [properties, searchQuery, selectedCategory]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProperties.length / PAGE_SIZE));
 
@@ -75,6 +85,8 @@ export function useProperties() {
     isLoading,
     searchQuery,
     setSearchQuery: handleSetSearchQuery,
+    selectedCategory,
+    setSelectedCategory: handleSetSelectedCategory,
     currentPage,
     setCurrentPage,
     totalPages,

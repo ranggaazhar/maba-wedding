@@ -270,11 +270,18 @@ export default function Bookings() {
                                 onClick={() => navigate(`/admin/bookings/${booking.id}`)}>
                                 <Eye size={16} />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}
-                                disabled={booking.is_deletable === false}>
-                                <Trash2 size={16} />
-                              </Button>
+                              {booking.is_deletable === false ? (
+                                <span title="Booking tidak dapat dihapus karena invoice belum lunas" className="cursor-not-allowed">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive opacity-50" disabled>
+                                    <Trash2 size={16} />
+                                  </Button>
+                                </span>
+                              ) : (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                  onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}>
+                                  <Trash2 size={16} />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>

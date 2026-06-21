@@ -3,6 +3,10 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Star, CheckCircle, Loader2, AlertCircle, Clock } from "lucide-react";
 import { reviewApi, type ReviewLink } from "@/api/reviewApi";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 // ── Star Input ────────────────────────────────────────────────
 
@@ -215,33 +219,34 @@ export default function ReviewForm() {
 
           {/* Nama */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Nama Anda</label>
-            <input
+            <Label htmlFor="customer_name">Nama Anda</Label>
+            <Input
+              id="customer_name"
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Masukkan nama Anda"
-              className="w-full px-4 py-2.5 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
           {/* Rating */}
           <div className="space-y-3">
-            <label className="text-sm font-medium text-foreground">Rating</label>
+            <Label>Rating</Label>
             <StarInput value={rating} onChange={setRating} />
           </div>
 
           {/* Review Text */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
+            <Label htmlFor="review_text">
               Ulasan <span className="text-muted-foreground font-normal">(min. 10 karakter)</span>
-            </label>
-            <textarea
+            </Label>
+            <Textarea
+              id="review_text"
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
               placeholder="Ceritakan pengalaman Anda menggunakan jasa dekorasi kami..."
               rows={5}
-              className="w-full px-4 py-3 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              className="resize-none"
             />
             <p className="text-xs text-muted-foreground text-right">{reviewText.length} karakter</p>
           </div>
@@ -255,17 +260,17 @@ export default function ReviewForm() {
           )}
 
           {/* Submit */}
-          <button
+          <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full py-3 rounded-lg font-medium text-white bg-primary hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-6 text-base font-semibold"
           >
             {isSubmitting ? (
-              <><Loader2 size={16} className="animate-spin" /> Mengirim...</>
+              <><Loader2 size={16} className="animate-spin mr-2" /> Mengirim...</>
             ) : (
               "Kirim Ulasan ✨"
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Footer */}

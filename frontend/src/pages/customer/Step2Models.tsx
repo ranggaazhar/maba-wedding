@@ -61,7 +61,7 @@ export default function Step2Models({ models, setModels, onNext, onBack }: Step2
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-4">Pilih Model Dekorasi</h3>
-        
+
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2 mb-4">
           <Button
@@ -126,7 +126,7 @@ export default function Step2Models({ models, setModels, onNext, onBack }: Step2
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {selectedCategory === "all" 
+              {selectedCategory === "all"
                 ? "Belum ada project yang dipublikasikan. Silakan hubungi admin."
                 : "Tidak ada project di kategori ini."
               }
@@ -136,7 +136,7 @@ export default function Step2Models({ models, setModels, onNext, onBack }: Step2
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProjects.map(project => {
               const isSelected = models.find(m => m.project_id === project.id);
-              
+
               return (
                 <Card key={project.id} className={`overflow-hidden ${isSelected ? "ring-2 ring-primary" : ""}`}>
                   <div className="aspect-video overflow-hidden">
@@ -158,7 +158,7 @@ export default function Step2Models({ models, setModels, onNext, onBack }: Step2
                       {project.category?.name || "Uncategorized"}
                     </Badge>
                     <p className="text-lg font-bold text-primary mb-3">
-                      {project.price && project.price !== "0" 
+                      {project.price && project.price !== "0"
                         ? `Rp ${Number(project.price).toLocaleString("id-ID")}`
                         : "Hubungi Admin"
                       }

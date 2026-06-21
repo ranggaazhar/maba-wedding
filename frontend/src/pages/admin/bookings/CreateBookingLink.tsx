@@ -144,10 +144,10 @@ export default function CreateBookingLink() {
             </div>
 
             {/* Submit Button */}
-            <Button 
-              type="submit" 
-              disabled={isSubmitting} 
-              className="w-full gradient-ocean text-primary-foreground h-12 text-base font-medium" 
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full gradient-ocean text-primary-foreground h-12 text-base font-medium"
             >
               {isSubmitting ? (
                 "Membuat..."
@@ -173,13 +173,13 @@ export default function CreateBookingLink() {
               <h3 className="font-semibold text-lg text-success">Link Berhasil Dibuat!</h3>
             </div>
             <div className="flex items-center gap-2">
-              <Input 
-                value={generatedLink} 
-                readOnly 
-                className="bg-muted border-muted-foreground/20 font-mono text-sm" 
+              <Input
+                value={generatedLink}
+                readOnly
+                className="bg-muted border-muted-foreground/20 font-mono text-sm"
               />
-              <Button 
-                onClick={handleCopyLink} 
+              <Button
+                onClick={handleCopyLink}
                 className="gradient-ocean text-primary-foreground shrink-0"
                 size="lg"
               >

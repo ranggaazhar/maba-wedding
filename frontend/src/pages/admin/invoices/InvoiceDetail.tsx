@@ -1,7 +1,7 @@
 import { useInvoiceDetail } from '@/hooks/Admin/invoices/useInvoiceDetail';
 import {
   ArrowLeft, Edit, Send, FileText, CheckCircle,
-  AlertTriangle, Loader2, Clock, MessageCircle
+  Loader2, Clock, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,15 +19,15 @@ const formatDate = (dateStr?: string) => {
 };
 
 const statusConfig: Record<InvoiceStatus, { label: string; className: string; icon: React.ReactNode }> = {
-  DRAFT:   { label: 'Draft',     className: 'bg-muted text-muted-foreground border-border',    icon: <Clock size={14} /> },
-  SENT:    { label: 'Terkirim',  className: 'bg-blue-100 text-blue-700 border-blue-200',       icon: <Send size={14} /> },
-  PAID:    { label: 'Lunas',     className: 'bg-green-100 text-green-700 border-green-200',    icon: <CheckCircle size={14} /> },
+  DRAFT: { label: 'Draft', className: 'bg-muted text-muted-foreground border-border', icon: <Clock size={14} /> },
+  SENT: { label: 'Terkirim', className: 'bg-blue-100 text-blue-700 border-blue-200', icon: <Send size={14} /> },
+  PAID: { label: 'Lunas', className: 'bg-green-100 text-green-700 border-green-200', icon: <CheckCircle size={14} /> },
 };
 
 const itemTypeLabel: Record<string, { label: string; className: string }> = {
-  item:       { label: 'Item',    className: 'text-foreground' },
-  discount:   { label: 'Diskon',  className: 'text-green-600' },
-  penalty:    { label: 'Denda',   className: 'text-red-600' },
+  item: { label: 'Item', className: 'text-foreground' },
+  discount: { label: 'Diskon', className: 'text-green-600' },
+  penalty: { label: 'Denda', className: 'text-red-600' },
   adjustment: { label: 'Koreksi', className: 'text-orange-500' },
 };
 
@@ -73,13 +73,20 @@ export default function InvoiceDetail() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {invoice.status !== 'PAID' && (
+          {invoice.status === 'PAID' ? (
+            <span title="Invoice tidak dapat di-edit karena sudah lunas" className="cursor-not-allowed">
+              <Button variant="outline" size="sm" disabled>
+                <Edit size={16} className="mr-2" />
+                Edit
+              </Button>
+            </span>
+          ) : (
             <Button variant="outline" size="sm" onClick={() => navigate(`/admin/invoices/${id}/edit`)}>
               <Edit size={16} className="mr-2" />
               Edit
             </Button>
           )}
-  
+
           {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
             <Button
               size="sm"
@@ -105,13 +112,13 @@ export default function InvoiceDetail() {
             <div className="flex justify-between items-start mb-8">
               <div>
                 <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center">
-            <img
-              src={LogoMaba}
-              alt="Logo Maba"
-              className="h-12 w-12 object-contain"
-            />
-                </div>
+                  <div className="flex items-center justify-center">
+                    <img
+                      src={LogoMaba}
+                      alt="Logo Maba"
+                      className="h-12 w-12 object-contain"
+                    />
+                  </div>
                   <span className="font-bold text-foreground tracking-tight text-lg">MABA WEDDING DEKOR</span>
                 </div>
                 <p className="text-sm text-muted-foreground">Kulon Progo, Yogyakarta</p>

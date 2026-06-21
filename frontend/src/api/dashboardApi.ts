@@ -40,6 +40,34 @@ class DashboardApi {
     });
     return data;
   }
+
+  async globalSearch(q: string): Promise<ApiResponse<{
+    bookings: { id: number; code: string; name: string }[];
+    projects: { id: number; slug: string; title: string }[];
+    properties: { id: number; name: string }[];
+  }>> {
+    const { data } = await axios.get(`${API_URL}/search`, {
+      params: { q },
+      ...this.getAuthHeaders(),
+    });
+    return data;
+  }
+
+  async getNotifications(): Promise<ApiResponse<{
+    notifications: {
+      id: string;
+      type: 'booking' | 'review';
+      target_id: number;
+      title: string;
+      message: string;
+      date: string;
+      unread: boolean;
+    }[];
+    unreadCount: number;
+  }>> {
+    const { data } = await axios.get(`${API_URL}/notifications`, this.getAuthHeaders());
+    return data;
+  }
 }
 
 export const dashboardApi = new DashboardApi();

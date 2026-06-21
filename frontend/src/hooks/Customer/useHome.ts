@@ -26,7 +26,7 @@ export function useHome() {
     async function loadAll() {
       const [projectsResult, reviewsResult] = await Promise.allSettled([
         projectApi.getAllProjects({ is_published: true, is_featured: true, include_photos: true }),
-        reviewApi.getPublishedReviews(6, false),
+        reviewApi.getPublishedReviews(6),
       ]);
 
       if (cancelled) return;

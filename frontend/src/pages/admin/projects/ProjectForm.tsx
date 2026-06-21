@@ -253,11 +253,10 @@ export default function ProjectForm() {
               className={`flex flex-col items-center gap-1 ${currentStep < step.id ? 'cursor-default' : 'cursor-pointer'}`}
               disabled={saving}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
-                currentStep === step.id ? 'border-primary bg-primary text-white scale-110' :
-                currentStep > step.id ? 'border-green-500 bg-green-500 text-white' :
-                'border-muted text-muted-foreground'
-              }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${currentStep === step.id ? 'border-primary bg-primary text-white scale-110' :
+                  currentStep > step.id ? 'border-green-500 bg-green-500 text-white' :
+                    'border-muted text-muted-foreground'
+                }`}>
                 {currentStep > step.id ? <Check size={16} strokeWidth={3} /> : step.id}
               </div>
               <span className={`text-[10px] font-medium hidden md:block ${currentStep === step.id ? 'text-primary' : 'text-muted-foreground'}`}>

@@ -22,7 +22,7 @@ interface Step4Props {
     account_number: string;
     account_name: string;
   }) => void;
-  totalEstimate: number; 
+  totalEstimate: number;
   dpAmount: number;
   bookingMode: 'catalog' | 'custom' | 'combination' | null;
   eventType: string;
@@ -51,7 +51,7 @@ export default function Step4Payment({
   const formatRupiah = (amount: number) =>
     new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
 
-  const catalogTotalEstimate = bookingMode === 'catalog' ? totalEstimate 
+  const catalogTotalEstimate = bookingMode === 'catalog' ? totalEstimate
     : Math.max(0, totalEstimate - customRequestFee);
   const dpCatalogAmount = Math.ceil(catalogTotalEstimate * 0.1);
 

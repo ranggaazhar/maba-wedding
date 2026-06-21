@@ -60,7 +60,7 @@ export function ProjectDetail() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1D3557]/80 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-12">
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
           <div className="max-w-7xl mx-auto">
             {project.category ? (
               <span className="inline-block px-4 py-2 bg-[#A8DADC] text-[#1D3557] rounded-full text-sm mb-4">
@@ -111,7 +111,7 @@ export function ProjectDetail() {
                     <ImageWithFallback
                       src={otherPhotos[0].url}
                       alt={otherPhotos[0].caption ?? project.title}
-                      className="w-full h-[500px] object-cover hover:scale-105 transition-transform duration-700"
+                      className="w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
                     />
                   </div>
                   <div className="order-1 md:order-2 space-y-6">
@@ -146,7 +146,7 @@ export function ProjectDetail() {
                     <ImageWithFallback
                       src={otherPhotos[1].url}
                       alt={otherPhotos[1].caption ?? project.title}
-                      className="w-full h-[500px] object-cover hover:scale-105 transition-transform duration-700"
+                      className="w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
                     />
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export function ProjectDetail() {
               <ImageWithFallback
                 src={heroPhoto.url}
                 alt={project.title}
-                className="w-full h-[600px] object-cover hover:scale-105 transition-transform duration-1000"
+                className="w-full h-[350px] sm:h-[450px] md:h-[600px] object-cover hover:scale-105 transition-transform duration-1000"
               />
             </div>
             <div className="max-w-4xl mx-auto text-center space-y-8">

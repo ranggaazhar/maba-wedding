@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type {
   InvoiceStatus, CreateInvoiceData,
-  UpdateInvoiceData, CreateInvoiceItemData,
+  UpdateInvoiceData,
 } from '@/types/invoice.types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';

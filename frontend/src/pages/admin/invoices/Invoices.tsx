@@ -198,22 +198,43 @@ export default function Invoices() {
                             >
                               <Eye size={16} />
                             </Button>
-                            <Button
-                              variant="ghost" size="icon" className="h-8 w-8"
-                              title="Edit"
-                              onClick={() => navigate(`/admin/invoices/${inv.id}/edit`)}
-                              disabled={inv.status === "PAID"}
-                            >
-                              <Edit size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                              title="Hapus"
-                              onClick={() => setDeleteId(inv.id)}
-                              disabled={inv.status === "PAID"}
-                            >
-                              <Trash2 size={16} />
-                            </Button>
+                            {inv.status === "PAID" ? (
+                              <span title="Invoice tidak dapat di-edit karena sudah lunas" className="cursor-not-allowed">
+                                <Button
+                                  variant="ghost" size="icon" className="h-8 w-8"
+                                  disabled
+                                >
+                                  <Edit size={16} />
+                                </Button>
+                              </span>
+                            ) : (
+                              <Button
+                                variant="ghost" size="icon" className="h-8 w-8"
+                                title="Edit"
+                                onClick={() => navigate(`/admin/invoices/${inv.id}/edit`)}
+                              >
+                                <Edit size={16} />
+                              </Button>
+                            )}
+                            
+                            {inv.status === "PAID" ? (
+                              <span title="Invoice tidak dapat dihapus karena sudah lunas" className="cursor-not-allowed">
+                                <Button
+                                  variant="ghost" size="icon" className="h-8 w-8 text-destructive opacity-50"
+                                  disabled
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              </span>
+                            ) : (
+                              <Button
+                                variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                title="Hapus"
+                                onClick={() => setDeleteId(inv.id)}
+                              >
+                                <Trash2 size={16} />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -322,8 +322,19 @@ class BookingService {
     const transaction = await sequelize.transaction();
 
     try {
-      const booking = await Booking.findByPk(id);
+      const booking = await Booking.findByPk(id, {
+        include: [{
+          model: Invoice,
+          as: 'invoice',
+          attributes: ['id']
+        }],
+        transaction
+      });
       if (!booking) throw new Error('Booking tidak ditemukan');
+
+      if (booking.invoice) {
+        throw new Error('Booking tidak dapat di-update karena sudah dibuatkan invoice.');
+      }
 
       // Hitung ulang dp_amount kalau total_estimate berubah
       const totalEstimate = parseFloat(data.total_estimate || booking.total_estimate || 0);

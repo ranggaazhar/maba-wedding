@@ -58,8 +58,8 @@ export function useCustomerBookingForm() {
 
   // ── Biaya dasar custom request berdasarkan jenis acara ──────────────────
   const CUSTOM_REQUEST_FEES: Record<string, number> = {
-    Wedding:    1_000_000,
-    Engagement:   300_000,
+    Wedding: 1_000_000,
+    Engagement: 300_000,
   };
 
   // Fee ini berlaku jika booking memiliki custom request
@@ -104,10 +104,10 @@ export function useCustomerBookingForm() {
     return 0;
   })();
 
-  const totalSteps = !bookingMode ? 99 
-    : bookingMode === 'catalog'     ? 4  // CATALOG_STEPS has 4 steps
-    : bookingMode === 'custom'      ? 4  // CUSTOM_STEPS now has 4 steps (+ property)
-    : 5;                                 // COMBINATION_STEPS has 5 steps
+  const totalSteps = !bookingMode ? 99
+    : bookingMode === 'catalog' ? 4  // CATALOG_STEPS has 4 steps
+      : bookingMode === 'custom' ? 4  // CUSTOM_STEPS now has 4 steps (+ property)
+        : 5;                                 // COMBINATION_STEPS has 5 steps
   useEffect(() => {
     const validateLink = async () => {
       if (!token) {
@@ -151,7 +151,7 @@ export function useCustomerBookingForm() {
 
   const handleNextFromStep1 = () => {
     if (!validateStep1()) return;
-    setCurrentStep(2);  
+    setCurrentStep(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleSelectMode = (mode: BookingMode) => {
@@ -209,58 +209,58 @@ export function useCustomerBookingForm() {
   };
 
   // ── Submit ────────────────────────────────────────────────────────────────
- const handleSubmitBooking = async () => {
-  try {
-    setIsSubmitting(true);
+  const handleSubmitBooking = async () => {
+    try {
+      setIsSubmitting(true);
 
-    const hasModels  = (formData.models?.length ?? 0) > 0;
-    const validCRs   = customRequests.filter((r) => r.title?.trim() && r.description?.trim());
-    const hasCustom  = validCRs.length > 0;
+      const hasModels = (formData.models?.length ?? 0) > 0;
+      const validCRs = customRequests.filter((r) => r.title?.trim() && r.description?.trim());
+      const hasCustom = validCRs.length > 0;
 
-    if (!hasModels && !hasCustom) {
-      Swal.fire('Error', 'Pilih model dari katalog atau tambahkan custom request', 'error');
-      return;
-    }
-
-    const payload: CreateBookingData = {
-      ...formData,
-      total_estimate: totalEstimate > 0 ? String(totalEstimate) : undefined,
-      dp_amount:      dpAmount > 0      ? String(dpAmount)      : undefined,
-      custom_requests: hasCustom ? validCRs : [],
-    };
-
-    // ↓ Ubah di sini — kirim customRequestFiles sebagai File[][]
-    const filesPerRequest: File[][] = validCRs.map((_, index) =>
-      customRequestFiles[index] || []
-    );
-
-    const bookingResponse = await bookingApi.createBooking(payload, filesPerRequest);
-
-    if (bookingResponse.success) {
-      const bookingId = bookingResponse.data.id;
-      setCreatedBookingId(bookingId);
-      setBookingCode(bookingResponse.data.booking_code);
-
-      if (paymentFile) {
-        try {
-          await bookingApi.uploadPaymentProof(bookingId, paymentFile, paymentData);
-        } catch (uploadError) {
-          console.error('Payment upload error:', uploadError);
-        }
+      if (!hasModels && !hasCustom) {
+        Swal.fire('Error', 'Pilih model dari katalog atau tambahkan custom request', 'error');
+        return;
       }
 
-      setIsSuccess(true);
+      const payload: CreateBookingData = {
+        ...formData,
+        total_estimate: totalEstimate > 0 ? String(totalEstimate) : undefined,
+        dp_amount: dpAmount > 0 ? String(dpAmount) : undefined,
+        custom_requests: hasCustom ? validCRs : [],
+      };
+
+      // ↓ Ubah di sini — kirim customRequestFiles sebagai File[][]
+      const filesPerRequest: File[][] = validCRs.map((_, index) =>
+        customRequestFiles[index] || []
+      );
+
+      const bookingResponse = await bookingApi.createBooking(payload, filesPerRequest);
+
+      if (bookingResponse.success) {
+        const bookingId = bookingResponse.data.id;
+        setCreatedBookingId(bookingId);
+        setBookingCode(bookingResponse.data.booking_code);
+
+        if (paymentFile) {
+          try {
+            await bookingApi.uploadPaymentProof(bookingId, paymentFile, paymentData);
+          } catch (uploadError) {
+            console.error('Payment upload error:', uploadError);
+          }
+        }
+
+        setIsSuccess(true);
+      }
+    } catch (error: unknown) {
+      Swal.fire(
+        'Error',
+        axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menyimpan booking',
+        'error'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error: unknown) {
-    Swal.fire(
-      'Error',
-      axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menyimpan booking',
-      'error'
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return {
     // Navigation

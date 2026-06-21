@@ -96,15 +96,27 @@ export default function ProjectDetailPage() {
             Edit
           </Button>
 
-          <Button
-            variant="destructive"
-            className="h-9 px-4 text-sm font-medium"
-            disabled={project.is_deletable === false}
-            onClick={handleDelete}
-          >
-            <Trash2 size={16} className="mr-2" />
-            Hapus
-          </Button>
+          {project.is_deletable === false ? (
+            <span title="Project tidak dapat dihapus karena masih memiliki booking atau invoice yang belum lunas" className="cursor-not-allowed">
+              <Button
+                variant="destructive"
+                className="h-9 px-4 text-sm font-medium"
+                disabled
+              >
+                <Trash2 size={16} className="mr-2" />
+                Hapus
+              </Button>
+            </span>
+          ) : (
+            <Button
+              variant="destructive"
+              className="h-9 px-4 text-sm font-medium"
+              onClick={handleDelete}
+            >
+              <Trash2 size={16} className="mr-2" />
+              Hapus
+            </Button>
+          )}
         </div>
       </div>
 
@@ -137,9 +149,8 @@ export default function ProjectDetailPage() {
                       <button
                         key={i}
                         onClick={() => setActiveIndex(i)}
-                        className={`rounded-full transition-all duration-300 ${
-                          i === activeIndex ? "w-5 h-2 bg-white" : "w-2 h-2 bg-white/50 hover:bg-white/80"
-                        }`}
+                        className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-5 h-2 bg-white" : "w-2 h-2 bg-white/50 hover:bg-white/80"
+                          }`}
                       />
                     ))}
                   </div>

@@ -34,9 +34,11 @@ const menuItems = [
 interface AdminSidebarProps {
   collapsed: boolean;
   onCollapse: (val: boolean) => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export function AdminSidebar({ collapsed, onCollapse }: AdminSidebarProps) {
+export function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobileClose }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { clearAuth } = useAuthStore();
@@ -59,7 +61,11 @@ export function AdminSidebar({ collapsed, onCollapse }: AdminSidebarProps) {
       className={cn(
         'fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out border-r',
         'bg-[hsl(var(--sidebar-background))] border-[hsl(var(--sidebar-border))]',
-        collapsed ? 'w-20' : 'w-64'
+        // Desktop widths
+        collapsed ? 'md:w-20' : 'md:w-64',
+        // Mobile drawer transitions
+        'w-64 -translate-x-full md:translate-x-0',
+        mobileOpen && 'translate-x-0'
       )}
     >
       {/* Header */}
@@ -81,7 +87,7 @@ export function AdminSidebar({ collapsed, onCollapse }: AdminSidebarProps) {
         )}
         <button
           onClick={() => onCollapse(!collapsed)}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/80 hover:text-white"
+          className="hidden md:block p-2 rounded-lg hover:bg-white/10 transition-colors text-white/80 hover:text-white"
         >
           {collapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}
         </button>
@@ -98,6 +104,7 @@ export function AdminSidebar({ collapsed, onCollapse }: AdminSidebarProps) {
               <li key={item.path}>
                 <NavLink
                   to={item.path}
+                  onClick={() => onMobileClose?.()}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium',
                     isActive
@@ -118,7 +125,10 @@ export function AdminSidebar({ collapsed, onCollapse }: AdminSidebarProps) {
       {/* Footer / Logout */}
       <div className="p-3 border-t border-white/20 mt-2">
         <button
-          onClick={handleLogout}
+          onClick={() => {
+            onMobileClose?.();
+            handleLogout();
+          }}
           className={cn(
             'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium w-full',
             'text-red-400 hover:bg-red-500/10 hover:text-red-300',

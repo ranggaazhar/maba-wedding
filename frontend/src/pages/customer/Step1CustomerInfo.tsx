@@ -24,9 +24,9 @@ export default function Step1CustomerInfo({ formData, setFormData, onNext }: Ste
     e.preventDefault();
 
     // Validation
-    if (!formData.customer_name || !formData.customer_phone || 
-        !formData.full_address || !formData.event_venue || 
-        !formData.event_date || !formData.event_type) {
+    if (!formData.customer_name || !formData.customer_phone ||
+      !formData.full_address || !formData.event_venue ||
+      !formData.event_date || !formData.event_type) {
       Swal.fire("Error", "Mohon lengkapi semua field yang wajib diisi", "error");
       return;
     }
@@ -145,7 +145,7 @@ export default function Step1CustomerInfo({ formData, setFormData, onNext }: Ste
           </div>
         </div>
 
-       {/* Theme Color */}
+        {/* Theme Color */}
         <div className="space-y-2">
           <Label htmlFor="theme_color">Warna Tema</Label>
           <div className="flex items-center gap-3">

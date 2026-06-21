@@ -1,16 +1,16 @@
 // src/pages/admin/properties/PropertyDetail.tsx
 import {
   ArrowLeft, Edit, Trash2, Loader2, ImageIcon, Package,
-  DollarSign, Star, Eye, EyeOff, Calendar,
+  DollarSign, Eye, EyeOff, Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePropertyDetail } from '@/hooks/Admin/property/usePropertyDetail';
 
 export default function PropertyDetail() {
   const {
-    property, isLoading, selectedImage, setSelectedImage,
+    property, isLoading, selectedImage,
     navigate, handleDelete, formatPrice,
   } = usePropertyDetail();
 
@@ -43,50 +43,58 @@ export default function PropertyDetail() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-  <div className="flex items-start gap-4">
-    <Button variant="ghost" size="icon" onClick={() => navigate('/admin/properties')}>
-      <ArrowLeft size={20} />
-    </Button>
-    <div className="flex-1">
-      <div className="flex flex-wrap items-center gap-2 mb-1">
-        <h1 className="text-2xl font-bold tracking-tight">{property.name}</h1>
-        {property.is_available ? (
-          <Badge className="bg-green-500 hover:bg-green-600">
-            <Eye size={12} className="mr-1" /> Tersedia
-          </Badge>
-        ) : (
-          <Badge variant="secondary">
-            <EyeOff size={12} className="mr-1" /> Tidak Tersedia
-          </Badge>
-        )}
-      </div>
-      <p className="text-sm text-muted-foreground flex items-center gap-2">
-        <span>{property.category?.name || 'Uncategorized'}</span>
-        <span>•</span>
-        <span className="flex items-center gap-1">
-          <Calendar size={14} />
-          {new Date(property.created_at).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          })}
-        </span>
-      </p>
-    </div>
-  </div>
+        <div className="flex items-start gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/properties')}>
+            <ArrowLeft size={20} />
+          </Button>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h1 className="text-2xl font-bold tracking-tight">{property.name}</h1>
+              {property.is_available ? (
+                <Badge className="bg-green-500 hover:bg-green-600">
+                  <Eye size={12} className="mr-1" /> Tersedia
+                </Badge>
+              ) : (
+                <Badge variant="secondary">
+                  <EyeOff size={12} className="mr-1" /> Tidak Tersedia
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <span>{property.category?.name || 'Uncategorized'}</span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Calendar size={14} />
+                {new Date(property.created_at).toLocaleDateString('id-ID', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </span>
+            </p>
+          </div>
+        </div>
 
-  <div className="flex flex-wrap gap-2">
-    <Button
-      className="gradient-ocean text-primary-foreground h-9 px-4 text-sm font-medium"
-      onClick={() => navigate(`/admin/properties/edit/${property.id}`)}
-    >
-      <Edit size={16} className="mr-2" /> Edit
-    </Button>
-    <Button variant="destructive" size="sm" onClick={handleDelete} disabled={property.is_deletable === false}>
-      <Trash2 size={16} className="mr-2" /> Hapus
-    </Button>
-  </div>
-</div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            className="gradient-ocean text-primary-foreground h-9 px-4 text-sm font-medium"
+            onClick={() => navigate(`/admin/properties/edit/${property.id}`)}
+          >
+            <Edit size={16} className="mr-2" /> Edit
+          </Button>
+          {property.is_deletable === false ? (
+            <span title="Properti tidak dapat dihapus karena masih memiliki booking atau invoice yang belum lunas" className="cursor-not-allowed">
+              <Button variant="destructive" size="sm" disabled>
+                <Trash2 size={16} className="mr-2" /> Hapus
+              </Button>
+            </span>
+          ) : (
+            <Button variant="destructive" size="sm" onClick={handleDelete}>
+              <Trash2 size={16} className="mr-2" /> Hapus
+            </Button>
+          )}
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -142,13 +142,20 @@ export default function Projects() {
                           <Eye size={14} className="mr-2" />
                           {project.is_published ? "Unpublish" : "Publish"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          disabled={project.is_deletable === false}
-                          onClick={() => handleDelete(project.id, project.title)}
-                        >
-                          <Trash2 size={14} className="mr-2" /> Hapus
-                        </DropdownMenuItem>
+                        {project.is_deletable === false ? (
+                          <div title="Project tidak dapat dihapus karena masih memiliki booking atau invoice yang belum lunas">
+                            <DropdownMenuItem className="text-destructive opacity-50 cursor-not-allowed" disabled>
+                              <Trash2 size={14} className="mr-2" /> Hapus
+                            </DropdownMenuItem>
+                          </div>
+                        ) : (
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDelete(project.id, project.title)}
+                          >
+                            <Trash2 size={14} className="mr-2" /> Hapus
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

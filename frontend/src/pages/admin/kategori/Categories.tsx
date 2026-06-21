@@ -8,7 +8,7 @@ import {
   DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CategoryDialog } from './CategoryDialog';
-import { useKategori } from '@/hooks/Admin/kategori/useKategori'; 
+import { useKategori } from '@/hooks/Admin/kategori/useKategori';
 
 const categoryIcons: Record<string, string> = {
   'wedding-set': '💒',
@@ -26,7 +26,7 @@ export default function Categories() {
     isDialogOpen, selectedCategory,
     handleCreate, handleEdit, handleCloseDialog,
     handleSubmit, handleDelete, handleToggleStatus,
-  } = useKategori(); 
+  } = useKategori();
 
   return (
     <div className="space-y-6">
