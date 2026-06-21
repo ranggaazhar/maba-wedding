@@ -1,60 +1,6 @@
-// validators/siteSettingValidator.js
+// validators/invoiceValidator.js
 const { body, param, validationResult } = require('express-validator');
 
-const createSiteSettingValidation = [
-  body('setting_key')
-    .trim()
-    .notEmpty().withMessage('Setting key is required')
-    .isLength({ max: 100 }).withMessage('Setting key must not exceed 100 characters')
-    .matches(/^[a-z0-9_]+$/).withMessage('Setting key must contain only lowercase letters, numbers, and underscores'),
-  
-  body('setting_value')
-    .optional()
-    .trim(),
-  
-  body('setting_type')
-    .optional()
-    .trim()
-    .isIn(['text', 'number', 'boolean', 'json', 'url', 'email', 'tel', 'textarea'])
-    .withMessage('Invalid setting type'),
-  
-  body('description')
-    .optional()
-    .trim()
-];
-
-const updateSiteSettingValidation = [
-  param('id')
-    .isInt({ min: 1 }).withMessage('Invalid site setting ID'),
-  
-  body('setting_value')
-    .optional()
-    .trim(),
-  
-  body('setting_type')
-    .optional()
-    .trim()
-    .isIn(['text', 'number', 'boolean', 'json', 'url', 'email', 'tel', 'textarea'])
-    .withMessage('Invalid setting type'),
-  
-  body('description')
-    .optional()
-    .trim()
-];
-
-const bulkUpdateSettingsValidation = [
-  body('settings')
-    .isArray().withMessage('Settings must be an array'),
-  
-  body('settings.*.setting_key')
-    .trim()
-    .notEmpty().withMessage('Setting key is required'),
-  
-  body('settings.*.setting_value')
-    .optional()
-];
-
-// validators/invoiceValidator.js
 const createInvoiceValidation = [
   body('booking_id')
     .optional()
@@ -239,9 +185,6 @@ const validate = (req, res, next) => {
 };
 
 module.exports = {
-  createSiteSettingValidation,
-  updateSiteSettingValidation,
-  bulkUpdateSettingsValidation,
   createInvoiceValidation,
   updateInvoiceValidation,
   createInvoiceItemValidation,

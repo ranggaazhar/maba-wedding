@@ -8,7 +8,7 @@ const {
   createInvoiceItemValidation,
   invoiceIdValidation,
   validate,
-} = require('../validators/siteSettingValidator');
+} = require('../validators/invoiceValidator');
 
 // Invoices
 router.get('/',                           authMiddleware, invoiceController.getAllInvoices);
