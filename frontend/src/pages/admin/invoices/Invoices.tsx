@@ -35,6 +35,7 @@ export default function Invoices() {
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [search, statusFilter]);
 

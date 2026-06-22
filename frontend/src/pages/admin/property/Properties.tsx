@@ -27,6 +27,7 @@ export default function Properties() {
 
   // Reset page when filter changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [searchQuery, selectedCategory, selectedStatus]);
 

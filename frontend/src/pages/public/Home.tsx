@@ -76,11 +76,11 @@ const whyChooseUs = [
 ];
 
 const orderSteps = [
-  { number: '01', title: 'Konsultasi',       description: 'Diskusi awal untuk memahami visi dan kebutuhan Anda' },
+  { number: '01', title: 'Konsultasi', description: 'Diskusi awal untuk memahami visi dan kebutuhan Anda' },
   { number: '02', title: 'Pemilihan Konsep', description: 'Pilih tema dan gaya dekorasi yang sesuai' },
-  { number: '03', title: 'Desain',           description: 'Tim kami merancang layout detail untuk approval' },
-  { number: '04', title: 'Eksekusi',         description: 'Instalasi dan setup di hari H dengan sempurna' },
-  { number: '05', title: 'Evaluasi',         description: 'Kami memastikan semuanya berjalan lancar' },
+  { number: '03', title: 'Desain', description: 'Tim kami merancang layout detail untuk approval' },
+  { number: '04', title: 'Eksekusi', description: 'Instalasi dan setup di hari H dengan sempurna' },
+  { number: '05', title: 'Evaluasi', description: 'Kami memastikan semuanya berjalan lancar' },
 ];
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ export function Home() {
   } = useHome();
 
   const [visibleCount, setVisibleCount] = useState(3);
-  
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -136,7 +136,7 @@ export function Home() {
                 <Badge variant="outline" className="text-[#457B9D] border-[#A8DADC] px-4 py-1 rounded-full text-xs tracking-widest uppercase">
                   wedding decoration vendor
                 </Badge>
-                <h1 className="leading-tight !text-[#1D3557] !text-5xl !font-serif !font-semibold">
+                <h1 className="leading-tight text-[#1D3557] text-5xl font-serif font-bold">
                   Every love story deserves a beautiful wedding decoration
                 </h1>
                 <p className="text-[#6B7280] text-xl leading-relaxed max-w-xl">
@@ -209,7 +209,7 @@ export function Home() {
                 <div className="relative w-full h-72 rounded-2xl overflow-hidden shadow-xl z-10 transform hover:scale-105 transition-transform duration-500">
                   <div className="w-full h-[400px] rounded-2xl overflow-hidden shadow-xl">
                     <ImageWithFallback
-                      src= {Gedung}
+                      src={Gedung}
                       alt="Wedding Decoration"
                       className="w-full h-full object-cover"
                     />
@@ -387,11 +387,10 @@ export function Home() {
                   <button
                     key={i}
                     onClick={() => setCurrentPortfolio(i)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      i === currentPortfolio
+                    className={`h-2 rounded-full transition-all duration-300 ${i === currentPortfolio
                         ? 'w-12 bg-gradient-to-r from-[#A8DADC] to-[#457B9D]'
                         : 'w-2 bg-[#A8DADC]/30 hover:bg-[#A8DADC]/60'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -486,9 +485,8 @@ export function Home() {
                       <button
                         key={i}
                         onClick={() => setCurrentTestimonial(i)}
-                        className={`h-2 rounded-full transition-all ${
-                          i === currentTestimonial ? 'w-8 bg-[#A8DADC]' : 'w-2 bg-white/30'
-                        }`}
+                        className={`h-2 rounded-full transition-all ${i === currentTestimonial ? 'w-8 bg-[#A8DADC]' : 'w-2 bg-white/30'
+                          }`}
                       />
                     ))}
                   </div>
@@ -569,7 +567,7 @@ export function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1D3557]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
             </div>
-            
+
             <div className="aspect-square rounded-2xl overflow-hidden shadow-xl group animate-[fadeInUp_1s_ease-out_0.1s_both]">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1676853963956-0309922ebca1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwdGFibGUlMjBjZW50ZXJwaWVjZXxlbnwxfHx8fDE3NjQ4MTgxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
@@ -577,7 +575,7 @@ export function Home() {
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
             </div>
-            
+
             <div className="aspect-square rounded-2xl overflow-hidden shadow-xl group animate-[fadeInUp_1s_ease-out_0.2s_both]">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1700061955118-4c321eec3773?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMHJvc2VzJTIwd2VkZGluZ3xlbnwxfHx8fDE3NjQ4NDE5MDl8MA&ixlib=rb-4.1.0&q=80&w=1080"
@@ -585,7 +583,7 @@ export function Home() {
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
             </div>
-            
+
             <div className="aspect-square rounded-2xl overflow-hidden shadow-xl group animate-[fadeInUp_1s_ease-out_0.3s_both]">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1762926627960-18e533c63134?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwd2VsY29tZSUyMGdhdGV8ZW58MXx8fHwxNzY0ODQwNjczfDA&ixlib=rb-4.1.0&q=80&w=1080"
@@ -593,7 +591,7 @@ export function Home() {
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
             </div>
-            
+
             <div className="aspect-square rounded-2xl overflow-hidden shadow-xl group animate-[fadeInUp_1s_ease-out_0.4s_both]">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1611550898818-87c908160447?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY2FycGV0JTIwYWlzbGV8ZW58MXx8fHwxNzY0ODQxOTA5fDA&ixlib=rb-4.1.0&q=80&w=1080"

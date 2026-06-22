@@ -73,10 +73,12 @@ export default function Bookings() {
 
   // Reset page numbers when search / filter parameters change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentBookingPage(1);
   }, [searchQuery, paymentFilter, bookingTypeFilter]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentLinkPage(1);
   }, [linkSearchQuery]);
 

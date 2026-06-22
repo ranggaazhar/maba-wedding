@@ -77,7 +77,7 @@ export function Properties() {
       </section>
 
       {/* Search & Filter Section */}
-      <section className="bg-white border-b border-[#E5E7EB] sticky top-20 z-40 shadow-sm -mt-16 relative">
+      <section className="bg-white border-b border-[#E5E7EB] top-20 z-40 shadow-sm -mt-16 relative">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             {/* Search Bar */}
@@ -98,11 +98,10 @@ export function Properties() {
               <Button
                 variant="ghost"
                 onClick={() => setSelectedCategory('All')}
-                className={`px-5 py-2 h-auto rounded-full transition-all text-sm font-light ${
-                  selectedCategory === 'All'
+                className={`px-5 py-2 h-auto rounded-full transition-all text-sm font-light ${selectedCategory === 'All'
                     ? 'bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white shadow-lg hover:text-white hover:opacity-90'
                     : 'bg-[#F8F9FA] text-[#6B7280] hover:bg-[#A8DADC]/20 hover:text-[#1D3557]'
-                }`}
+                  }`}
               >
                 All
               </Button>
@@ -111,11 +110,10 @@ export function Properties() {
                   key={cat.id}
                   variant="ghost"
                   onClick={() => setSelectedCategory(cat.name)}
-                  className={`px-5 py-2 h-auto rounded-full transition-all text-sm font-sans font-light ${
-                    selectedCategory === cat.name
+                  className={`px-5 py-2 h-auto rounded-full transition-all text-sm font-sans font-light ${selectedCategory === cat.name
                       ? 'bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white shadow-lg hover:text-white hover:opacity-90'
                       : 'bg-[#F8F9FA] text-[#6B7280] hover:bg-[#A8DADC]/20 hover:text-[#1D3557]'
-                  }`}
+                    }`}
                 >
                   {cat.name}
                 </Button>
@@ -201,8 +199,8 @@ export function Properties() {
                         variant="ghost"
                         onClick={() => setCurrentPage(item as number)}
                         className={`px-4 py-2 h-auto rounded-lg transition-all font-sans ${currentPage === item
-                            ? 'bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white hover:text-white hover:opacity-90 shadow-lg'
-                            : 'border-2 border-[#A8DADC] text-[#457B9D] hover:bg-[#A8DADC] hover:text-white'
+                          ? 'bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white hover:text-white hover:opacity-90 shadow-lg'
+                          : 'border-2 border-[#A8DADC] text-[#457B9D] hover:bg-[#A8DADC] hover:text-white'
                           }`}
                       >
                         {item}

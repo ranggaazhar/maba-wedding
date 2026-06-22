@@ -67,7 +67,7 @@ export function ProjectDetail() {
                 {project.category.name}
               </span>
             ) : null}
-            <h1 className="!text-white mb-4">{project.title}</h1>
+            <h1 className="text-white mb-4">{project.title}</h1>
             <div className="flex flex-wrap gap-6 text-[#A8DADC]">
               {project.theme ? (
                 <div className="flex items-center gap-2">

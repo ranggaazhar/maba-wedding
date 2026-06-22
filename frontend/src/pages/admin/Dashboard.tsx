@@ -21,7 +21,6 @@ export default function Dashboard() {
     isLoadingBookings,
     isLoadingReviews,
     error,
-    refresh,
     formatCurrency,
     formatDate,
     paymentStatusLabel,
