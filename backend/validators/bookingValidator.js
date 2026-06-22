@@ -8,7 +8,7 @@ const createBookingLinkValidation = [
     .isLength({ max: 100 }).withMessage('Customer name must not exceed 100 characters'),
   body('customer_phone').optional().trim()
     .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
-  body('expires_at').optional()
+  body('expires_at').optional({ nullable: true, checkFalsy: true })
     .isISO8601().withMessage('Expires at must be a valid date'),
   body('notes').optional().trim()
 ];
@@ -19,7 +19,7 @@ const updateBookingLinkValidation = [
     .isLength({ max: 100 }).withMessage('Customer name must not exceed 100 characters'),
   body('customer_phone').optional().trim()
     .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
-  body('expires_at').optional()
+  body('expires_at').optional({ nullable: true, checkFalsy: true })
     .isISO8601().withMessage('Expires at must be a valid date'),
   body('notes').optional().trim()
 ];

@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
-import { AlertTriangle, Trash2, X } from "lucide-react";
+import { AlertTriangle, Trash2, X, Check, Info } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ export interface OceanConfirmDialogProps {
   description?: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  variant?: "danger" | "warning" | "info";
+  variant?: "danger" | "warning" | "info" | "success";
   loading?: boolean;
   onConfirm: () => void | Promise<void>;
   showCancelButton?: boolean;
@@ -40,6 +40,13 @@ const variantStyles = {
     ring: "ring-sky-200",
     confirmClass:
       "gradient-ocean text-primary-foreground shadow-lg",
+  },
+  success: {
+    iconBg: "bg-emerald-50",
+    iconColor: "text-emerald-500",
+    ring: "ring-emerald-200",
+    confirmClass:
+      "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25",
   },
 };
 
@@ -85,7 +92,8 @@ export function OceanConfirmDialog({
               "h-1.5 w-full rounded-t-2xl",
               variant === "danger" && "bg-rose-500",
               variant === "warning" && "bg-amber-500",
-              variant === "info" && "gradient-ocean"
+              variant === "info" && "gradient-ocean",
+              variant === "success" && "bg-emerald-500"
             )}
           />
 
@@ -110,7 +118,13 @@ export function OceanConfirmDialog({
                   styles.ring
                 )}
               >
-                <AlertTriangle className="h-7 w-7" strokeWidth={1.8} />
+                {variant === "success" ? (
+                  <Check className="h-7 w-7" strokeWidth={1.8} />
+                ) : variant === "info" ? (
+                  <Info className="h-7 w-7" strokeWidth={1.8} />
+                ) : (
+                  <AlertTriangle className="h-7 w-7" strokeWidth={1.8} />
+                )}
               </div>
             </div>
 
@@ -119,7 +133,11 @@ export function OceanConfirmDialog({
               {title}
             </AlertDialogPrimitive.Title>
             <AlertDialogPrimitive.Description className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {description}
+              {description && (description.includes("<") || description.includes(">")) ? (
+                <span dangerouslySetInnerHTML={{ __html: description }} />
+              ) : (
+                description
+              )}
             </AlertDialogPrimitive.Description>
 
             {/* Actions */}
@@ -167,7 +185,11 @@ export function OceanConfirmDialog({
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <Trash2 className="h-4 w-4" />
+                    {variant === "danger" ? (
+                      <Trash2 className="h-4 w-4" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
                     {confirmLabel}
                   </span>
                 )}

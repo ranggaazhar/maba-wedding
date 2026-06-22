@@ -113,9 +113,13 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
           {toast.title}
         </p>
         {toast.description && (
-          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-            {toast.description}
-          </p>
+          <div className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+            {toast.description.includes("<") || toast.description.includes(">") ? (
+              <span dangerouslySetInnerHTML={{ __html: toast.description }} />
+            ) : (
+              toast.description
+            )}
+          </div>
         )}
       </div>
 

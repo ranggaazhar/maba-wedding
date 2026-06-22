@@ -31,6 +31,17 @@ export default function Step1CustomerInfo({ formData, setFormData, onNext }: Ste
       return;
     }
 
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+
+    if (formData.event_date < todayStr) {
+      Swal.fire("Error", "Tanggal acara tidak boleh sebelum hari ini", "error");
+      return;
+    }
+
     onNext();
   };
 
@@ -108,6 +119,13 @@ export default function Step1CustomerInfo({ formData, setFormData, onNext }: Ste
               type="date"
               value={formData.event_date}
               onChange={(e) => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
+              min={(() => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              })()}
               required
             />
           </div>

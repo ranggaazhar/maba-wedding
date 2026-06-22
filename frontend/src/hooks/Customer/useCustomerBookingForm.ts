@@ -146,6 +146,18 @@ export function useCustomerBookingForm() {
       Swal.fire('Validasi', 'Mohon lengkapi semua field yang wajib diisi', 'warning');
       return false;
     }
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+
+    if (event_date < todayStr) {
+      Swal.fire('Validasi', 'Tanggal acara tidak boleh sebelum hari ini', 'warning');
+      return false;
+    }
+
     return true;
   };
 

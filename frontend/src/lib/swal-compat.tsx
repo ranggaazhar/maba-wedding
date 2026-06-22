@@ -121,7 +121,7 @@ const SwalMock = {
             confirmLabel={confirmBtnText}
             cancelLabel={options.cancelButtonText || "Batal"}
             showCancelButton={options.showCancelButton === true}
-            variant={type === "warning" ? "warning" : type === "error" ? "danger" : "info"}
+            variant={type === "warning" ? "warning" : type === "error" ? "danger" : type === "success" ? "success" : "info"}
             onConfirm={handleConfirm}
           />
         );

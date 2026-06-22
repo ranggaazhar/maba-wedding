@@ -24,6 +24,17 @@ export default function CreateBookingLink() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+
+    if (formData.expires_at && formData.expires_at < todayStr) {
+      Swal.fire("Error", "Tanggal expired tidak boleh sebelum hari ini", "error");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const response = await bookingLinkApi.createBookingLink(formData);
@@ -121,6 +132,13 @@ export default function CreateBookingLink() {
                 type="date"
                 value={formData.expires_at}
                 onChange={(e) => setFormData(prev => ({ ...prev, expires_at: e.target.value }))}
+                min={(() => {
+                  const today = new Date();
+                  const year = today.getFullYear();
+                  const month = String(today.getMonth() + 1).padStart(2, '0');
+                  const day = String(today.getDate()).padStart(2, '0');
+                  return `${year}-${month}-${day}`;
+                })()}
                 className="bg-background"
               />
               <p className="text-xs text-muted-foreground">

@@ -249,6 +249,28 @@ export function useInvoiceForm() {
       Swal.fire('Validasi', 'Mohon lengkapi semua field yang wajib diisi', 'warning');
       return;
     }
+
+    if (!isEdit && !selectedBooking) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
+      if (eventDate < todayStr) {
+        Swal.fire('Validasi', 'Tanggal acara tidak boleh sebelum hari ini', 'warning');
+        return;
+      }
+      if (issueDate < todayStr) {
+        Swal.fire('Validasi', 'Tanggal invoice tidak boleh sebelum hari ini', 'warning');
+        return;
+      }
+      if (dueDate < issueDate) {
+        Swal.fire('Validasi', 'Tanggal jatuh tempo tidak boleh sebelum tanggal invoice', 'warning');
+        return;
+      }
+    }
+
     if (items.some(i => !i.item_name || !i.unit_price)) {
       Swal.fire('Validasi', 'Mohon lengkapi nama dan harga semua item', 'warning');
       return;

@@ -137,7 +137,12 @@ class BookingLinkService {
       throw new Error('Cannot update a used booking link');
     }
     
-    await bookingLink.update(data);
+    const updateData = { ...data };
+    if (updateData.expires_at === '') {
+      updateData.expires_at = null;
+    }
+    
+    await bookingLink.update(updateData);
     return bookingLink;
   }
   

@@ -30,6 +30,14 @@ const formatCurrency = (val: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 
 export default function InvoiceForm() {
+  const getTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const {
     isEdit, isLoading, isSubmitting, isRecalculating,
     bookings, isLoadingBookings, bookingPopoverOpen, setBookingPopoverOpen,
@@ -229,6 +237,7 @@ export default function InvoiceForm() {
                 type="date"
                 value={eventDate}
                 onChange={e => setEventDate(e.target.value)}
+                min={isEdit || selectedBooking ? undefined : getTodayString()}
                 className="bg-muted/30"
               />
             </div>
@@ -249,6 +258,7 @@ export default function InvoiceForm() {
                 type="date"
                 value={issueDate}
                 onChange={e => setIssueDate(e.target.value)}
+                min={isEdit ? undefined : getTodayString()}
                 className="bg-muted/30"
               />
             </div>
@@ -258,6 +268,7 @@ export default function InvoiceForm() {
                 type="date"
                 value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
+                min={isEdit || selectedBooking ? undefined : (issueDate || getTodayString())}
                 className="bg-muted/30"
               />
             </div>
