@@ -2,12 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookingApi, bookingLinkApi } from '@/api/bookingApi';
-import type { Booking, BookingLink, BookingStats } from '@/types/booking.types';
+import type { Booking, BookingLink, BookingStats, PaymentStatus } from '@/types/booking.types';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
 type BookingTypeFilter = 'all' | 'catalog' | 'custom' | 'combination';
-type PaymentFilter = 'all' | 'with_payment' | 'without_payment';
+type PaymentFilter = 'all' | 'WAITING_CONFIRMATION' | 'CONFIRMED';
 
 export function useBookings() {
   const navigate = useNavigate();
@@ -50,7 +50,9 @@ export function useBookings() {
         include_models: true,
       };
       if (debouncedSearch.trim()) filters.search = debouncedSearch;
-      if (paymentFilter !== 'all') filters.has_payment = paymentFilter === 'with_payment';
+      if (paymentFilter !== 'all') {
+        filters.payment_status = paymentFilter as PaymentStatus;
+      }
 
       // Kirim filter dasar ke backend
       if (bookingTypeFilter === 'custom' || bookingTypeFilter === 'combination') {

@@ -8,7 +8,6 @@ import { CurrencyInput } from '@/components/ui/currency-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -84,7 +83,6 @@ export default function InvoiceForm() {
             <div className="flex items-center gap-2">
               <BookOpen size={18} className="text-primary" />
               <h2 className="font-semibold text-foreground text-lg">Isi dari Booking</h2>
-              <Badge variant="outline" className="text-xs">Opsional</Badge>
             </div>
             <p className="text-sm text-muted-foreground">
               Pilih booking yang sudah dikonfirmasi untuk mengisi form secara otomatis.

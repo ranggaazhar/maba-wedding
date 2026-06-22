@@ -41,8 +41,8 @@ export default function Properties() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="page-header mb-0">
-          <h1 className="page-title text-2xl font-bold">Properties</h1>
-          <p className="page-subtitle text-muted-foreground">Katalog properti untuk disewakan</p>
+          <h1 className="page-title text-2xl font-bold">Properti</h1>
+          <p className="page-subtitle text-base">Katalog properti untuk disewakan</p>
         </div>
         <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate('/admin/properties/new')}>
           <Plus size={18} className="mr-2" /> Tambah Property
@@ -120,7 +120,11 @@ export default function Properties() {
                   <div className="absolute top-3 right-3">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="secondary" className="h-8 w-8 opacity-90">
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="h-8 w-8 rounded-full bg-black/45 hover:bg-black/70 text-white"
+                        >
                           <MoreHorizontal size={16} />
                         </Button>
                       </DropdownMenuTrigger>

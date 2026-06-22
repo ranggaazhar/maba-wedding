@@ -32,8 +32,8 @@ export default function Categories() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="page-header mb-0">
-          <h1 className="page-title text-2xl font-bold">Kategori</h1>
-          <p className="page-subtitle text-muted-foreground">Kelola kategori dekorasi wedding</p>
+          <h1 className="page-title font-extrabold text-2xl">Kategori Project</h1>
+          <p className="page-subtitle text-base">Kelola kategori dekorasi wedding</p>
         </div>
         <Button onClick={handleCreate} className="gradient-ocean text-primary-foreground">
           <Plus size={18} className="mr-2" /> Tambah Kategori

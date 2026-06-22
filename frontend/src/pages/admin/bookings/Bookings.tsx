@@ -97,8 +97,8 @@ export default function Bookings() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="page-header mb-0">
-          <h1 className="page-title">Bookings</h1>
-          <p className="page-subtitle">Kelola booking dan link booking</p>
+          <h1 className="page-title page-title font-extrabold text-2xl">Bookings</h1>
+          <p className="page-subtitle text-base">Kelola booking dan link booking</p>
         </div>
         <Button onClick={() => navigate("/admin/booking-links/new")} className="gradient-ocean text-primary-foreground">
           <Link2 size={18} className="mr-2" />
@@ -123,7 +123,7 @@ export default function Bookings() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+                <CardTitle className="text-base font-bold">Total Bookings</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -132,7 +132,7 @@ export default function Bookings() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sudah Bayar DP</CardTitle>
+                <CardTitle className="text-base font-bold">Sudah Bayar DP</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -141,7 +141,7 @@ export default function Bookings() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Bulan Ini</CardTitle>
+                <CardTitle className="text-base font-bold">Bulan Ini</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -198,8 +198,8 @@ export default function Bookings() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="with_payment">Sudah Bayar</SelectItem>
-                <SelectItem value="without_payment">Belum Bayar</SelectItem>
+                <SelectItem value="WAITING_CONFIRMATION">Menunggu Konfirmasi</SelectItem>
+                <SelectItem value="CONFIRMED">DP Dikonfirmasi</SelectItem>
               </SelectContent>
             </Select>
           </div>

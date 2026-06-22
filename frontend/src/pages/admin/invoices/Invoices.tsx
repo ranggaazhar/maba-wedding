@@ -16,9 +16,9 @@ const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
 const statusConfig: Record<InvoiceStatus, { label: string; className: string }> = {
-  DRAFT:   { label: 'Draft',     className: 'bg-muted text-muted-foreground border-border' },
-  SENT:    { label: 'Terkirim',  className: 'bg-blue-100 text-blue-700 border-blue-200' },
-  PAID:    { label: 'Lunas',     className: 'bg-green-100 text-green-700 border-green-200' },
+  DRAFT: { label: 'Draft', className: 'bg-muted text-muted-foreground border-border' },
+  SENT: { label: 'Terkirim', className: 'bg-blue-100 text-blue-700 border-blue-200' },
+  PAID: { label: 'Lunas', className: 'bg-green-100 text-green-700 border-green-200' },
 };
 
 export default function Invoices() {
@@ -50,8 +50,8 @@ export default function Invoices() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="page-header mb-0">
-          <h1 className="page-title">Invoice</h1>
-          <p className="page-subtitle">Kelola invoice dan tagihan pelanggan</p>
+          <h1 className="page-title font-extrabold text-2xl">Invoice</h1>
+          <p className="page-subtitle text-base">Kelola invoice dan tagihan pelanggan</p>
         </div>
         <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/admin/invoices/new")}>
           <Plus size={18} className="mr-2" />
@@ -89,24 +89,24 @@ export default function Invoices() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground">Total Invoice</p>
+          <p className="text-base text-muted-foreground">Total Invoice</p>
           <p className="text-2xl font-bold text-foreground">{stats?.total ?? "-"}</p>
           <p className="text-xs text-muted-foreground mt-1">Bulan ini: {stats?.thisMonth ?? 0}</p>
         </div>
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground">Total Nilai</p>
+          <p className="text-base text-muted-foreground">Total Nilai</p>
           <p className="text-xl font-bold text-foreground">
             {stats ? formatCurrency(parseFloat(stats.totalAmount)) : "-"}
           </p>
         </div>
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground">Sudah Lunas</p>
-          <p className="text-2xl font-bold text-green-600">{stats?.paid ?? "-"}</p>
+          <p className="text-base text-muted-foreground">Sudah Lunas</p>
+          <p className="text-2xl font-bold">{stats?.paid ?? "-"}</p>
           <p className="text-xs text-muted-foreground mt-1">invoice</p>
         </div>
         <div className="stat-card">
-          <p className="text-sm text-muted-foreground">Sisa Tagihan</p>
-          <p className="text-xl font-bold text-destructive">
+          <p className="text-base text-muted-foreground">Sisa Tagihan</p>
+          <p className="text-xl font-bold">
             {stats ? formatCurrency(parseFloat(stats.remainingAmount)) : "-"}
           </p>
         </div>
@@ -116,10 +116,10 @@ export default function Invoices() {
       <div className="table-container">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
-           <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-            <p className="text-sm text-muted-foreground">Memuat data...</p>
-          </div>
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+              <p className="text-sm text-muted-foreground">Memuat data...</p>
+            </div>
           </div>
         ) : invoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -216,7 +216,7 @@ export default function Invoices() {
                                 <Edit size={16} />
                               </Button>
                             )}
-                            
+
                             {inv.status === "PAID" ? (
                               <span title="Invoice tidak dapat dihapus karena sudah lunas" className="cursor-not-allowed">
                                 <Button

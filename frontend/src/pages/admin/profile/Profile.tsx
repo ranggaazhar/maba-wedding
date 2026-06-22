@@ -89,25 +89,25 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] w-full flex flex-col">
       <main className="flex-1 w-full pb-10">
-        
+
         {/* HEADER: POSISI NAIK MAKSIMAL & TANPA KOTAK PUTIH */}
         <header className="w-full px-6 pb-4">
           <div className="flex flex-col gap-0.5">
             {/* Breadcrumb Navigation */}
             <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[hsl(var(--muted-foreground))]">
-              <span 
-                className="hover:text-[hsl(var(--ocean-soft))] cursor-pointer transition-colors" 
-                onClick={() => navigate('/')}
+              <span
+                className="hover:text-[hsl(var(--ocean-soft))] cursor-pointer transition-colors"
+                onClick={() => navigate('/admin/dashboard')}
               >
                 Dashboard
               </span>
               <span className="opacity-20">/</span>
               <span className="text-[hsl(var(--ocean-deep))]">Profile</span>
             </nav>
-            
+
             <div className="flex items-center gap-3 pt-2">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/admin/dashboard')}
                 className="p-1.5 rounded-lg bg-white text-[hsl(var(--ocean-deep))] hover:bg-[hsl(var(--ocean-pale))] border border-[hsl(var(--border))] shadow-sm transition-all"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -121,16 +121,16 @@ export default function Profile() {
 
         {/* CONTENT AREA: FULL WIDTH DENGAN JARAK RAPAT */}
         <div className="px-6 w-full space-y-4">
-          
+
           {/* USER IDENTITY CARD */}
           <div className="w-full bg-white rounded-2xl border border-[hsl(var(--border))] p-6 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-[hsl(var(--ocean-light))] rounded-full -mr-24 -mt-24 opacity-10 blur-3xl"></div>
-            
+
             <div className="relative flex items-center gap-6">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[hsl(var(--ocean-soft))] to-[hsl(var(--ocean-deep))] flex items-center justify-center text-white text-3xl font-bold shadow-lg ring-4 ring-[hsl(var(--ocean-pale))]">
                 {admin?.name?.charAt(0).toUpperCase()}
               </div>
-              
+
               <div className="flex-1 space-y-1">
                 <h3 className="text-2xl font-bold text-[hsl(var(--foreground))]">{admin?.name}</h3>
                 <div className="flex items-center gap-2 text-[hsl(var(--muted-foreground))]">
@@ -151,15 +151,15 @@ export default function Profile() {
 
           {/* MAIN FORM CARD */}
           <div className="w-full bg-white rounded-2xl border border-[hsl(var(--border))] shadow-sm overflow-hidden">
-            
+
             {/* Tab Switcher: Compact size */}
             <div className="flex p-1 bg-[hsl(var(--ocean-pale))] m-4 rounded-xl border border-[hsl(var(--ocean-light))] max-w-xs">
               <button
                 onClick={() => setActiveTab('profile')}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-[11px] font-bold transition-all",
-                  activeTab === 'profile' 
-                    ? "bg-white text-[hsl(var(--ocean-deep))] shadow-sm" 
+                  activeTab === 'profile'
+                    ? "bg-white text-[hsl(var(--ocean-deep))] shadow-sm"
                     : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
                 )}
               >
@@ -169,8 +169,8 @@ export default function Profile() {
                 onClick={() => setActiveTab('password')}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-[11px] font-bold transition-all",
-                  activeTab === 'password' 
-                    ? "bg-white text-[hsl(var(--ocean-deep))] shadow-sm" 
+                  activeTab === 'password'
+                    ? "bg-white text-[hsl(var(--ocean-deep))] shadow-sm"
                     : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
                 )}
               >
@@ -257,9 +257,9 @@ export default function Profile() {
                           className="w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white transition-all outline-none text-sm"
                           required
                         />
-                        <button 
-                          type="button" 
-                          onClick={() => setShowPasswords({...showPasswords, current: !showPasswords.current})} 
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
                         >
                           {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -279,9 +279,9 @@ export default function Profile() {
                             className="w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white text-sm outline-none"
                             required
                           />
-                          <button 
-                            type="button" 
-                            onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})} 
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
                           >
                             {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -299,9 +299,9 @@ export default function Profile() {
                             className="w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white text-sm outline-none"
                             required
                           />
-                          <button 
-                            type="button" 
-                            onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})} 
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
                           >
                             {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

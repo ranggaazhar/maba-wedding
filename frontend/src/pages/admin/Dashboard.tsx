@@ -1,7 +1,7 @@
 // src/pages/admin/Dashboard.tsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Package, Star, TrendingUp, Users, RefreshCw, AlertCircle } from 'lucide-react';
+import { Calendar, Package, Star, TrendingUp, Users, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authApi } from '@/api/Authapi';
 import { useDashboard } from '@/hooks/Admin/dashboard/useDashboard';
@@ -45,18 +45,11 @@ export default function Dashboard() {
       {/* Page Header */}
       <div className="page-header flex items-center justify-between">
         <div>
-          <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">
+          <h1 className="page-title font-extrabold text-2xl">Dashboard</h1>
+          <p className="page-subtitle text-base">
             Selamat datang kembali, {admin?.name}! Berikut ringkasan bisnis Anda.
           </p>
         </div>
-        <button
-          onClick={refresh}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted/50 transition-colors"
-        >
-          <RefreshCw size={14} />
-          Refresh
-        </button>
       </div>
 
       {/* Error Banner */}
