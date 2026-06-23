@@ -192,8 +192,8 @@ export function useBookings() {
     });
     if (result.isConfirmed) {
       try {
-        await bookingLinkApi.deleteBookingLink(id);
-        Swal.fire('Terhapus!', 'Link berhasil dihapus', 'success');
+        const response = await bookingLinkApi.deleteBookingLink(id);
+        Swal.fire('Terhapus!', response.message || 'Link berhasil dihapus', 'success');
         fetchBookingLinks();
       } catch (error) {
         Swal.fire(
@@ -208,7 +208,7 @@ export function useBookings() {
   const handleDeleteAllLinks = async () => {
     const result = await Swal.fire({
       title: 'Yakin hapus semua booking link?',
-      text: 'Semua link booking akan dihapus permanen!',
+      text: 'Semua link booking yang belum digunakan/tidak aktif akan dihapus permanen!',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -217,8 +217,8 @@ export function useBookings() {
     });
     if (result.isConfirmed) {
       try {
-        await bookingLinkApi.deleteAllBookingLinks();
-        Swal.fire('Terhapus!', 'Semua booking link berhasil dihapus', 'success');
+        const response = await bookingLinkApi.deleteAllBookingLinks();
+        Swal.fire('Terhapus!', response.message || 'Semua booking link yang tidak digunakan berhasil dihapus', 'success');
         fetchBookingLinks();
       } catch (error) {
         Swal.fire(

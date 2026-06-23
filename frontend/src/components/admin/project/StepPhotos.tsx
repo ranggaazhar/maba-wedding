@@ -343,7 +343,7 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, setExisti
               <Label className="text-primary flex items-center gap-2">
                 📷 Foto yang Sudah Ada ({existingPhotos.length})
               </Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {existingPhotos.map((photo, index) => {
                   const isHero = photo.is_hero;
                   return (
@@ -435,8 +435,8 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, setExisti
 
                   return (
                     <div key={index} className="border rounded-xl p-4 bg-card space-y-4">
-                      <div className="flex gap-4">
-                        <div className="relative w-32 h-32 shrink-0 rounded-lg overflow-hidden border-2 border-blue-200">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative w-full sm:w-32 aspect-video sm:aspect-square sm:h-32 shrink-0 rounded-lg overflow-hidden border-2 border-blue-200">
                           <img src={preview} alt="New" className="w-full h-full object-cover" />
                           {isHero && (
                             <Badge className="absolute top-1 right-1 bg-amber-500 text-white text-[9px]">Hero</Badge>
@@ -499,23 +499,23 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, setExisti
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-1 shrink-0">
+                        <div className="flex flex-row sm:flex-col gap-2 sm:gap-1 shrink-0 justify-end sm:justify-start">
                           <Button
                             size="sm"
                             variant={isHero ? 'default' : 'outline'}
-                            className={isHero ? 'h-8 bg-amber-500 px-2 cursor-default' : 'h-8 px-2'}
+                            className={isHero ? 'h-8 w-8 bg-amber-500 p-0 cursor-default' : 'h-8 w-8 p-0'}
                             disabled={true}
                             type="button"
                           >
                             <Star size={12} className={isHero ? 'fill-current' : ''} />
                           </Button>
-                          <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => movePhoto(index, 'up')} disabled={index === 0} type="button">
+                          <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => movePhoto(index, 'up')} disabled={index === 0} type="button">
                             <ArrowUp size={12} />
                           </Button>
-                          <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => movePhoto(index, 'down')} disabled={index === previews.length - 1} type="button">
+                          <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => movePhoto(index, 'down')} disabled={index === previews.length - 1} type="button">
                             <ArrowDown size={12} />
                           </Button>
-                          <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => removeNewPhoto(index)} type="button">
+                          <Button size="sm" variant="destructive" className="h-8 w-8 p-0" onClick={() => removeNewPhoto(index)} type="button">
                             <X size={12} />
                           </Button>
                         </div>
@@ -530,14 +530,14 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, setExisti
       </div>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Foto</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Preview</Label>
-              <div className="relative w-full aspect-square rounded-xl overflow-hidden border bg-muted/30">
+              <div className="relative w-full aspect-video sm:aspect-square rounded-xl overflow-hidden border bg-muted/30">
                 {newPhotoFile ? (
                   <img src={URL.createObjectURL(newPhotoFile)} alt="New" className="w-full h-full object-cover" />
                 ) : editingPhoto ? (
@@ -610,9 +610,9 @@ export function StepPhotos({ formData, updateFormData, existingPhotos, setExisti
               )}
             </div>
           </div>
-          <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)} type="button">Batal</Button>
-            <Button onClick={handleSaveEdit} className="px-8" type="button">Simpan Perubahan</Button>
+          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 pt-4 border-t">
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} type="button" className="w-full sm:w-auto">Batal</Button>
+            <Button onClick={handleSaveEdit} className="w-full sm:w-auto px-8" type="button">Simpan Perubahan</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -125,6 +125,10 @@ export default function BookingEdit() {
     if (!crForm.title.trim() || !crForm.description.trim()) {
       return;
     }
+    if (selectedFiles.length === 0) {
+      Swal.fire('Validasi', 'Mohon upload minimal 1 foto referensi untuk custom request', 'warning');
+      return;
+    }
     await handleAddCustomRequest(crForm, selectedFiles);
     setIsAddModalOpen(false);
   };
@@ -133,6 +137,11 @@ export default function BookingEdit() {
     e.preventDefault();
     if (!currentEditCR) return;
     if (!crForm.title.trim() || !crForm.description.trim()) {
+      return;
+    }
+    const existingCount = activeEditCR?.reference_images_urls?.length || 0;
+    if (existingCount + selectedFiles.length === 0) {
+      Swal.fire('Validasi', 'Minimal harus ada 1 foto referensi (terunggah atau baru)', 'warning');
       return;
     }
     await handleUpdateCustomRequest(currentEditCR.id, {
@@ -675,7 +684,7 @@ export default function BookingEdit() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="add_cr_theme">Tema Warna</Label>
+                <Label htmlFor="add_cr_theme">Tema Warna <span className="text-destructive">*</span></Label>
                 <div className="flex items-center gap-3">
                   <input
                     id="add_cr_theme"
@@ -704,8 +713,8 @@ export default function BookingEdit() {
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-1.5">
                     <ImageIcon size={14} />
-                    Foto Referensi
-                    <span className="text-muted-foreground font-normal">(maks. 5 foto)</span>
+                    Foto Referensi <span className="text-destructive">*</span>
+                    <span className="text-muted-foreground font-normal"> (maks. 5 foto)</span>
                   </Label>
                   <span className="text-xs text-muted-foreground">
                     {selectedFiles.length}/5
@@ -793,7 +802,7 @@ export default function BookingEdit() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_cr_theme">Tema Warna</Label>
+                <Label htmlFor="edit_cr_theme">Tema Warna <span className="text-destructive">*</span></Label>
                 <div className="flex items-center gap-3">
                   <input
                     id="edit_cr_theme"
@@ -844,7 +853,7 @@ export default function BookingEdit() {
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-1.5">
                     <ImageIcon size={14} />
-                    Foto Baru Akan Diunggah
+                    Foto Baru Akan Diunggah <span className="text-destructive">*</span>
                     <span className="text-muted-foreground font-normal">
                       (maks. {5 - (activeEditCR?.reference_images_urls?.length || 0)} foto baru)
                     </span>

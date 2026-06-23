@@ -80,9 +80,30 @@ export default function Step2CustomRequest({
 
   const handleNext = () => {
     if (!optional) {
-      const valid = customRequests.every((r) => r.title?.trim() && r.description?.trim());
+      const valid = customRequests.every((r, idx) => {
+        const files = customRequestFiles[idx] || [];
+        return r.title?.trim() && r.description?.trim() && files.length > 0;
+      });
       if (!valid || customRequests.length === 0) {
-        alert('Lengkapi judul dan deskripsi setiap custom request');
+        alert('Lengkapi judul, deskripsi, tema warna, dan minimal 1 foto referensi untuk setiap custom request.');
+        return;
+      }
+    } else {
+      // Jika opsional (Combination), tapi ada field yang diisi, maka harus lengkap
+      let hasInvalid = false;
+      for (let idx = 0; idx < customRequests.length; idx++) {
+        const r = customRequests[idx];
+        const files = customRequestFiles[idx] || [];
+        const hasAnyValue = r.title?.trim() || r.description?.trim() || files.length > 0;
+        if (hasAnyValue) {
+          if (!r.title?.trim() || !r.description?.trim() || files.length === 0) {
+            hasInvalid = true;
+            break;
+          }
+        }
+      }
+      if (hasInvalid) {
+        alert('Untuk custom request yang diisi, Anda harus melengkapi judul, deskripsi, tema warna, dan minimal 1 foto referensi.');
         return;
       }
     }
@@ -172,9 +193,11 @@ export default function Step2CustomRequest({
                   />
                 </div>
 
-                {/* Tema warna */}
+                 {/* Tema warna */}
                 <div className="space-y-2">
-                  <Label htmlFor={`color-${index}`}>Tema Warna (Opsional)</Label>
+                  <Label htmlFor={`color-${index}`}>
+                    Tema Warna <span className="text-destructive">*</span>
+                  </Label>
                   <div className="flex items-center gap-3">
                     <input
                       id={`color-${index}`}
@@ -199,7 +222,7 @@ export default function Step2CustomRequest({
                   <div className="flex items-center justify-between">
                     <Label className="flex items-center gap-1.5">
                       <ImageIcon size={14} />
-                      Foto Referensi
+                      Foto Referensi <span className="text-destructive">*</span>
                       <span className="text-muted-foreground font-normal">(maks. {MAX_FILES} foto)</span>
                     </Label>
                     <span className="text-xs text-muted-foreground">

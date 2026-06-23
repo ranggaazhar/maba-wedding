@@ -55,10 +55,6 @@ module.exports = (sequelize, DataTypes) => {
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: true
-    },
-    notes: {
-      type: DataTypes.TEXT,
-      allowNull: true
     }
   }, {
     sequelize,

@@ -18,11 +18,36 @@ export default function CreateBookingLink() {
     customer_name: "",
     customer_phone: "",
     expires_at: "",
-    notes: "",
+  });
+
+  const [errors, setErrors] = useState({
+    customer_name: "",
+    customer_phone: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    let hasError = false;
+    const newErrors = { customer_name: "", customer_phone: "" };
+
+    if (!formData.customer_name.trim()) {
+      newErrors.customer_name = "Nama customer wajib diisi";
+      hasError = true;
+    }
+    if (!formData.customer_phone.trim()) {
+      newErrors.customer_phone = "Nomor telepon wajib diisi";
+      hasError = true;
+    } else {
+      const phoneRegex = /^(?:\+62|62|0)8[1-9][0-9]{7,11}$/;
+      if (!phoneRegex.test(formData.customer_phone.trim())) {
+        newErrors.customer_phone = "Format nomor telepon tidak valid (contoh: 08123456789)";
+        hasError = true;
+      }
+    }
+
+    setErrors(newErrors);
+    if (hasError) return;
 
     const today = new Date();
     const year = today.getFullYear();
@@ -97,29 +122,41 @@ export default function CreateBookingLink() {
             {/* Nama Customer */}
             <div className="space-y-2">
               <Label htmlFor="customer_name" className="text-sm font-medium">
-                Nama Customer
+                Nama Customer <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="customer_name"
                 value={formData.customer_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, customer_name: e.target.value }));
+                  if (errors.customer_name) setErrors(prev => ({ ...prev, customer_name: "" }));
+                }}
                 placeholder="Nama customer"
-                className="bg-background"
+                className={`bg-background ${errors.customer_name ? 'border-destructive' : ''}`}
               />
+              {errors.customer_name && (
+                <p className="text-xs text-destructive mt-1">{errors.customer_name}</p>
+              )}
             </div>
 
             {/* Nomor Telepon */}
             <div className="space-y-2">
               <Label htmlFor="customer_phone" className="text-sm font-medium">
-                Nomor Telepon
+                Nomor Telepon <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="customer_phone"
                 value={formData.customer_phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, customer_phone: e.target.value }));
+                  if (errors.customer_phone) setErrors(prev => ({ ...prev, customer_phone: "" }));
+                }}
                 placeholder="08123456789"
-                className="bg-background"
+                className={`bg-background ${errors.customer_phone ? 'border-destructive' : ''}`}
               />
+              {errors.customer_phone && (
+                <p className="text-xs text-destructive mt-1">{errors.customer_phone}</p>
+              )}
             </div>
 
             {/* Tanggal Expired */}
@@ -144,21 +181,6 @@ export default function CreateBookingLink() {
               <p className="text-xs text-muted-foreground">
                 Kosongkan untuk expired otomatis 30 hari
               </p>
-            </div>
-
-            {/* Catatan */}
-            <div className="space-y-2">
-              <Label htmlFor="notes" className="text-sm font-medium">
-                Catatan
-              </Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Catatan internal"
-                rows={4}
-                className="bg-background resize-none"
-              />
             </div>
 
             {/* Submit Button */}

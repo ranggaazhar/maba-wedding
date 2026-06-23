@@ -342,11 +342,11 @@ class BookingService {
         throw new Error('Booking tidak dapat di-update karena sudah dibuatkan invoice.');
       }
 
-      // Hitung ulang dp_amount kalau total_estimate berubah
+      // Hitung ulang dp_amount jika tidak ada dp_amount sebelumnya, atau gunakan yang sudah ada
       const totalEstimate = parseFloat(data.total_estimate || booking.total_estimate || 0);
       let dpAmount = data.dp_amount
         ? parseFloat(data.dp_amount)
-        : Math.ceil(totalEstimate * 0.1);
+        : (booking.dp_amount ? parseFloat(booking.dp_amount) : Math.ceil(totalEstimate * 0.1));
 
       if (dpAmount > totalEstimate) {
         dpAmount = totalEstimate;

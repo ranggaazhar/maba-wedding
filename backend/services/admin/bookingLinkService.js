@@ -6,19 +6,35 @@ class BookingLinkService {
   async deleteAllBookingLinks() {
     const transaction = await sequelize.transaction();
     try {
-      // Set booking_link_id to null in bookings table first to avoid foreign key violations
-      await Booking.update(
-        { booking_link_id: null },
-        { where: {}, transaction }
-      );
-      // Delete all booking links
-      await BookingLink.destroy({ where: {}, transaction });
+      // Find all booking_link_ids currently used by bookings
+      const bookings = await Booking.findAll({
+        attributes: ['booking_link_id'],
+        where: { booking_link_id: { [Op.ne]: null } },
+        raw: true
+      });
+      const usedLinkIds = bookings.map(b => b.booking_link_id).filter(Boolean);
+
+      let deletedCount = 0;
+      if (usedLinkIds.length > 0) {
+        deletedCount = await BookingLink.destroy({
+          where: {
+            id: { [Op.notIn]: usedLinkIds }
+          },
+          transaction
+        });
+      } else {
+        deletedCount = await BookingLink.destroy({
+          where: {},
+          transaction
+        });
+      }
+      
       await transaction.commit();
+      return { message: `${deletedCount} link booking yang belum digunakan berhasil dihapus` };
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
-    return { message: 'All booking links deleted successfully' };
   }
   generateToken() {
     return crypto.randomBytes(32).toString('hex');
@@ -138,8 +154,7 @@ class BookingLinkService {
       customer_name: data.customer_name,
       customer_phone: data.customer_phone,
       expires_at: expiresAt,
-      created_by: adminId || data.created_by,
-      notes: data.notes
+      created_by: adminId || data.created_by
     });
     
     return bookingLink;
@@ -164,6 +179,10 @@ class BookingLinkService {
   
   async deleteBookingLink(id) {
     const bookingLink = await this.getBookingLinkById(id, true);
+    
+    if (bookingLink.is_used || bookingLink.booking) {
+      throw new Error('Cannot delete a used booking link');
+    }
     
     await bookingLink.destroy();
     return { message: 'Booking link deleted successfully' };

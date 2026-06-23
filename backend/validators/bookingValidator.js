@@ -4,24 +4,26 @@ const { body, param, query, validationResult } = require('express-validator');
 // ── BookingLink Validations ───────────────────────────────────────
 
 const createBookingLinkValidation = [
-  body('customer_name').optional().trim()
+  body('customer_name').trim()
+    .notEmpty().withMessage('Customer name is required')
     .isLength({ max: 100 }).withMessage('Customer name must not exceed 100 characters'),
-  body('customer_phone').optional().trim()
+  body('customer_phone').trim()
+    .notEmpty().withMessage('Customer phone is required')
     .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
   body('expires_at').optional({ nullable: true, checkFalsy: true })
-    .isISO8601().withMessage('Expires at must be a valid date'),
-  body('notes').optional().trim()
+    .isISO8601().withMessage('Expires at must be a valid date')
 ];
 
 const updateBookingLinkValidation = [
   param('id').isInt({ min: 1 }).withMessage('Invalid booking link ID'),
-  body('customer_name').optional().trim()
+  body('customer_name').trim()
+    .notEmpty().withMessage('Customer name is required')
     .isLength({ max: 100 }).withMessage('Customer name must not exceed 100 characters'),
-  body('customer_phone').optional().trim()
+  body('customer_phone').trim()
+    .notEmpty().withMessage('Customer phone is required')
     .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
   body('expires_at').optional({ nullable: true, checkFalsy: true })
-    .isISO8601().withMessage('Expires at must be a valid date'),
-  body('notes').optional().trim()
+    .isISO8601().withMessage('Expires at must be a valid date')
 ];
 
 const bookingLinkTokenValidation = [
