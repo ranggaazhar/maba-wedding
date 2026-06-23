@@ -103,6 +103,31 @@ class BookingController {
     // Distribusi files ke masing-masing custom_request
     // berdasarkan image_count yang dikirim frontend
     if (Array.isArray(data.custom_requests) && req.files?.length > 0) {
+      // 1. Validasi batas global (maks 25 foto)
+      if (req.files.length > 25) {
+        for (const file of req.files) {
+          await FileHelper.deleteFile(file.path.replace(/\\/g, '/'));
+        }
+        return res.status(400).json({
+          success: false,
+          message: 'Total seluruh foto referensi custom request tidak boleh melebihi 25 foto.'
+        });
+      }
+
+      // 2. Validasi batas per card request (maks 5 foto)
+      for (const cr of data.custom_requests) {
+        const count = parseInt(cr.image_count) || 0;
+        if (count > 5) {
+          for (const file of req.files) {
+            await FileHelper.deleteFile(file.path.replace(/\\/g, '/'));
+          }
+          return res.status(400).json({
+            success: false,
+            message: 'Jumlah foto referensi untuk masing-masing custom request maksimal 5 foto.'
+          });
+        }
+      }
+
       let fileOffset = 0;
       data.custom_requests = data.custom_requests.map(cr => {
         const count = parseInt(cr.image_count) || 0;

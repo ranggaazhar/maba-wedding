@@ -34,7 +34,7 @@ router.get('/statistics',authMiddleware, bookingController.getStatistics);
 router.get('/date-range',authMiddleware, bookingController.getBookingsByDateRange);
 router.get('/:id',authMiddleware, bookingIdValidation, validate, bookingController.getBookingById);
 router.post('/',
-  upload.customRequestImages.array('custom_request_images', 5),
+  upload.customRequestImages.array('custom_request_images', 25),
   processMultipleImages({ width: 1280, quality: 80, format: 'jpeg' }),
   createBookingValidation, validate,
   bookingController.createBooking

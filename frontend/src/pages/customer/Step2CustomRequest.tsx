@@ -42,26 +42,45 @@ export default function Step2CustomRequest({
 }: Step2CustomRequestProps) {
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Hitung total seluruh foto yang sudah diupload di semua card request
+  const totalUploaded = Object.values(customRequestFiles).reduce(
+    (sum, currentFiles) => sum + (currentFiles?.length || 0),
+    0
+  );
+
   const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files || []);
     if (newFiles.length === 0) return;
 
+    const globalRemaining = 25 - totalUploaded;
+    if (globalRemaining <= 0) {
+      alert("Maksimal total seluruh foto untuk semua request adalah 25 foto.");
+      return;
+    }
+
     const current = customRequestFiles[index] || [];
-    const remaining = MAX_FILES - current.length;
-    if (remaining <= 0) {
+    const cardRemaining = MAX_FILES - current.length;
+    if (cardRemaining <= 0) {
       alert(`Maksimal ${MAX_FILES} foto per request`);
       return;
     }
 
+    // Batasan adalah yang paling kecil antara kapasitas sisa per card atau sisa global
+    const allowedLimit = Math.min(cardRemaining, globalRemaining);
+
     const toAdd: File[] = [];
     const skipped: string[] = [];
-    newFiles.slice(0, remaining).forEach((f) => {
+    newFiles.slice(0, allowedLimit).forEach((f) => {
       if (f.size > MAX_SIZE_MB * 1024 * 1024) skipped.push(f.name);
       else toAdd.push(f);
     });
 
     if (skipped.length > 0) {
       alert(`File berikut melebihi ${MAX_SIZE_MB}MB:\n${skipped.join('\n')}`);
+    }
+
+    if (newFiles.length > allowedLimit) {
+      alert(`Hanya ${allowedLimit} foto pertama yang diproses karena batas kuota (Maksimal ${MAX_FILES} foto per request dan maksimal 25 total foto seluruh request).`);
     }
 
     if (toAdd.length > 0) {
@@ -79,6 +98,11 @@ export default function Step2CustomRequest({
   };
 
   const handleNext = () => {
+    if (totalUploaded > 25) {
+      alert("Total seluruh foto referensi untuk semua request tidak boleh melebihi 25 foto.");
+      return;
+    }
+
     if (!optional) {
       const valid = customRequests.every((r, idx) => {
         const files = customRequestFiles[idx] || [];
@@ -219,14 +243,14 @@ export default function Step2CustomRequest({
 
                 {/* Upload foto referensi */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-between flex-wrap gap-1">
+                    <Label className="flex items-center gap-1.5 flex-wrap">
                       <ImageIcon size={14} />
                       Foto Referensi <span className="text-destructive">*</span>
                       <span className="text-muted-foreground font-normal">(maks. {MAX_FILES} foto)</span>
                     </Label>
-                    <span className="text-xs text-muted-foreground">
-                      {files.length}/{MAX_FILES}
+                    <span className="text-xs text-muted-foreground font-medium">
+                      Request #{index + 1}: {files.length}/{MAX_FILES}
                     </span>
                   </div>
 
@@ -253,7 +277,7 @@ export default function Step2CustomRequest({
                   )}
 
                   {/* Upload button */}
-                  {files.length < MAX_FILES && (
+                  {files.length < MAX_FILES && totalUploaded < 25 && (
                     <div
                       className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/50 transition-colors"
                       onClick={() => fileInputRefs.current[index]?.click()}
