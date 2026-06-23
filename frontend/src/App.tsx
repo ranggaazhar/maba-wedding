@@ -41,6 +41,8 @@ import ReviewDetail from './pages/admin/reviews/ReviewDetail';
 import CustomerBookingForm from './pages/customer/CustomerBookingForm';
 import ReviewForm from './pages/customer/ReviewForm';
 
+import { ErrorBoundary } from './components/ErrorBoundary';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -61,8 +63,9 @@ function App() {
   const { isAuthenticated } = useAuthStore();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <OceanToastProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <OceanToastProvider>
         <BrowserRouter>
           <Routes>
             {/* ── Public Website (Navbar + Footer) ──────────────── */}
@@ -133,6 +136,7 @@ function App() {
         </BrowserRouter>
       </OceanToastProvider>
     </QueryClientProvider>
+  </ErrorBoundary>
   );
 }
 
