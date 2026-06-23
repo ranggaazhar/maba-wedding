@@ -40,6 +40,13 @@ async function connectDatabase() {
     }
 
     try {
+      await db.sequelize.query('ALTER TABLE reviews MODIFY COLUMN review_link_id INT NULL');
+      console.log('✅ Database column reviews.review_link_id altered to NULL');
+    } catch (queryErr) {
+      console.log('ℹ️ reviews.review_link_id already nullable or table not created:', queryErr.message);
+    }
+
+    try {
       await db.sequelize.query("UPDATE invoices SET status = 'SENT' WHERE status = 'OVERDUE'");
       await db.sequelize.query("ALTER TABLE invoices MODIFY COLUMN status ENUM('DRAFT', 'SENT', 'PAID') NOT NULL DEFAULT 'DRAFT'");
       console.log('✅ Database invoices.status column altered to remove OVERDUE');

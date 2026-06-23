@@ -24,6 +24,7 @@ router.post('/links/validate/:token',bookingLinkTokenValidation, validate, booki
 router.get('/links/:id', authMiddleware, bookingLinkController.getBookingLinkById);
 router.post('/links', authMiddleware, createBookingLinkValidation, validate, bookingLinkController.createBookingLink);
 router.put('/links/:id',authMiddleware, updateBookingLinkValidation, validate, bookingLinkController.updateBookingLink);
+router.delete('/links', authMiddleware, bookingLinkController.deleteAllBookingLinks);
 router.delete('/links/:id',authMiddleware, bookingLinkController.deleteBookingLink);
 router.patch('/links/:id/regenerate-token',authMiddleware, bookingLinkController.regenerateToken);
 

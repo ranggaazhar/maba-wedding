@@ -247,6 +247,11 @@ class ReviewApi {
     return response.data;
   }
 
+  async deleteAllReviewLinks() {
+    const response = await axios.delete(`${API_URL}/reviews/links`, this.getAuthHeaders());
+    return response.data;
+  }
+
   async regenerateToken(id: number) {
     const response = await axios.patch(
       `${API_URL}/reviews/links/${id}/regenerate-token`,

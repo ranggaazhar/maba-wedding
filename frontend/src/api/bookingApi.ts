@@ -76,6 +76,11 @@ class BookingLinkApi {
     return response.data;
   }
 
+  async deleteAllBookingLinks(): Promise<ApiResponse<null>> {
+    const response = await axios.delete(`${API_URL}/bookings/links`, this.getAuthHeaders());
+    return response.data;
+  }
+
   async regenerateToken(id: number): Promise<ApiResponse<BookingLink>> {
     const response = await axios.patch(
       `${API_URL}/bookings/links/${id}/regenerate-token`,

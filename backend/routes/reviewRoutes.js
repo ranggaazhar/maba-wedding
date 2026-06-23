@@ -23,6 +23,7 @@ router.post('/links/validate/:token',         reviewLinkTokenValidation, validat
 router.get('/links/:id',                      authMiddleware, reviewLinkController.getReviewLinkById);
 router.post('/links',                         authMiddleware, createReviewLinkValidation, validate, reviewLinkController.createReviewLink);
 router.put('/links/:id',                      authMiddleware, updateReviewLinkValidation, validate, reviewLinkController.updateReviewLink);
+router.delete('/links', authMiddleware, reviewLinkController.deleteAllReviewLinks);
 router.delete('/links/:id',                   authMiddleware, reviewLinkController.deleteReviewLink);
 router.patch('/links/:id/mark-sent',          authMiddleware, reviewLinkController.markAsSent);
 router.patch('/links/:id/regenerate-token',   authMiddleware, reviewLinkController.regenerateToken);

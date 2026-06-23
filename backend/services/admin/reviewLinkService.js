@@ -1,9 +1,20 @@
-// services/reviewLinkService.js
-const { ReviewLink, Booking, Review, Admin } = require('../../models');
+const { ReviewLink, Booking, Review, Admin, sequelize } = require('../../models');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 
 class ReviewLinkService {
+  async deleteAllReviewLinks() {
+    const transaction = await sequelize.transaction();
+    try {
+      await Review.update({ review_link_id: null }, { where: {}, transaction });
+      await ReviewLink.destroy({ where: {}, transaction });
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+    return { message: 'All review links deleted successfully' };
+  }
   generateToken() {
     return crypto.randomBytes(32).toString('hex');
   }
@@ -160,13 +171,17 @@ class ReviewLinkService {
   
   async deleteReviewLink(id) {
     const reviewLink = await this.getReviewLinkById(id, true);
-    
-    // Don't allow deleting if already used or has review
-    if (reviewLink.is_used || reviewLink.review) {
-      throw new Error('Cannot delete a used review link or link with existing review');
+    const transaction = await sequelize.transaction();
+    try {
+      if (reviewLink.review) {
+        await reviewLink.review.update({ review_link_id: null }, { transaction });
+      }
+      await reviewLink.destroy({ transaction });
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-    
-    await reviewLink.destroy();
     return { message: 'Review link deleted successfully' };
   }
   

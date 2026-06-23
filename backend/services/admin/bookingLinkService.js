@@ -1,9 +1,25 @@
-// services/bookingLinkService.js
-const { BookingLink, Booking, Admin } = require('../../models');
+const { BookingLink, Booking, Admin, sequelize } = require('../../models');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 
 class BookingLinkService {
+  async deleteAllBookingLinks() {
+    const transaction = await sequelize.transaction();
+    try {
+      // Set booking_link_id to null in bookings table first to avoid foreign key violations
+      await Booking.update(
+        { booking_link_id: null },
+        { where: {}, transaction }
+      );
+      // Delete all booking links
+      await BookingLink.destroy({ where: {}, transaction });
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+    return { message: 'All booking links deleted successfully' };
+  }
   generateToken() {
     return crypto.randomBytes(32).toString('hex');
   }

@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     review_link_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       unique: true
     },
     customer_name: {
