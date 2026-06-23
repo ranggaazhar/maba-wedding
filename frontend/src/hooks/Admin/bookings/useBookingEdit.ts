@@ -1,12 +1,19 @@
 // src/hooks/admin/bookings/useBookingEdit.ts
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { bookingApi } from '@/api/bookingApi';
+import { bookingApi, customRequestApi } from '@/api/bookingApi';
 import { projectApi } from '@/api/projectApi';
 import { categoryApi } from '@/api/categoryApi';
 import { propertyApi } from '@/api/propertyApi';
 import { propertyCategoryApi } from '@/api/propertyCategoryApi';
-import type { Booking, BookingModel, BookingProperty } from '@/types/booking.types';
+import type { 
+  Booking, 
+  BookingModel, 
+  BookingProperty, 
+  BookingCustomRequest, 
+  CreateCustomRequestData, 
+  UpdateCustomRequestData 
+} from '@/types/booking.types';
 import type { Project } from '@/types/project.types';
 import type { Category } from '@/types/category.types';
 import type { Property } from '@/types/property.types';
@@ -47,6 +54,7 @@ export function useBookingEdit() {
 
   // ── Tipe booking yang sedang diedit ──────────────────────────────────────
   const [hasCustomRequest, setHasCustomRequest] = useState(false);
+  const [customRequests, setCustomRequests] = useState<BookingCustomRequest[]>([]);
 
   // ── Filters ───────────────────────────────────────────────────────────────
   const [modelCategoryFilter, setModelCategoryFilter] = useState('all');
@@ -82,6 +90,7 @@ export function useBookingEdit() {
         setSelectedModels(booking.models || []);
         setSelectedProperties(booking.properties || []);
         setHasCustomRequest(booking.has_custom_request);
+        setCustomRequests(booking.customRequests || []);
       }
     } catch (error: unknown) {
       Swal.fire(
@@ -249,6 +258,120 @@ export function useBookingEdit() {
     return property.image_url || '';
   };
 
+  // ── Custom Request Actions ────────────────────────────────────────────────
+
+  const handleAddCustomRequest = async (data: CreateCustomRequestData, files?: File[]) => {
+    try {
+      setIsSaving(true);
+      const res = await customRequestApi.create(Number(id), data, files);
+      if (res.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: 'Custom request berhasil ditambahkan',
+          confirmButtonText: 'OK'
+        });
+        await fetchBookingData();
+      }
+    } catch (error: any) {
+      Swal.fire(
+        'Error',
+        axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menambahkan custom request',
+        'error'
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdateCustomRequest = async (crId: number, data: UpdateCustomRequestData, files?: File[]) => {
+    try {
+      setIsSaving(true);
+      const res = await customRequestApi.update(crId, data, files);
+      if (res.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: 'Custom request berhasil diupdate',
+          confirmButtonText: 'OK'
+        });
+        await fetchBookingData();
+      }
+    } catch (error: any) {
+      Swal.fire(
+        'Error',
+        axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal mengupdate custom request',
+        'error'
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteCustomRequest = async (crId: number) => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: 'Custom request ini akan dihapus secara permanen!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal'
+    });
+    
+    if (result.isConfirmed) {
+      try {
+        setIsSaving(true);
+        const res = await customRequestApi.delete(crId);
+        if (res.success) {
+          Swal.fire('Terhapus!', 'Custom request telah berhasil dihapus.', 'success');
+          await fetchBookingData();
+        }
+      } catch (error: any) {
+        Swal.fire(
+          'Error',
+          axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menghapus custom request',
+          'error'
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
+  const handleDeleteCustomRequestImage = async (crId: number, index: number) => {
+    const result = await Swal.fire({
+      title: 'Hapus Foto Referensi?',
+      text: 'Foto ini akan dihapus dari request.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, hapus',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setIsSaving(true);
+        const res = await customRequestApi.deleteImage(crId, index);
+        if (res.success) {
+          Swal.fire('Terhapus!', 'Foto referensi berhasil dihapus.', 'success');
+          await fetchBookingData();
+        }
+      } catch (error: any) {
+        Swal.fire(
+          'Error',
+          axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menghapus foto referensi',
+          'error'
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
   return {
     // Loading state
     isLoading,
@@ -260,6 +383,7 @@ export function useBookingEdit() {
 
     // Booking type info
     hasCustomRequest,
+    customRequests,
 
     // Master data
     projects,
@@ -299,5 +423,11 @@ export function useBookingEdit() {
     // Image helpers
     getProjectImage,
     getPropertyImage,
+
+    // Custom Request Actions
+    handleAddCustomRequest,
+    handleUpdateCustomRequest,
+    handleDeleteCustomRequest,
+    handleDeleteCustomRequestImage,
   };
 }

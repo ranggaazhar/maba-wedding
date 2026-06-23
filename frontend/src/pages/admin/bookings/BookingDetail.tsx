@@ -543,7 +543,12 @@ function CustomRequestCard({
           <div className="flex items-center gap-2 text-sm">
             <Palette size={14} className="text-muted-foreground" />
             <span className="text-muted-foreground">Tema warna:</span>
-            <span className="font-medium">{request.color_theme}</span>
+            <div
+              className="w-5 h-5 rounded-full border border-border shadow-sm flex-shrink-0"
+              style={{ backgroundColor: request.color_theme }}
+              title={request.color_theme}
+            />
+            <span className="font-medium text-muted-foreground text-xs">{request.color_theme}</span>
           </div>
         )}
 

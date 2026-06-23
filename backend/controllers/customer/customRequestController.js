@@ -2,23 +2,23 @@
 const customRequestService = require('../../services/customer/customRequestService');
 const FileHelper = require('../../utils/fileHelper');
 
-class CustomRequestController {
-
-  _addImageUrls(request, req) {
-    const data = request.toJSON ? request.toJSON() : { ...request };
-    if (data.reference_images && Array.isArray(data.reference_images)) {
-      data.reference_images_urls = data.reference_images.map(imgPath =>
-        FileHelper.getFileUrl(imgPath, req)
-      );
-    }
-    return data;
+function _addImageUrls(request, req) {
+  const data = request.toJSON ? request.toJSON() : { ...request };
+  if (data.reference_images && Array.isArray(data.reference_images)) {
+    data.reference_images_urls = data.reference_images.map(imgPath =>
+      FileHelper.getFileUrl(imgPath, req)
+    );
   }
+  return data;
+}
+
+class CustomRequestController {
 
   async getByBooking(req, res) {
     try {
       const { bookingId } = req.params;
       const requests = await customRequestService.getRequestsByBookingId(bookingId);
-      const data = requests.map(r => this._addImageUrls(r, req));
+      const data = requests.map(r => _addImageUrls(r, req));
       return res.status(200).json({ success: true, message: 'Custom requests retrieved successfully', data });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
@@ -31,7 +31,7 @@ class CustomRequestController {
       return res.status(200).json({
         success: true,
         message: 'Custom request retrieved successfully',
-        data: this._addImageUrls(request, req),
+        data: _addImageUrls(request, req),
       });
     } catch (error) {
       return res.status(error.message.includes('tidak ditemukan') ? 404 : 500)
@@ -47,7 +47,7 @@ class CustomRequestController {
       return res.status(201).json({
         success: true,
         message: 'Custom request berhasil dibuat',
-        data: this._addImageUrls(request, req),
+        data: _addImageUrls(request, req),
       });
     } catch (error) {
       if (req.files) {
@@ -64,7 +64,7 @@ class CustomRequestController {
       return res.status(200).json({
         success: true,
         message: 'Custom request berhasil diperbarui',
-        data: this._addImageUrls(request, req),
+        data: _addImageUrls(request, req),
       });
     } catch (error) {
       if (req.files) {
@@ -94,7 +94,7 @@ class CustomRequestController {
       return res.status(200).json({
         success: true,
         message: 'Foto referensi berhasil dihapus',
-        data: this._addImageUrls(request, req),
+        data: _addImageUrls(request, req),
       });
     } catch (error) {
       const statusCode = error.message.includes('tidak ditemukan') ? 404
@@ -113,7 +113,7 @@ class CustomRequestController {
       return res.status(200).json({
         success: true,
         message: 'Custom requests retrieved successfully',
-        data: requests.map(r => this._addImageUrls(r, req)),
+        data: requests.map(r => _addImageUrls(r, req)),
       });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
