@@ -205,6 +205,31 @@ export function useBookings() {
     }
   };
 
+  const handleDeleteAllLinks = async () => {
+    const result = await Swal.fire({
+      title: 'Yakin hapus semua booking link?',
+      text: 'Semua link booking akan dihapus permanen!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Ya, Hapus Semua!',
+      cancelButtonText: 'Batal',
+    });
+    if (result.isConfirmed) {
+      try {
+        await bookingLinkApi.deleteAllBookingLinks();
+        Swal.fire('Terhapus!', 'Semua booking link berhasil dihapus', 'success');
+        fetchBookingLinks();
+      } catch (error) {
+        Swal.fire(
+          'Gagal!',
+          axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal menghapus semua link',
+          'error'
+        );
+      }
+    }
+  };
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   const isExpired = (expiresAt: string | undefined) => {
@@ -245,6 +270,7 @@ export function useBookings() {
     handleCopyLink,
     handleRegenerateToken,
     handleDeleteLink,
+    handleDeleteAllLinks,
 
     // Helpers
     isExpired,

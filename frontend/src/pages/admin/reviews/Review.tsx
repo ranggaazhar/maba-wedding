@@ -133,6 +133,28 @@ export default function Reviews() {
     }
   };
 
+  const handleDeleteAllReviewLinks = async () => {
+    const confirm = await Swal.fire({
+      title: "Hapus semua review link?",
+      text: "Semua review link dan ulasan terkait akan dihapus permanen!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus Semua",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#ef4444",
+    });
+    if (!confirm.isConfirmed) return;
+    try {
+      await reviewApi.deleteAllReviewLinks();
+      Swal.fire({ icon: "success", title: "Semua link terhapus", timer: 1200, showConfirmButton: false });
+      fetchReviewLinks();
+      fetchReviews();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal menghapus semua link";
+      Swal.fire("Error", msg, "error");
+    }
+  };
+
   const handleRegenerateToken = async (id: number) => {
     const confirm = await Swal.fire({
       title: "Regenerate token?",
@@ -399,6 +421,18 @@ export default function Reviews() {
 
         {/* ── Review Links Tab ── */}
         <TabsContent value="links" className="space-y-4">
+          {reviewLinks.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAllReviewLinks}
+                size="sm"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Hapus Semua Link
+              </Button>
+            </div>
+          )}
 
           {isLinksLoading ? (
             <div className="flex justify-center py-16"><Loader2 className="animate-spin text-muted-foreground" size={32} /></div>
@@ -471,12 +505,10 @@ export default function Reviews() {
                                     <RefreshCw size={15} />
                                   </Button>
                                 )}
-                                {!link.is_used && (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                    title="Hapus" onClick={() => handleDeleteReviewLink(link.id)}>
-                                    <Trash2 size={15} />
-                                  </Button>
-                                )}
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                  title="Hapus" onClick={() => handleDeleteReviewLink(link.id)}>
+                                  <Trash2 size={15} />
+                                </Button>
                               </div>
                             </td>
                           </tr>

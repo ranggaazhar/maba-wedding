@@ -64,6 +64,7 @@ export default function Bookings() {
     bookingStats,
     navigate,
     handleDeleteBooking, handleCopyLink, handleRegenerateToken, handleDeleteLink,
+    handleDeleteAllLinks,
     isExpired, formatDate,
   } = useBookings();
 
@@ -304,12 +305,23 @@ export default function Bookings() {
           )}
         </TabsContent>
 
-        {/* ── TAB: BOOKING LINKS ── */}
         <TabsContent value="links" className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input placeholder="Cari link..." className="pl-10 bg-card"
-              value={linkSearchQuery} onChange={(e) => setLinkSearchQuery(e.target.value)} />
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              <Input placeholder="Cari link..." className="pl-10 bg-card"
+                value={linkSearchQuery} onChange={(e) => setLinkSearchQuery(e.target.value)} />
+            </div>
+            {bookingLinks.length > 0 && (
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAllLinks}
+                className="shrink-0"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Hapus Semua Link
+              </Button>
+            )}
           </div>
 
           {isLoadingLinks ? (
