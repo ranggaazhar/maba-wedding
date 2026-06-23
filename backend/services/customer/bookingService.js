@@ -237,18 +237,13 @@ class BookingService {
       const hasModels = Array.isArray(data.models) && data.models.length > 0;
       const hasCustomRequests = Array.isArray(data.custom_requests) && data.custom_requests.length > 0;
 
-      let totalEstimate = null;
-      let dpAmount = null;
-
-      if (hasModels) {
-        totalEstimate = data.total_estimate ? parseFloat(data.total_estimate) : null;
-        dpAmount = data.dp_amount
-          ? parseFloat(data.dp_amount)
-          : (totalEstimate ? Math.ceil(totalEstimate * 0.1) : null);
-        
-        if (dpAmount !== null && totalEstimate !== null && dpAmount > totalEstimate) {
-          dpAmount = totalEstimate;
-        }
+      let totalEstimate = data.total_estimate ? parseFloat(data.total_estimate) : null;
+      let dpAmount = data.dp_amount
+        ? parseFloat(data.dp_amount)
+        : (totalEstimate ? Math.ceil(totalEstimate * 0.1) : null);
+      
+      if (dpAmount !== null && totalEstimate !== null && dpAmount > totalEstimate) {
+        dpAmount = totalEstimate;
       }
       const booking = await Booking.create({
         booking_link_id:  data.booking_link_id,
