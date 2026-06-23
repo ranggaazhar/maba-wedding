@@ -86,7 +86,7 @@ export default function BookingDetail() {
           <ArrowLeft size={18} className="mr-2" /> Kembali ke Bookings
         </Button>
 
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-foreground">{booking.booking_code}</h1>

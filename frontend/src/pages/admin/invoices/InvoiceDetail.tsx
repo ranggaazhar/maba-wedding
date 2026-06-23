@@ -164,7 +164,7 @@ export default function InvoiceDetail() {
             <Separator className="mb-6" />
 
             {/* Customer & Event */}
-            <div className="grid grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8">
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Tagihan Kepada</p>
                 <p className="font-semibold text-foreground">{invoice.customer_name}</p>
@@ -182,8 +182,8 @@ export default function InvoiceDetail() {
             </div>
 
             {/* Items Table */}
-            <div className="rounded-lg border border-border overflow-hidden mb-6">
-              <table className="w-full">
+            <div className="rounded-lg border border-border overflow-hidden mb-6 overflow-x-auto">
+              <table className="w-full min-w-[500px]">
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="text-left p-3 text-xs font-medium text-muted-foreground">No</th>

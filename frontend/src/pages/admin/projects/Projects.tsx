@@ -42,18 +42,18 @@ export default function Projects() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="page-header mb-0">
           <h1 className="page-title text-2xl font-bold">Projects</h1>
           <p className="page-subtitle text-base">Kelola portfolio dekorasi Anda</p>
         </div>
-        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/admin/projects/new")}>
+        <Button className="gradient-ocean text-primary-foreground w-full sm:w-auto" onClick={() => navigate("/admin/projects/new")}>
           <Plus size={18} className="mr-2" /> Tambah Project
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <Input
@@ -63,30 +63,32 @@ export default function Projects() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full md:w-48 bg-card">
-            <SelectValue placeholder="Kategori" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Kategori</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger className="w-full md:w-40 bg-card">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Status</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button variant="outline" size="icon" onClick={fetchProjects}>
-          <Filter size={18} />
-        </Button>
+        <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="bg-card">
+              <SelectValue placeholder="Kategori" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Kategori</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="bg-card">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="icon" onClick={fetchProjects} className="hidden sm:flex">
+            <Filter size={18} />
+          </Button>
+        </div>
       </div>
 
       {/* Content */}

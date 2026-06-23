@@ -17,7 +17,7 @@ import type { Booking } from "@/types/booking.types";
 import { getBookingType } from "@/types/booking.types";
 import { Pagination } from "@/components/admin/Pagination";
 
-// ── Booking type badge ────────────────────────────────────────────────────────
+// ── Booking type badge ─────────────────────────────────────────────────────────
 
 function BookingTypeBadge({ booking }: { booking: Booking }) {
   const type = getBookingType(booking);
@@ -42,6 +42,7 @@ function BookingTypeBadge({ booking }: { booking: Booking }) {
     </Badge>
   );
 }
+
 const paymentStatusStyles: Record<string, string> = {
   PENDING: 'bg-warning/10 text-warning border-warning/20',
   WAITING_CONFIRMATION: 'bg-blue-50 text-blue-600 border-blue-200',
@@ -72,7 +73,6 @@ export default function Bookings() {
   const [currentLinkPage, setCurrentLinkPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  // Reset page numbers when search / filter parameters change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentBookingPage(1);
@@ -98,12 +98,12 @@ export default function Bookings() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="page-header mb-0">
           <h1 className="page-title page-title font-extrabold text-2xl">Bookings</h1>
           <p className="page-subtitle text-base">Kelola booking dan link booking</p>
         </div>
-        <Button onClick={() => navigate("/admin/booking-links/new")} className="gradient-ocean text-primary-foreground">
+        <Button onClick={() => navigate("/admin/booking-links/new")} className="gradient-ocean text-primary-foreground w-full sm:w-auto">
           <Link2 size={18} className="mr-2" />
           Buat Link Booking
         </Button>
@@ -154,7 +154,7 @@ export default function Bookings() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
               <Input
@@ -164,50 +164,37 @@ export default function Bookings() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+            <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+              <Select
+                value={bookingTypeFilter}
+                onValueChange={(v) => setBookingTypeFilter(v as typeof bookingTypeFilter)}
+              >
+                <SelectTrigger className="bg-card">
+                  <Filter size={14} className="mr-1.5 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Tipe" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Tipe</SelectItem>
+                  <SelectItem value="catalog">Katalog</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                  <SelectItem value="combination">Kombinasi</SelectItem>
+                </SelectContent>
+              </Select>
 
-            {/* Filter tipe booking */}
-            <Select
-              value={bookingTypeFilter}
-              onValueChange={(v) => setBookingTypeFilter(v as typeof bookingTypeFilter)}
-            >
-              <SelectTrigger className="w-full md:w-44 bg-card">
-                <Filter size={14} className="mr-2 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Tipe Booking" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Tipe</SelectItem>
-                <SelectItem value="catalog">
-                  <div className="flex items-center gap-2">
-                    Katalog
-                  </div>
-                </SelectItem>
-                <SelectItem value="custom">
-                  <div className="flex items-center gap-2">
-                    Custom
-                  </div>
-                </SelectItem>
-                <SelectItem value="combination">
-                  <div className="flex items-center gap-2">
-                    Kombinasi
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Filter status bayar */}
-            <Select value={paymentFilter} onValueChange={(v) => setPaymentFilter(v as typeof paymentFilter)}>
-              <SelectTrigger className="w-full md:w-44 bg-card">
-                <SelectValue placeholder="Status Bayar" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="WAITING_CONFIRMATION">Menunggu Konfirmasi</SelectItem>
-                <SelectItem value="CONFIRMED">DP Dikonfirmasi</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select value={paymentFilter} onValueChange={(v) => setPaymentFilter(v as typeof paymentFilter)}>
+                <SelectTrigger className="bg-card">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value="WAITING_CONFIRMATION">Menunggu Konfirmasi</SelectItem>
+                  <SelectItem value="CONFIRMED">DP Dikonfirmasi</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Table */}
+          {/* Content */}
           {isLoadingBookings ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -225,7 +212,75 @@ export default function Bookings() {
             </Card>
           ) : (
             <div className="space-y-4">
-              <div className="table-container">
+              {/* ── Mobile Card View (< md) ── */}
+              <div className="block md:hidden space-y-3">
+                {paginatedBookings.map((booking, index) => (
+                  <div
+                    key={booking.id}
+                    className="border rounded-lg p-4 bg-card space-y-3 shadow-sm animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {/* Row 1: kode + status */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-mono text-sm font-semibold text-foreground">{booking.booking_code}</span>
+                        <p className="font-medium text-foreground mt-0.5 truncate">{booking.customer_name}</p>
+                        <p className="text-xs text-muted-foreground">{booking.customer_phone}</p>
+                      </div>
+                      <Badge className={`${paymentStatusStyles[booking.payment_status] ?? paymentStatusStyles.PENDING} text-xs shrink-0`}>
+                        {paymentStatusLabels[booking.payment_status] ?? 'Belum Bayar'}
+                      </Badge>
+                    </div>
+                    {/* Row 2: meta info */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                      <div>
+                        <span className="text-muted-foreground text-xs">Tanggal</span>
+                        <p className="text-foreground">{formatDate(booking.event_date)}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">Jenis</span>
+                        <p className="text-foreground">{booking.event_type}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">Venue</span>
+                        <p className="text-foreground truncate">{booking.event_venue}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">Tipe</span>
+                        <div className="mt-0.5"><BookingTypeBadge booking={booking} /></div>
+                      </div>
+                    </div>
+                    {/* Row 3: action */}
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => navigate(`/admin/bookings/${booking.id}`)}
+                      >
+                        <Eye size={14} className="mr-1.5" /> Detail
+                      </Button>
+                      {booking.is_deletable === false ? (
+                        <Button variant="ghost" size="sm" className="text-destructive opacity-50" disabled>
+                          <Trash2 size={14} />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteBooking(booking.id, booking.booking_code)}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Desktop Table View (>= md) ── */}
+              <div className="hidden md:block table-container">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-muted/50">
@@ -293,6 +348,7 @@ export default function Bookings() {
                   </table>
                 </div>
               </div>
+
               <Pagination
                 currentPage={currentBookingPage}
                 totalPages={totalBookingPages}
@@ -305,8 +361,9 @@ export default function Bookings() {
           )}
         </TabsContent>
 
+        {/* ── TAB: BOOKING LINKS ── */}
         <TabsContent value="links" className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
               <Input placeholder="Cari link..." className="pl-10 bg-card"
@@ -316,7 +373,7 @@ export default function Bookings() {
               <Button
                 variant="destructive"
                 onClick={handleDeleteAllLinks}
-                className="shrink-0"
+                className="shrink-0 w-full sm:w-auto"
               >
                 <Trash2 size={16} className="mr-2" />
                 Hapus Semua Link
@@ -341,7 +398,57 @@ export default function Bookings() {
             </Card>
           ) : (
             <div className="space-y-4">
-              <div className="table-container">
+              {/* ── Mobile Card View (< md) ── */}
+              <div className="block md:hidden space-y-3">
+                {paginatedBookingLinks.map((link, index) => (
+                  <div
+                    key={link.id}
+                    className="border rounded-lg p-4 bg-card space-y-3 shadow-sm animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-foreground truncate">{link.customer_name || `Link #${link.id}`}</p>
+                        <p className="text-sm text-muted-foreground">{link.customer_phone}</p>
+                      </div>
+                      {link.is_used ? (
+                        <Badge className="bg-success/10 text-success border-success/20 shrink-0">Terisi</Badge>
+                      ) : isExpired(link.expires_at) ? (
+                        <Badge variant="destructive" className="shrink-0">Expired</Badge>
+                      ) : (
+                        <Badge className="bg-warning/10 text-warning border-warning/20 shrink-0">Belum Terisi</Badge>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground text-xs">Dibuat</span>
+                        <p>{formatDate(link.created_at)}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">Kadaluarsa</span>
+                        <p>{link.expires_at ? formatDate(link.expires_at) : '-'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleCopyLink(link.token)}>
+                        <Link2 size={14} className="mr-1.5" /> Salin Link
+                      </Button>
+                      {!link.is_used && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleRegenerateToken(link.id)}>
+                          <RefreshCw size={14} />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDeleteLink(link.id)}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Desktop Table View (>= md) ── */}
+              <div className="hidden md:block table-container">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-muted/50">
@@ -395,6 +502,7 @@ export default function Bookings() {
                   </table>
                 </div>
               </div>
+
               <Pagination
                 currentPage={currentLinkPage}
                 totalPages={totalLinkPages}

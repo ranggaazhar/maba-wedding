@@ -227,7 +227,7 @@ export default function Reviews() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="page-header mb-0">
           <h1 className="page-title">Reviews</h1>
           <p className="page-subtitle">Kelola ulasan dari pelanggan</p>
@@ -236,7 +236,7 @@ export default function Reviews() {
           {pendingReviews.length > 0 && (
             <div className="flex items-center gap-2 px-3 py-2 bg-warning/10 rounded-lg">
               <div className="h-2 w-2 rounded-full bg-warning animate-pulse" />
-              <span className="text-sm font-medium text-warning">{pendingReviews.length} menunggu status persetujuan</span>
+              <span className="text-sm font-medium text-warning">{pendingReviews.length} menunggu persetujuan</span>
             </div>
           )}
         </div>
@@ -303,7 +303,7 @@ export default function Reviews() {
                           </div>
                         )}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 pt-2 sm:pt-0">
                         <Button variant="outline" size="icon" className="h-9 w-9"
                           onClick={() => navigate(`/admin/reviews/${review.id}`)}>
                           <Eye size={16} />
@@ -422,11 +422,13 @@ export default function Reviews() {
         {/* ── Review Links Tab ── */}
         <TabsContent value="links" className="space-y-4">
           {reviewLinks.length > 0 && (
-            <div className="flex justify-end">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p className="text-sm text-muted-foreground">{reviewLinks.length} review link</p>
               <Button
                 variant="destructive"
                 onClick={handleDeleteAllReviewLinks}
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 <Trash2 size={16} className="mr-2" />
                 Hapus Semua Link
@@ -438,7 +440,71 @@ export default function Reviews() {
             <div className="flex justify-center py-16"><Loader2 className="animate-spin text-muted-foreground" size={32} /></div>
           ) : (
             <div className="space-y-4">
-              <div className="table-container">
+              {/* ── Mobile Card View (< md) ── */}
+              <div className="block md:hidden space-y-3">
+                {paginatedReviewLinks.length === 0 ? (
+                  <div className="border rounded-lg p-12 text-center text-muted-foreground bg-card">
+                    Belum ada review link
+                  </div>
+                ) : paginatedReviewLinks.map((link, index) => {
+                  const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
+                  return (
+                    <div key={link.id}
+                      className="border rounded-lg p-4 bg-card space-y-3 shadow-sm animate-fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <span className="font-mono text-sm font-medium">
+                            {link.booking?.booking_code || `#${link.booking_id}`}
+                          </span>
+                          <p className="font-medium text-foreground truncate">{link.booking?.customer_name || '-'}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          {link.is_used
+                            ? <Badge className="bg-success/10 text-success border-success/20 shrink-0">Terisi</Badge>
+                            : isExpired
+                              ? <Badge className="bg-destructive/10 text-destructive border-destructive/20 shrink-0">Kadaluarsa</Badge>
+                              : <Badge className="bg-warning/10 text-warning border-warning/20 shrink-0">Belum Terisi</Badge>
+                          }
+                          {link.sent_at && <Badge variant="outline" className="text-xs">Terkirim</Badge>}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground text-xs">Dibuat</span>
+                          <p>{formatDate(link.created_at)}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground text-xs">Kadaluarsa</span>
+                          <p className={isExpired ? 'text-destructive' : ''}>{formatDate(link.expires_at)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 pt-2 border-t">
+                        {!link.is_used && (
+                          <Button variant="outline" size="sm" className="flex-1" title="Copy Link"
+                            onClick={() => handleCopyLink(link.token)}>
+                            <Copy size={13} className="mr-1.5" /> Salin Link
+                          </Button>
+                        )}
+                        {!link.is_used && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Regenerate Token"
+                            onClick={() => handleRegenerateToken(link.id)}>
+                            <RefreshCw size={14} />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          title="Hapus" onClick={() => handleDeleteReviewLink(link.id)}>
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* ── Desktop Table View (>= md) ── */}
+              <div className="hidden md:block table-container">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-muted/50">
@@ -518,6 +584,7 @@ export default function Reviews() {
                   </table>
                 </div>
               </div>
+
               <Pagination
                 currentPage={currentLinkPage}
                 totalPages={totalLinkPages}

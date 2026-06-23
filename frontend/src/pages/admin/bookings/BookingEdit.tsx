@@ -169,7 +169,7 @@ export default function BookingEdit() {
           Kembali ke Detail
         </Button>
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">Edit Booking</h1>
             <p className="text-muted-foreground">Update informasi booking customer</p>
@@ -179,26 +179,28 @@ export default function BookingEdit() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="info">
-            <User size={16} className="mr-2" />
-            Informasi
-          </TabsTrigger>
-          <TabsTrigger value="models">
-            <Package size={16} className="mr-2" />
-            Model Dekorasi ({selectedModels.length})
-          </TabsTrigger>
-          <TabsTrigger value="properties">
-            <ShoppingCart size={16} className="mr-2" />
-            Properties ({selectedProperties.length})
-          </TabsTrigger>
-          {hasCustomRequest && (
-            <TabsTrigger value="custom-requests">
-              <Sparkles size={16} className="mr-2" />
-              Custom Request ({customRequests.length})
+        <div className="w-full overflow-x-auto pb-1">
+          <TabsList className="bg-muted/50 inline-flex w-max min-w-full">
+            <TabsTrigger value="info">
+              <User size={16} className="mr-2" />
+              Informasi
             </TabsTrigger>
-          )}
-        </TabsList>
+            <TabsTrigger value="models">
+              <Package size={16} className="mr-2" />
+              Model Dekorasi ({selectedModels.length})
+            </TabsTrigger>
+            <TabsTrigger value="properties">
+              <ShoppingCart size={16} className="mr-2" />
+              Properties ({selectedProperties.length})
+            </TabsTrigger>
+            {hasCustomRequest && (
+              <TabsTrigger value="custom-requests">
+                <Sparkles size={16} className="mr-2" />
+                Custom Request ({customRequests.length})
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         {/* TAB 1: INFORMASI */}
         <TabsContent value="info" className="space-y-6">
@@ -632,7 +634,7 @@ export default function BookingEdit() {
       {/* Save Button Footer */}
       <Card className="sticky bottom-4 shadow-lg">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Estimasi</p>
               <p className="text-xl font-bold text-primary">
@@ -640,7 +642,7 @@ export default function BookingEdit() {
               </p>
             </div>
             {/* Tombol save sengaja tidak ada type="button" agar bisa trigger handleSave */}
-            <Button onClick={handleSave} disabled={isSaving} size="lg">
+            <Button onClick={handleSave} disabled={isSaving} size="lg" className="w-full sm:w-auto">
               {isSaving ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</>
               ) : (

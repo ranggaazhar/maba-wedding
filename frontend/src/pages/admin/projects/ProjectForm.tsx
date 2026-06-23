@@ -298,7 +298,7 @@ export default function ProjectForm() {
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between py-6 border-t">
+      <div className="flex flex-wrap items-center justify-between gap-3 py-6 border-t">
         <Button variant="outline" onClick={prevStep} disabled={currentStep === 1 || saving}>
           <ArrowLeft size={18} className="mr-2" /> Kembali
         </Button>

@@ -142,7 +142,7 @@ export default function ReviewDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate("/admin/reviews")}>
           <ArrowLeft size={20} />
         </Button>
@@ -153,20 +153,20 @@ export default function ReviewDetail() {
         <div className="flex gap-2 flex-wrap">
           {!review.is_approved ? (
             <>
-              <Button className="bg-success hover:bg-success/90 text-success-foreground"
+              <Button className="bg-success hover:bg-success/90 text-success-foreground w-full sm:w-auto"
                 onClick={handleApprove} disabled={isActionLoading}>
                 {isActionLoading
                   ? <Loader2 size={16} className="animate-spin mr-2" />
                   : <Check size={16} className="mr-2" />}
                 Setujui
               </Button>
-              <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10"
+              <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10 w-full sm:w-auto"
                 onClick={handleReject} disabled={isActionLoading}>
                 <X size={16} className="mr-2" />Tolak
               </Button>
             </>
           ) : (
-            <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10"
+            <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 w-full sm:w-auto"
               onClick={handleDelete}>
               <Trash2 size={16} className="mr-2" />Hapus
             </Button>

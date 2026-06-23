@@ -129,7 +129,7 @@ export default function InvoiceForm() {
                     }
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[500px] p-0" align="start">
+                <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[500px] p-0" align="start">
                   <Command>
                     <CommandInput placeholder="Cari nama customer atau kode booking..." />
                     <CommandList>
@@ -398,7 +398,7 @@ export default function InvoiceForm() {
 
           {/* Total Preview */}
           <div className="flex justify-end">
-            <div className="w-72 space-y-2">
+            <div className="w-full sm:w-72 space-y-2">
               {items.some(i => i.item_type !== 'item') && (
                 <>
                   {items.filter(i => i.item_type !== 'discount').map(i => (
@@ -480,10 +480,10 @@ export default function InvoiceForm() {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => navigate('/admin/invoices')}>Batal</Button>
+        <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
+          <Button variant="outline" onClick={() => navigate('/admin/invoices')} className="w-full sm:w-auto">Batal</Button>
           <Button
-            className="gradient-ocean text-primary-foreground"
+            className="gradient-ocean text-primary-foreground w-full sm:w-auto"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >

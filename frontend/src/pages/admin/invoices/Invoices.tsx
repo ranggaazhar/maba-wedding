@@ -45,23 +45,22 @@ export default function Invoices() {
     currentPage * ITEMS_PER_PAGE
   );
 
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="page-header mb-0">
           <h1 className="page-title font-extrabold text-2xl">Invoice</h1>
           <p className="page-subtitle text-base">Kelola invoice dan tagihan pelanggan</p>
         </div>
-        <Button className="gradient-ocean text-primary-foreground" onClick={() => navigate("/admin/invoices/new")}>
+        <Button className="gradient-ocean text-primary-foreground w-full sm:w-auto" onClick={() => navigate("/admin/invoices/new")}>
           <Plus size={18} className="mr-2" />
           Buat Invoice
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <Input
@@ -71,43 +70,45 @@ export default function Invoices() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full md:w-44 bg-card">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Status</SelectItem>
-            <SelectItem value="DRAFT">Draft</SelectItem>
-            <SelectItem value="SENT">Terkirim</SelectItem>
-            <SelectItem value="PAID">Lunas</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button variant="outline" size="icon">
-          <Filter size={18} />
-        </Button>
+        <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="bg-card">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="DRAFT">Draft</SelectItem>
+              <SelectItem value="SENT">Terkirim</SelectItem>
+              <SelectItem value="PAID">Lunas</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="icon" className="hidden sm:flex">
+            <Filter size={18} />
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <div className="stat-card">
-          <p className="text-base text-muted-foreground">Total Invoice</p>
+          <p className="text-sm text-muted-foreground">Total Invoice</p>
           <p className="text-2xl font-bold text-foreground">{stats?.total ?? "-"}</p>
           <p className="text-xs text-muted-foreground mt-1">Bulan ini: {stats?.thisMonth ?? 0}</p>
         </div>
         <div className="stat-card">
-          <p className="text-base text-muted-foreground">Total Nilai</p>
-          <p className="text-xl font-bold text-foreground">
+          <p className="text-sm text-muted-foreground">Total Nilai</p>
+          <p className="text-lg font-bold text-foreground truncate">
             {stats ? formatCurrency(parseFloat(stats.totalAmount)) : "-"}
           </p>
         </div>
         <div className="stat-card">
-          <p className="text-base text-muted-foreground">Sudah Lunas</p>
+          <p className="text-sm text-muted-foreground">Sudah Lunas</p>
           <p className="text-2xl font-bold">{stats?.paid ?? "-"}</p>
           <p className="text-xs text-muted-foreground mt-1">invoice</p>
         </div>
         <div className="stat-card">
-          <p className="text-base text-muted-foreground">Sisa Tagihan</p>
-          <p className="text-xl font-bold">
+          <p className="text-sm text-muted-foreground">Sisa Tagihan</p>
+          <p className="text-lg font-bold truncate">
             {stats ? formatCurrency(parseFloat(stats.remainingAmount)) : "-"}
           </p>
         </div>
@@ -117,8 +118,8 @@ export default function Invoices() {
       <div className="table-container">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
               <p className="text-sm text-muted-foreground">Memuat data...</p>
             </div>
           </div>
@@ -132,7 +133,98 @@ export default function Invoices() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="overflow-x-auto">
+            {/* ── Mobile Card View (< md) ── */}
+            <div className="block md:hidden space-y-3">
+              {paginatedInvoices.map((inv, index) => {
+                const remaining = inv.total - inv.down_payment;
+                const cfg = statusConfig[inv.status];
+                return (
+                  <div
+                    key={inv.id}
+                    className="border rounded-lg p-4 bg-card space-y-3 shadow-sm animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {/* Row 1: nomor + status */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-mono text-sm font-semibold text-foreground">{inv.invoice_number}</span>
+                        {inv.booking && (
+                          <p className="text-xs text-muted-foreground">{inv.booking.booking_code}</p>
+                        )}
+                        <p className="font-medium text-foreground mt-0.5 truncate">{inv.customer_name}</p>
+                        <p className="text-xs text-muted-foreground">{inv.customer_phone}</p>
+                      </div>
+                      <Badge className={`${cfg.className} shrink-0 text-xs`}>{cfg.label}</Badge>
+                    </div>
+                    {/* Row 2: meta */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                      <div>
+                        <span className="text-muted-foreground text-xs">Acara</span>
+                        <p className="truncate">{inv.event_type || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">Tgl Acara</span>
+                        <p>{formatDate(inv.event_date)}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">Total</span>
+                        <p className="font-semibold text-foreground">{formatCurrency(inv.total)}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">Sisa</span>
+                        {inv.status === 'PAID' ? (
+                          <p className="text-green-600 font-medium">Lunas</p>
+                        ) : (
+                          <p className="text-destructive font-medium">{formatCurrency(remaining)}</p>
+                        )}
+                      </div>
+                    </div>
+                    {/* Row 3: actions */}
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => navigate(`/admin/invoices/${inv.id}`)}
+                      >
+                        <Eye size={14} className="mr-1.5" /> Detail
+                      </Button>
+                      {inv.status === 'PAID' ? (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
+                          <Edit size={14} />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => navigate(`/admin/invoices/${inv.id}/edit`)}
+                        >
+                          <Edit size={14} />
+                        </Button>
+                      )}
+                      {inv.status === 'PAID' ? (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive opacity-50" disabled>
+                          <Trash2 size={14} />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeleteId(inv.id)}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Desktop Table View (>= md) ── */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-muted/50">
                   <tr>
@@ -201,10 +293,7 @@ export default function Invoices() {
                             </Button>
                             {inv.status === "PAID" ? (
                               <span title="Invoice tidak dapat di-edit karena sudah lunas" className="cursor-not-allowed">
-                                <Button
-                                  variant="ghost" size="icon" className="h-8 w-8"
-                                  disabled
-                                >
+                                <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
                                   <Edit size={16} />
                                 </Button>
                               </span>
@@ -244,6 +333,7 @@ export default function Invoices() {
                 </tbody>
               </table>
             </div>
+
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

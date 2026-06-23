@@ -47,26 +47,28 @@ export default function PropertyForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button 
-          type="button"
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate("/admin/properties")}
-        >
-          <ArrowLeft size={20} />
-        </Button>
-        
-        <div className="flex-1">
-           <h1 className="text-2xl font-bold tracking-tight">
-            {isEditMode ? "Edit Property" : "Tambah Property Baru"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {isEditMode ? "Update informasi property" : "Isi form untuk menambah property baru"}
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <Button 
+            type="button"
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate("/admin/properties")}
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          
+          <div className="flex-1">
+             <h1 className="text-2xl font-bold tracking-tight">
+              {isEditMode ? "Edit Property" : "Tambah Property Baru"}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {isEditMode ? "Update informasi property" : "Isi form untuk menambah property baru"}
+            </p>
+          </div>
         </div>
         <Button 
-          className="gradient-ocean text-primary-foreground h-10 text-base font-medium"
+          className="gradient-ocean text-primary-foreground h-10 text-base font-medium w-full sm:w-auto sm:ml-auto"
           type="submit" 
           disabled={isLoading}
         >
