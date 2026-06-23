@@ -71,7 +71,7 @@ const uploadConfigs = {
     storage: createStorage('uploads/payment-proofs'),
     fileFilter: imageFilter,
     limits: {
-      fileSize: 10 * 1024 * 1024 // 10MB for payment proofs
+      fileSize: 5 * 1024 * 1024 // 5MB for payment proofs
     }
   }),
 
@@ -79,7 +79,7 @@ const uploadConfigs = {
     storage: createStorage('uploads/custom-requests'),
     fileFilter: imageFilter,
     limits: {
-      fileSize: 10 * 1024 * 1024,  // 10MB per file
+      fileSize: 5 * 1024 * 1024,  // 5MB per file
       files: 5                      // maksimal 5 foto referensi
     }
   }),

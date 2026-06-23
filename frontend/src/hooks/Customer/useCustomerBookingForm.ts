@@ -45,7 +45,7 @@ export function useCustomerBookingForm() {
   });
 
   const [customRequests, setCustomRequests] = useState<CreateCustomRequestData[]>([
-    { title: '', description: '', color_theme: '', reference_images: [] },
+    { title: '', description: '', color_theme: '#d4a017', reference_images: [] },
   ]);
   const [customRequestFiles, setCustomRequestFiles] = useState<Record<number, File[]>>({});
 
@@ -196,7 +196,7 @@ export function useCustomerBookingForm() {
   const handleAddCustomRequest = () => {
     setCustomRequests((prev) => [
       ...prev,
-      { title: '', description: '', color_theme: '', reference_images: [] },
+      { title: '', description: '', color_theme: '#d4a017', reference_images: [] },
     ]);
   };
 

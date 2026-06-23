@@ -71,8 +71,8 @@ export default function Step4Payment({
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      Swal.fire("Error", "Ukuran file maksimal 10MB", "error");
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire("Error", "Ukuran file maksimal 5MB", "error");
       return;
     }
 
@@ -289,7 +289,7 @@ export default function Step4Payment({
                 <p className="text-sm font-medium text-muted-foreground mb-1">
                   Klik untuk upload bukti transfer
                 </p>
-                <p className="text-xs text-muted-foreground">PNG, JPG, JPEG (Max. 10MB)</p>
+                <p className="text-xs text-muted-foreground">PNG, JPG, JPEG (Max. 5MB)</p>
               </div>
             ) : (
               <div className="relative">

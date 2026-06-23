@@ -7,8 +7,8 @@ interface CustomRequestDraft extends CreateCustomRequestData {
   previewUrls: string[];
 }
 
-const MAX_FILES_PER_REQUEST = 7;
-const MAX_FILE_SIZE_MB = 10;
+const MAX_FILES_PER_REQUEST = 5;
+const MAX_FILE_SIZE_MB = 5;
 
 function createEmptyDraft(): CustomRequestDraft {
   return {

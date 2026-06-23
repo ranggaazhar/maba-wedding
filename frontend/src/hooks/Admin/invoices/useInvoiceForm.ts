@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { invoiceApi } from '@/api/InvoiceApi';
 import { bookingApi } from '@/api/bookingApi';
 import type { ItemRow } from '@/types/invoice.types';
@@ -18,6 +18,7 @@ const defaultItem = (): ItemRow => ({
 
 export function useInvoiceForm() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
@@ -132,7 +133,27 @@ export function useInvoiceForm() {
       setEventType(detail.event_type || '');
       setEventDate(detail.event_date || '');
       setBookingId(String(detail.id));
-      setDownPayment(parseFloat(detail.dp_amount || '0'));
+      
+      let dp = parseFloat(detail.dp_amount || '0');
+      if (dp === 0 && detail.total_estimate) {
+        const hasCustom = detail.has_custom_request;
+        let catalogTotal = 0;
+        detail.models?.forEach((m) => { catalogTotal += parseFloat(m.price || '0'); });
+        detail.properties?.forEach((p) => { catalogTotal += parseFloat(p.subtotal || '0'); });
+        const dpCatalog = Math.ceil(catalogTotal * 0.1);
+
+        let dpCustom = 0;
+        if (hasCustom) {
+          dpCustom = detail.event_type === 'Wedding' ? 1000000 : (detail.event_type === 'Engagement' ? 300000 : 0);
+        }
+        dp = dpCatalog + dpCustom;
+
+        const totalEst = parseFloat(detail.total_estimate || '0');
+        if (totalEst > 0 && dp > totalEst) {
+          dp = totalEst;
+        }
+      }
+      setDownPayment(dp);
 
       if (detail.event_date) {
         const due = new Date(detail.event_date);
@@ -310,6 +331,26 @@ export function useInvoiceForm() {
       setIsSubmitting(false);
     }
   };
+
+  // Load booking if booking_id query param is present (hanya mode create)
+  const bookingIdParam = searchParams.get('booking_id');
+  useEffect(() => {
+    if (isEdit || !bookingIdParam) return;
+    const loadBooking = async () => {
+      try {
+        setIsLoadingBookings(true);
+        const res = await bookingApi.getBookingById(Number(bookingIdParam));
+        if (res.success) {
+          handleSelectBooking(res.data);
+        }
+      } catch (err) {
+        console.error('Gagal memuat detail booking dari query param:', err);
+      } finally {
+        setIsLoadingBookings(false);
+      }
+    };
+    loadBooking();
+  }, [bookingIdParam, isEdit]);
 
   return {
     isEdit, isLoading, isSubmitting, isRecalculating,

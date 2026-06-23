@@ -26,8 +26,8 @@ interface Step2CustomRequestProps {
   optional?: boolean; 
 }
 
-const MAX_FILES = 7;
-const MAX_SIZE_MB = 10;
+const MAX_FILES = 5;
+const MAX_SIZE_MB = 5;
 
 export default function Step2CustomRequest({
   customRequests,
@@ -175,13 +175,21 @@ export default function Step2CustomRequest({
                 {/* Tema warna */}
                 <div className="space-y-2">
                   <Label htmlFor={`color-${index}`}>Tema Warna (Opsional)</Label>
-                  <Input
-                    id={`color-${index}`}
-                    value={request.color_theme || ''}
-                    onChange={(e) => onUpdate(index, { color_theme: e.target.value })}
-                    placeholder="Contoh: Sage Green & Gold, Dusty Pink"
-                    maxLength={100}
-                  />
+                  <div className="flex items-center gap-3">
+                    <input
+                      id={`color-${index}`}
+                      type="color"
+                      value={request.color_theme || '#d4a017'}
+                      onChange={(e) => onUpdate(index, { color_theme: e.target.value })}
+                      className="w-12 h-10 rounded-md border cursor-pointer p-0.5"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {request.color_theme || '#d4a017'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Klik kotak untuk memilih warna tema request ini
+                  </p>
                 </div>
 
                 <Separator />

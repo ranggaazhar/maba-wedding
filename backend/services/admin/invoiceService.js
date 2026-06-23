@@ -251,6 +251,29 @@ class InvoiceService {
         total += price;
       }
 
+      let downPayment = parseFloat(booking.dp_amount || 0);
+      if (downPayment === 0) {
+        let catalogTotal = 0;
+        for (const model of booking.models || []) {
+          catalogTotal += parseFloat(model.price || 0);
+        }
+        for (const prop of booking.properties || []) {
+          catalogTotal += parseFloat(prop.subtotal || 0);
+        }
+        const dpCatalog = Math.ceil(catalogTotal * 0.1);
+
+        let dpCustom = 0;
+        if (booking.has_custom_request) {
+          dpCustom = booking.event_type === 'Wedding' ? 1000000 : (booking.event_type === 'Engagement' ? 300000 : 0);
+        }
+        downPayment = dpCatalog + dpCustom;
+
+        const maxAllowed = parseFloat(booking.total_estimate || total || 0);
+        if (maxAllowed > 0 && downPayment > maxAllowed) {
+          downPayment = maxAllowed;
+        }
+      }
+
       const invoice = await Invoice.create({
         invoice_number:   await this._generateUniqueNumber(),
         booking_id:       bookingId,
@@ -261,7 +284,7 @@ class InvoiceService {
         event_date:       booking.event_date,
         event_type:       booking.event_type,
         total,
-        down_payment:     parseFloat(booking.dp_amount || 0),
+        down_payment:     downPayment,
         status:           'DRAFT',
         issue_date:       new Date(),
         due_date:         new Date(booking.event_date),

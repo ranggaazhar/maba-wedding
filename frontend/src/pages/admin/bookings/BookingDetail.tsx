@@ -120,6 +120,15 @@ export default function BookingDetail() {
               Download PDF
             </Button>
 
+            {paymentStatus === 'CONFIRMED' && !booking.invoice && (
+              <Button
+                className="gradient-ocean text-primary-foreground"
+                onClick={() => navigate(`/admin/invoices/new?booking_id=${booking.id}`)}
+              >
+                <FileText size={16} className="mr-2" /> Buat Invoice
+              </Button>
+            )}
+
             {booking.invoice ? (
               <span title="Edit tidak dapat dilakukan karena invoice sudah diterbitkan" className="cursor-not-allowed">
                 <Button variant="outline" disabled>
