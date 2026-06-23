@@ -11,8 +11,6 @@ export function useInvoiceDetail() {
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [adminNotes, setAdminNotes] = useState('');
-  const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   const fetchInvoice = useCallback(async () => {
@@ -22,7 +20,6 @@ export function useInvoiceDetail() {
       const res = await invoiceApi.getInvoiceById(Number(id));
       if (res.success) {
         setInvoice(res.data);
-        setAdminNotes(res.data.admin_notes || '');
       }
     } catch {
       Swal.fire('Error', 'Gagal memuat data invoice', 'error');
@@ -106,19 +103,6 @@ export function useInvoiceDetail() {
     }
   };
 
-  const handleSaveNotes = async () => {
-    if (!invoice) return;
-    try {
-      setIsSavingNotes(true);
-      await invoiceApi.updateInvoice(invoice.id, { admin_notes: adminNotes });
-      Swal.fire({ icon: 'success', title: 'Catatan tersimpan', timer: 1200, showConfirmButton: false });
-    } catch {
-      Swal.fire('Error', 'Gagal menyimpan catatan', 'error');
-    } finally {
-      setIsSavingNotes(false);
-    }
-  };
-
   const calculatedTotal = invoice?.items?.reduce((sum, item) => {
     const sub = parseFloat(String(item.subtotal));
     return item.item_type === 'discount' ? sum - sub : sum + sub;
@@ -126,9 +110,8 @@ export function useInvoiceDetail() {
 
   return {
     id, invoice, isLoading,
-    adminNotes, setAdminNotes,
-    isSavingNotes, isActionLoading,
+    isActionLoading,
     calculatedTotal, navigate,
-    handleSendWhatsapp, handleMarkAsPaid, handleSaveNotes,
+    handleSendWhatsapp, handleMarkAsPaid,
   };
 }

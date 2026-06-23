@@ -43,7 +43,6 @@ export function useInvoiceForm() {
   const [downPayment, setDownPayment] = useState(0);
   const [paymentTerms, setPaymentTerms] = useState(defaultPaymentTerms);
   const [notes, setNotes] = useState('');
-  const [adminNotes, setAdminNotes] = useState('');
   const [bookingId, setBookingId] = useState('');
   const [items, setItems] = useState<ItemRow[]>([{ _tempId: 1, item_name: '', item_type: 'item', description: '', quantity: 1, unit_price: 0, subtotal: 0 }]);
 
@@ -92,7 +91,6 @@ export function useInvoiceForm() {
           setDownPayment(Number(inv.down_payment) || 0);
           setPaymentTerms(inv.payment_terms || defaultPaymentTerms);
           setNotes(inv.notes || '');
-          setAdminNotes(inv.admin_notes || '');
           setBookingId(inv.booking_id ? String(inv.booking_id) : '');
           setItems(inv.items.map((item: ItemRow & { id: number }, i: number) => ({
             _tempId: item.id || i,
@@ -305,7 +303,7 @@ export function useInvoiceForm() {
       event_date: eventDate, issue_date: issueDate, due_date: dueDate,
       total: Math.max(0, calculatedTotal), down_payment: downPayment,
       payment_terms: paymentTerms || undefined,
-      notes: notes || undefined, admin_notes: adminNotes || undefined,
+      notes: notes || undefined,
       items: items.map((item, i) => ({
         item_name: item.item_name, item_type: item.item_type || 'item',
         description: item.description || undefined,
@@ -367,7 +365,6 @@ export function useInvoiceForm() {
     downPayment, setDownPayment,
     paymentTerms, setPaymentTerms,
     notes, setNotes,
-    adminNotes, setAdminNotes,
     bookingId, setBookingId,
     items, calculatedTotal, dpPercentage,
     navigate,

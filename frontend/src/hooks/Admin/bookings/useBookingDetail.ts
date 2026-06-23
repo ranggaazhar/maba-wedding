@@ -42,7 +42,6 @@ export function useBookingDetail() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [adminNotes, setAdminNotes] = useState('');
 
   // ── Fetch detail booking ──────────────────────────────────────────────────
 
@@ -53,7 +52,6 @@ export function useBookingDetail() {
       const response = await bookingApi.getBookingById(Number(id));
       if (response.success) {
         setBooking(response.data);
-        setAdminNotes(response.data.admin_notes || '');
       }
     } catch (error: unknown) {
       const message = axios.isAxiosError(error)
@@ -170,8 +168,6 @@ export function useBookingDetail() {
     booking,
     isLoading,
     isConfirming,
-    adminNotes,
-    setAdminNotes,
 
     // Actions
     navigate,

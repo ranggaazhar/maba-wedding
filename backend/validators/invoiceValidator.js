@@ -55,10 +55,6 @@ const createInvoiceValidation = [
     .optional()
     .trim(),
   
-  body('admin_notes')
-    .optional()
-    .trim(),
-  
   body('payment_terms')
     .optional()
     .trim(),
@@ -138,10 +134,6 @@ const updateInvoiceValidation = [
     .isISO8601().withMessage('Due date must be a valid date'),
   
   body('notes')
-    .optional()
-    .trim(),
-  
-  body('admin_notes')
     .optional()
     .trim(),
   

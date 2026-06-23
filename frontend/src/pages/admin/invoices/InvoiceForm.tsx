@@ -53,7 +53,6 @@ export default function InvoiceForm() {
     downPayment, setDownPayment,
     paymentTerms, setPaymentTerms,
     notes, setNotes,
-    adminNotes, setAdminNotes,
     bookingId, setBookingId,
     items, calculatedTotal, dpPercentage,
     navigate,
@@ -464,15 +463,6 @@ export default function InvoiceForm() {
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 placeholder="Catatan tambahan untuk customer..."
-                className="bg-muted/30"
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Catatan Admin (Internal)</Label>
-              <Textarea
-                value={adminNotes}
-                onChange={e => setAdminNotes(e.target.value)}
-                placeholder="Catatan internal admin..."
                 className="bg-muted/30"
               />
             </div>

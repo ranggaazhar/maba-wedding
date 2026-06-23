@@ -117,7 +117,6 @@ export interface Booking {
   total_estimate?: string;
   dp_amount?: string;
   customer_notes?: string;
-  admin_notes?: string;
   payment_proof_url?: string;
   payment_proof_full_url?: string;
   bank_name?: string;

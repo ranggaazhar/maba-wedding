@@ -156,7 +156,6 @@ class InvoiceService {
         issue_date:       data.issue_date || new Date(),
         due_date:         data.due_date,
         notes:            data.notes,
-        admin_notes:      data.admin_notes,
         payment_terms:    data.payment_terms,
         created_by:       adminId
       }, { transaction });
@@ -325,7 +324,6 @@ class InvoiceService {
         issue_date:       data.issue_date,
         due_date:         data.due_date,
         notes:            data.notes,
-        admin_notes:      data.admin_notes,
         payment_terms:    data.payment_terms
       }, { transaction });
 

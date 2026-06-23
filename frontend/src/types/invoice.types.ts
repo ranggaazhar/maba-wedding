@@ -34,7 +34,6 @@ export interface Invoice {
   issue_date: string;
   due_date: string;
   notes?: string;
-  admin_notes?: string;
   payment_terms?: string;
   pdf_url?: string;
   pdf_generated_at?: string;
@@ -82,14 +81,12 @@ export interface CreateInvoiceData {
   issue_date?: string;
   due_date: string;
   notes?: string;
-  admin_notes?: string;
   payment_terms?: string;
   items?: CreateInvoiceItemData[];
 }
 
 export interface UpdateInvoiceData extends Partial<CreateInvoiceData> {
   status?: InvoiceStatus;
-  admin_notes?: string;
 }
 
 export interface ItemRow extends Omit<CreateInvoiceItemData, 'subtotal'> {

@@ -99,11 +99,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       comment: 'Catatan untuk customer'
     },
-    admin_notes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-      comment: 'Catatan internal admin'
-    },
     payment_terms: {
       type: DataTypes.TEXT,
       allowNull: true,
