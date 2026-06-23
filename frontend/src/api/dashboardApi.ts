@@ -45,6 +45,10 @@ class DashboardApi {
     bookings: { id: number; code: string; name: string }[];
     projects: { id: number; slug: string; title: string }[];
     properties: { id: number; name: string }[];
+    invoices: { id: number; invoice_number: string; customer_name: string }[];
+    reviews: { id: number; customer_name: string; rating: number; review_text: string }[];
+    propertyCategories: { id: number; name: string }[];
+    categories: { id: number; name: string }[];
   }>> {
     const { data } = await axios.get(`${API_URL}/search`, {
       params: { q },

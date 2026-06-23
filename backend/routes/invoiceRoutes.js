@@ -24,6 +24,7 @@ router.patch('/:id/recalculate',          authMiddleware, invoiceIdValidation, v
 router.patch('/:id/mark-sent',            authMiddleware, invoiceIdValidation, validate, invoiceController.markAsSent);
 router.patch('/:id/mark-paid',            authMiddleware, invoiceIdValidation, validate, invoiceController.markAsPaid);
 router.post('/:id/send-whatsapp',         authMiddleware, invoiceIdValidation, validate, invoiceController.sendInvoiceWhatsapp);
+router.get('/:id/pdf',                    authMiddleware, invoiceIdValidation, validate, invoiceController.downloadInvoicePdf);
 
 // Invoice Items — static sub-paths MUST come before dynamic /:invoiceId/items
 router.get('/:invoiceId/items/calculate-total',  authMiddleware, invoiceController.calculateItemsTotal);

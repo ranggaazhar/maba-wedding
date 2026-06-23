@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useInvoiceDetail } from '@/hooks/Admin/invoices/useInvoiceDetail';
 import {
   ArrowLeft, Edit, Send, FileText, CheckCircle,
@@ -8,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import type { InvoiceStatus, InvoiceItem } from '@/types/invoice.types';
 import LogoMaba from '../../../assets/logomaba.svg';
+import { invoiceApi } from '@/api/InvoiceApi';
+import Swal from 'sweetalert2';
 
 
 const formatCurrency = (val: number) =>
@@ -38,6 +41,28 @@ export default function InvoiceDetail() {
     calculatedTotal, navigate,
     handleSendWhatsapp, handleMarkAsPaid,
   } = useInvoiceDetail();
+
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!invoice) return;
+    try {
+      setIsDownloadingPdf(true);
+      await invoiceApi.downloadInvoicePdf(invoice.id, `invoice-${invoice.invoice_number}.pdf`);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'PDF invoice berhasil didownload.',
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err: unknown) {
+      console.error(err);
+      Swal.fire('Error', 'Gagal mendownload PDF invoice', 'error');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -73,6 +98,11 @@ export default function InvoiceDetail() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" size="sm" className="border-primary/30 hover:bg-primary/5 text-primary" onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
+            {isDownloadingPdf ? <Loader2 size={16} className="mr-2 animate-spin" /> : <FileText size={16} className="mr-2" />}
+            Download PDF
+          </Button>
+
           {invoice.status === 'PAID' ? (
             <span title="Invoice tidak dapat di-edit karena sudah lunas" className="cursor-not-allowed">
               <Button variant="outline" size="sm" disabled>

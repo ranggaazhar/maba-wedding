@@ -30,10 +30,14 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
     // Format angka dengan titik ribuan: 1500000 → "1.500.000"
     const formatDisplay = (raw: string | number | undefined): string => {
       if (raw === undefined || raw === null || raw === '') return '';
-      const numStr = String(raw).replace(/\D/g, ''); // hapus semua non-digit
-      if (!numStr) return '';
+      let numStr = String(raw);
+      if (/^\d+\.\d+$/.test(numStr)) {
+        numStr = String(Math.round(parseFloat(numStr)));
+      }
+      const cleaned = numStr.replace(/\D/g, ''); // hapus semua non-digit
+      if (!cleaned) return '';
       // Format dengan titik sebagai pemisah ribuan
-      return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
 
     // State internal untuk nilai yang ditampilkan (dengan titik)
@@ -44,8 +48,18 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
     // Sync dari parent jika value berubah dari luar (misal saat load edit form)
     const prevValueRef = React.useRef<string | number | undefined>(value);
     React.useEffect(() => {
-      const newRaw = String(value ?? '').replace(/\D/g, '');
-      const prevRaw = String(prevValueRef.current ?? '').replace(/\D/g, '');
+      let newRaw = String(value ?? '');
+      if (/^\d+\.\d+$/.test(newRaw)) {
+        newRaw = String(Math.round(parseFloat(newRaw)));
+      }
+      newRaw = newRaw.replace(/\D/g, '');
+
+      let prevRaw = String(prevValueRef.current ?? '');
+      if (/^\d+\.\d+$/.test(prevRaw)) {
+        prevRaw = String(Math.round(parseFloat(prevRaw)));
+      }
+      prevRaw = prevRaw.replace(/\D/g, '');
+
       if (newRaw !== prevRaw) {
         setDisplayValue(formatDisplay(value));
         prevValueRef.current = value;

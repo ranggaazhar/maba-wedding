@@ -245,6 +245,10 @@ class BookingService {
         dpAmount = data.dp_amount
           ? parseFloat(data.dp_amount)
           : (totalEstimate ? Math.ceil(totalEstimate * 0.1) : null);
+        
+        if (dpAmount !== null && totalEstimate !== null && dpAmount > totalEstimate) {
+          dpAmount = totalEstimate;
+        }
       }
       const booking = await Booking.create({
         booking_link_id:  data.booking_link_id,
@@ -338,9 +342,13 @@ class BookingService {
 
       // Hitung ulang dp_amount kalau total_estimate berubah
       const totalEstimate = parseFloat(data.total_estimate || booking.total_estimate || 0);
-      const dpAmount = data.dp_amount
+      let dpAmount = data.dp_amount
         ? parseFloat(data.dp_amount)
         : Math.ceil(totalEstimate * 0.1);
+
+      if (dpAmount > totalEstimate) {
+        dpAmount = totalEstimate;
+      }
 
       // Sync has_custom_request flag based on actual custom requests count
       const customRequestsCount = await BookingCustomRequest.count({

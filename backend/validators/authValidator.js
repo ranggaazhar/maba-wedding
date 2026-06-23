@@ -21,7 +21,7 @@ const registerValidation = [
   body('phone')
     .optional()
     .trim()
-    .matches(/^[0-9+\-\s()]*$/).withMessage('Invalid phone number format')
+    .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid phone number format. Must be a valid Indonesian phone number (e.g. 08..., +628...)')
 ];
 
 // Validation rules for login

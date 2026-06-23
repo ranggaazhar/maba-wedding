@@ -1,5 +1,6 @@
 // controllers/invoiceController.js
 const invoiceService = require('../../services/admin/invoiceService');
+const invoicePdfService = require('../../services/admin/invoicePdfService');
 
 class InvoiceController {
 
@@ -232,6 +233,23 @@ class InvoiceController {
     } catch (error) {
       const statusCode = error.message.includes('tidak ditemukan') ? 404 : 500;
       return res.status(statusCode).json({ success: false, message: error.message });
+    }
+  }
+
+  async downloadInvoicePdf(req, res) {
+    try {
+      const { id } = req.params;
+      const invoice = await invoiceService.getInvoiceById(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: 'Invoice not found' });
+      }
+
+      // Generate PDF
+      const pdfPath = await invoicePdfService.generateInvoicePdf(invoice);
+      return res.download(pdfPath);
+    } catch (error) {
+      console.error('Download Invoice PDF Error:', error);
+      return res.status(500).json({ success: false, message: error.message });
     }
   }
 }

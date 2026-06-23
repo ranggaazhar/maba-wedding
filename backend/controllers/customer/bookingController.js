@@ -1,5 +1,6 @@
 const bookingService = require('../../services/customer/bookingService');
 const FileHelper = require('../../utils/fileHelper');
+const bookingPdfService = require('../../services/admin/bookingPdfService');
 
 class BookingController {
   async getAllBookings(req, res) {
@@ -322,6 +323,23 @@ class BookingController {
         error.message === 'Booking not found' ? 404 :
         error.message.includes('Belum ada') || error.message.includes('sudah pernah') ? 400 : 500;
       return res.status(statusCode).json({ success: false, message: error.message });
+    }
+  }
+
+  async downloadBookingPdf(req, res) {
+    try {
+      const { id } = req.params;
+      const booking = await bookingService.getBookingById(id, true);
+      if (!booking) {
+        return res.status(404).json({ success: false, message: 'Booking not found' });
+      }
+
+      const bookingData = booking.toJSON ? booking.toJSON() : booking;
+      const pdfPath = await bookingPdfService.generateBookingPdf(bookingData);
+      return res.download(pdfPath);
+    } catch (error) {
+      console.error('Download Booking PDF Error:', error);
+      return res.status(500).json({ success: false, message: error.message });
     }
   }
 

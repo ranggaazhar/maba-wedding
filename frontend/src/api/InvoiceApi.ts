@@ -101,6 +101,21 @@ class InvoiceApi {
     const response = await axios.post(`${API_URL}/invoices/${id}/send-whatsapp`, {}, this.getAuthHeaders());
     return response.data;
   }
+
+  async downloadInvoicePdf(id: number, filename: string): Promise<void> {
+    const response = await axios.get(`${API_URL}/invoices/${id}/pdf`, {
+      responseType: 'blob',
+      ...this.getAuthHeaders(),
+    });
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+  }
 }
 
 export const invoiceApi = new InvoiceApi();

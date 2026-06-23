@@ -277,6 +277,21 @@ class BookingApi {
     const response = await axios.get(`${API_URL}/bookings/statistics`, this.getAuthHeaders());
     return response.data;
   }
+
+  async downloadBookingPdf(id: number, filename: string): Promise<void> {
+    const response = await axios.get(`${API_URL}/bookings/${id}/pdf`, {
+      responseType: 'blob',
+      ...this.getAuthHeaders(),
+    });
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

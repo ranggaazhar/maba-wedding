@@ -31,6 +31,10 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
     bookings: { id: number; code: string; name: string }[];
     projects: { id: number; slug: string; title: string }[];
     properties: { id: number; name: string }[];
+    invoices: { id: number; invoice_number: string; customer_name: string }[];
+    reviews: { id: number; customer_name: string; rating: number; review_text: string }[];
+    propertyCategories: { id: number; name: string }[];
+    categories: { id: number; name: string }[];
   } | null>(null);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -256,9 +260,103 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
                     </div>
                   )}
 
+                  {/* Invoices */}
+                  {searchResults.invoices && searchResults.invoices.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">Invoices</p>
+                      <div className="space-y-1">
+                        {searchResults.invoices.map(inv => (
+                          <button
+                            key={inv.id}
+                            onClick={() => {
+                              navigate(`/admin/invoices/${inv.id}`);
+                              setSearchQuery('');
+                              setShowSearchResults(false);
+                            }}
+                            className="w-full text-left px-3 py-1.5 rounded-md hover:bg-muted text-sm flex items-center justify-between"
+                          >
+                            <span className="font-medium text-foreground">{inv.invoice_number}</span>
+                            <span className="text-xs text-muted-foreground truncate max-w-[150px]">{inv.customer_name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reviews */}
+                  {searchResults.reviews && searchResults.reviews.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">Reviews</p>
+                      <div className="space-y-1">
+                        {searchResults.reviews.map(r => (
+                          <button
+                            key={r.id}
+                            onClick={() => {
+                              navigate(`/admin/reviews/${r.id}`);
+                              setSearchQuery('');
+                              setShowSearchResults(false);
+                            }}
+                            className="w-full text-left px-3 py-1.5 rounded-md hover:bg-muted text-sm flex items-center justify-between"
+                          >
+                            <span className="font-medium text-foreground truncate max-w-[150px]">{r.customer_name}</span>
+                            <span className="text-xs text-yellow-500 font-medium shrink-0">⭐ {r.rating}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Property Categories */}
+                  {searchResults.propertyCategories && searchResults.propertyCategories.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">Kategori Properti</p>
+                      <div className="space-y-1">
+                        {searchResults.propertyCategories.map(cat => (
+                          <button
+                            key={cat.id}
+                            onClick={() => {
+                              navigate(`/admin/property-categories`);
+                              setSearchQuery('');
+                              setShowSearchResults(false);
+                            }}
+                            className="w-full text-left px-3 py-1.5 rounded-md hover:bg-muted text-sm truncate block"
+                          >
+                            {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Project Categories */}
+                  {searchResults.categories && searchResults.categories.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">Kategori Project</p>
+                      <div className="space-y-1">
+                        {searchResults.categories.map(cat => (
+                          <button
+                            key={cat.id}
+                            onClick={() => {
+                              navigate(`/admin/categories`);
+                              setSearchQuery('');
+                              setShowSearchResults(false);
+                            }}
+                            className="w-full text-left px-3 py-1.5 rounded-md hover:bg-muted text-sm truncate block"
+                          >
+                            {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {searchResults.bookings.length === 0 &&
                    searchResults.projects.length === 0 &&
-                   searchResults.properties.length === 0 && (
+                   searchResults.properties.length === 0 &&
+                   (!searchResults.invoices || searchResults.invoices.length === 0) &&
+                   (!searchResults.reviews || searchResults.reviews.length === 0) &&
+                   (!searchResults.propertyCategories || searchResults.propertyCategories.length === 0) &&
+                   (!searchResults.categories || searchResults.categories.length === 0) && (
                     <div className="text-center py-4 text-xs text-muted-foreground">
                       Tidak ada hasil ditemukan
                     </div>

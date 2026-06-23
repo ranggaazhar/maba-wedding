@@ -1,16 +1,29 @@
+const { Op } = require('sequelize');
 const db = require('../../models');
 
 class NotificationController {
   async getNotifications(req, res) {
     try {
-      // 1. Get recent bookings
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      // 1. Get recent bookings (last 24 hours)
       const bookings = await db.Booking.findAll({
+        where: {
+          submitted_at: {
+            [Op.gte]: oneDayAgo
+          }
+        },
         order: [['submitted_at', 'DESC']],
         limit: 10
       });
 
-      // 2. Get recent reviews
+      // 2. Get recent reviews (last 24 hours)
       const reviews = await db.Review.findAll({
+        where: {
+          submitted_at: {
+            [Op.gte]: oneDayAgo
+          }
+        },
         order: [['submitted_at', 'DESC']],
         limit: 10
       });

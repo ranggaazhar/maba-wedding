@@ -20,7 +20,8 @@ const createProjectValidation = [
   
   body('price')
     .optional()
-    .isDecimal().withMessage('Price must be a valid decimal number'),
+    .isDecimal().withMessage('Price must be a valid decimal number')
+    .custom(value => parseFloat(value) >= 0).withMessage('Price must be a positive number'),
   
   body('theme')
     .optional()
@@ -71,7 +72,8 @@ const updateProjectValidation = [
   
   body('price')
     .optional()
-    .isDecimal().withMessage('Price must be a valid decimal number'),
+    .isDecimal().withMessage('Price must be a valid decimal number')
+    .custom(value => parseFloat(value) >= 0).withMessage('Price must be a positive number'),
   
   body('theme')
     .optional()

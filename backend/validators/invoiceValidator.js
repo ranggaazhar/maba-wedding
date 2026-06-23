@@ -14,7 +14,7 @@ const createInvoiceValidation = [
   body('customer_phone')
     .trim()
     .notEmpty().withMessage('Customer phone is required')
-    .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
+    .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
   
   body('customer_address')
     .optional()
@@ -35,11 +35,13 @@ const createInvoiceValidation = [
   
   body('total')
     .notEmpty().withMessage('Total is required')
-    .isDecimal().withMessage('Total must be a valid decimal number'),
+    .isDecimal().withMessage('Total must be a valid decimal number')
+    .custom(value => parseFloat(value) >= 0).withMessage('Total must be a positive number'),
   
   body('down_payment')
     .optional()
-    .isDecimal().withMessage('Down payment must be a valid decimal number'),
+    .isDecimal().withMessage('Down payment must be a valid decimal number')
+    .custom(value => parseFloat(value) >= 0).withMessage('Down payment must be a positive number'),
   
   body('issue_date')
     .notEmpty().withMessage('Issue date is required')
@@ -63,7 +65,24 @@ const createInvoiceValidation = [
   
   body('items')
     .optional()
-    .isArray().withMessage('Items must be an array')
+    .isArray().withMessage('Items must be an array'),
+
+  // Custom checks: due_date >= issue_date, and down_payment <= total
+  body().custom((_, { req }) => {
+    if (req.body.issue_date && req.body.due_date) {
+      const issue = new Date(req.body.issue_date);
+      const due = new Date(req.body.due_date);
+      if (due < issue) {
+        throw new Error('Due date cannot be before issue date');
+      }
+    }
+    if (req.body.total && req.body.down_payment) {
+      if (parseFloat(req.body.down_payment) > parseFloat(req.body.total)) {
+        throw new Error('Down payment cannot exceed total amount');
+      }
+    }
+    return true;
+  })
 ];
 
 const updateInvoiceValidation = [
@@ -80,7 +99,7 @@ const updateInvoiceValidation = [
     .optional()
     .trim()
     .notEmpty().withMessage('Customer phone cannot be empty')
-    .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
+    .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
   
   body('customer_address')
     .optional()
@@ -102,11 +121,13 @@ const updateInvoiceValidation = [
   
   body('total')
     .optional()
-    .isDecimal().withMessage('Total must be a valid decimal number'),
+    .isDecimal().withMessage('Total must be a valid decimal number')
+    .custom(value => parseFloat(value) >= 0).withMessage('Total must be a positive number'),
   
   body('down_payment')
     .optional()
-    .isDecimal().withMessage('Down payment must be a valid decimal number'),
+    .isDecimal().withMessage('Down payment must be a valid decimal number')
+    .custom(value => parseFloat(value) >= 0).withMessage('Down payment must be a positive number'),
   
   body('issue_date')
     .optional()
@@ -126,7 +147,24 @@ const updateInvoiceValidation = [
   
   body('payment_terms')
     .optional()
-    .trim()
+    .trim(),
+
+  // Custom checks: due_date >= issue_date, and down_payment <= total
+  body().custom((_, { req }) => {
+    if (req.body.issue_date && req.body.due_date) {
+      const issue = new Date(req.body.issue_date);
+      const due = new Date(req.body.due_date);
+      if (due < issue) {
+        throw new Error('Due date cannot be before issue date');
+      }
+    }
+    if (req.body.total && req.body.down_payment) {
+      if (parseFloat(req.body.down_payment) > parseFloat(req.body.total)) {
+        throw new Error('Down payment cannot exceed total amount');
+      }
+    }
+    return true;
+  })
 ];
 
 const createInvoiceItemValidation = [

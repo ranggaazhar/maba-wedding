@@ -7,7 +7,7 @@ const createBookingLinkValidation = [
   body('customer_name').optional().trim()
     .isLength({ max: 100 }).withMessage('Customer name must not exceed 100 characters'),
   body('customer_phone').optional().trim()
-    .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
+    .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
   body('expires_at').optional({ nullable: true, checkFalsy: true })
     .isISO8601().withMessage('Expires at must be a valid date'),
   body('notes').optional().trim()
@@ -18,7 +18,7 @@ const updateBookingLinkValidation = [
   body('customer_name').optional().trim()
     .isLength({ max: 100 }).withMessage('Customer name must not exceed 100 characters'),
   body('customer_phone').optional().trim()
-    .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
+    .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
   body('expires_at').optional({ nullable: true, checkFalsy: true })
     .isISO8601().withMessage('Expires at must be a valid date'),
   body('notes').optional().trim()
@@ -39,7 +39,7 @@ const createBookingValidation = [
 
   body('customer_phone').trim()
     .notEmpty().withMessage('Customer phone is required')
-    .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
+    .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
 
   body('full_address').trim()
     .notEmpty().withMessage('Full address is required'),
@@ -95,7 +95,6 @@ const createBookingValidation = [
     return true;
   }),
 
-  // Validasi tiap item custom_request
   body('custom_requests.*.title').optional().trim()
     .notEmpty().withMessage('Judul custom request tidak boleh kosong')
     .isLength({ max: 200 }).withMessage('Judul maksimal 200 karakter'),
@@ -105,6 +104,16 @@ const createBookingValidation = [
 
   body('custom_requests.*.color_theme').optional().trim()
     .isLength({ max: 100 }).withMessage('Tema warna maksimal 100 karakter'),
+
+  // Validasi agar jumlah DP tidak melebihi total estimasi
+  body().custom((_, { req }) => {
+    if (req.body.dp_amount && req.body.total_estimate) {
+      if (parseFloat(req.body.dp_amount) > parseFloat(req.body.total_estimate)) {
+        throw new Error('Jumlah DP tidak boleh melebihi total estimasi biaya');
+      }
+    }
+    return true;
+  }),
 ];
 
 const updateBookingValidation = [
@@ -116,7 +125,7 @@ const updateBookingValidation = [
 
   body('customer_phone').optional().trim()
     .notEmpty().withMessage('Customer phone cannot be empty')
-    .isLength({ max: 20 }).withMessage('Customer phone must not exceed 20 characters'),
+    .matches(/^(?:\+62|62|0)8[1-9][0-9]{7,11}$/).withMessage('Invalid customer phone format. Must be a valid Indonesian phone number (e.g. 08..., +628...)'),
 
   body('full_address').optional().trim()
     .notEmpty().withMessage('Full address cannot be empty'),

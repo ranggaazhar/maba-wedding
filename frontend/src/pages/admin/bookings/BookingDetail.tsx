@@ -20,6 +20,8 @@ import {
   useBookingDetail,
   paymentStatusConfig,
 } from '@/hooks/Admin/bookings/useBookingDetail';
+import { bookingApi } from '@/api/bookingApi';
+import Swal from 'sweetalert2';
 
 
 export default function BookingDetail() {
@@ -31,6 +33,28 @@ export default function BookingDetail() {
     formatDate, formatDateTime, formatCurrency,
     totalPropertyCost, totalModelCost,
   } = useBookingDetail();
+
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!booking) return;
+    try {
+      setIsDownloadingPdf(true);
+      await bookingApi.downloadBookingPdf(booking.id, `booking-${booking.booking_code}.pdf`);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'PDF booking berhasil didownload.',
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err: unknown) {
+      console.error(err);
+      Swal.fire('Error', 'Gagal mendownload PDF booking', 'error');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -91,6 +115,11 @@ export default function BookingDetail() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" className="border-primary/30 hover:bg-primary/5 text-primary" onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
+              {isDownloadingPdf ? <Loader2 size={16} className="mr-2 animate-spin" /> : <FileText size={16} className="mr-2" />}
+              Download PDF
+            </Button>
+
             {booking.invoice ? (
               <span title="Edit tidak dapat dilakukan karena invoice sudah diterbitkan" className="cursor-not-allowed">
                 <Button variant="outline" disabled>

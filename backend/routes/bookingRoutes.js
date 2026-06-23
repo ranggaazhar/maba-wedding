@@ -50,5 +50,6 @@ router.post('/:id/payment-proof/upload',
 router.post('/:id/submit-payment',   bookingIdValidation, submitPaymentValidation, validate, bookingController.submitPayment);
 router.post('/:id/confirm-payment',  authMiddleware, bookingIdValidation, validate, bookingController.confirmPayment);
 router.delete('/:id/payment-proof',   authMiddleware, bookingIdValidation, validate, bookingController.deletePaymentProof);
+router.get('/:id/pdf',                authMiddleware, bookingIdValidation, validate, bookingController.downloadBookingPdf);
 
 module.exports = router;

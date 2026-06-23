@@ -93,15 +93,22 @@ export function useCustomerBookingForm() {
     // Untuk custom & kombinasi, DP flat custom request sesuai jenis acara
     const dpCustomRequest = customRequestFee; // 1.000.000 (Wedding) / 300.000 (Engagement)
 
+    let calculatedDp = 0;
     if (bookingMode === 'custom') {
       // DP = flat DP custom request + 10% properti (jika ada)
-      return dpCustomRequest + dpCatalog;
-    }
-    if (bookingMode === 'combination') {
+      calculatedDp = dpCustomRequest + dpCatalog;
+    } else if (bookingMode === 'combination') {
       // DP = 10% katalog (model + properti) + flat DP custom request
-      return dpCatalog + dpCustomRequest;
+      calculatedDp = dpCatalog + dpCustomRequest;
+    } else {
+      return 0;
     }
-    return 0;
+
+    // Cap DP agar tidak melebihi total estimasi
+    if (totalEstimate > 0 && calculatedDp > totalEstimate) {
+      return totalEstimate;
+    }
+    return calculatedDp;
   })();
 
   const totalSteps = !bookingMode ? 99
