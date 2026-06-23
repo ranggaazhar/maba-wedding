@@ -10,7 +10,7 @@ class BookingPdfService {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    const fileName = `booking-${booking.booking_code}-${Date.now()}.pdf`;
+    const fileName = `booking-${booking.booking_code}.pdf`;
     const filePath = path.join(outputDir, fileName);
 
     return new Promise((resolve, reject) => {

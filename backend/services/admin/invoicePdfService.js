@@ -11,7 +11,7 @@ class InvoicePdfService {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    const fileName = `invoice-${invoice.invoice_number}-${Date.now()}.pdf`;
+    const fileName = `invoice-${invoice.invoice_number}.pdf`;
     const filePath = path.join(outputDir, fileName);
 
     return new Promise((resolve, reject) => {

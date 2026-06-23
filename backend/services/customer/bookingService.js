@@ -223,7 +223,14 @@ class BookingService {
     try {
       const bookingLink = await BookingLink.findByPk(data.booking_link_id);
       if (!bookingLink) throw new Error('Booking link not found');
-      if (bookingLink.is_used) throw new Error('Booking link has already been used');
+      
+      const bookingExists = await Booking.findOne({ where: { booking_link_id: data.booking_link_id } });
+      if (bookingExists || bookingLink.is_used) {
+        if (!bookingLink.is_used) {
+          await bookingLink.update({ is_used: true });
+        }
+        throw new Error('Booking link has already been used');
+      }
       if (bookingLink.expires_at && new Date(bookingLink.expires_at) < new Date()) {
         throw new Error('Booking link has expired');
       }
@@ -442,6 +449,14 @@ class BookingService {
 
       // 5. Hapus booking
       await booking.destroy({ transaction });
+
+      // Reset booking link is_used to false
+      if (booking.booking_link_id) {
+        await BookingLink.update(
+          { is_used: false },
+          { where: { id: booking.booking_link_id }, transaction }
+        );
+      }
 
       await transaction.commit();
     } catch (error) {

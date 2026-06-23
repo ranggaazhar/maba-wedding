@@ -310,8 +310,70 @@ class InvoiceService {
 
   async updateInvoice(id, data) {
     const invoice = await this.getInvoiceById(id, false);
-    await invoice.update(data);
-    return await this.getInvoiceById(id);
+    const transaction = await sequelize.transaction();
+    try {
+      await invoice.update({
+        customer_name:    data.customer_name,
+        customer_phone:   data.customer_phone,
+        customer_address: data.customer_address,
+        event_venue:      data.event_venue,
+        event_date:       data.event_date,
+        event_type:       data.event_type,
+        total:            data.total || 0,
+        down_payment:     data.down_payment || 0,
+        status:           data.status || invoice.status,
+        issue_date:       data.issue_date,
+        due_date:         data.due_date,
+        notes:            data.notes,
+        admin_notes:      data.admin_notes,
+        payment_terms:    data.payment_terms
+      }, { transaction });
+
+      if (data.items) {
+        // Hapus item lama
+        await InvoiceItem.destroy({ where: { invoice_id: id }, transaction });
+        
+        // Buat item baru
+        if (data.items.length > 0) {
+          await InvoiceItem.bulkCreate(
+            data.items.map((item, i) => ({
+              invoice_id:    id,
+              item_name:     item.item_name,
+              item_type:     item.item_type || 'item',
+              description:   item.description,
+              quantity:      item.quantity || 1,
+              unit_price:    item.unit_price,
+              subtotal:      item.subtotal,
+              project_id:    item.project_id || null,
+              property_id:   item.property_id || null,
+              display_order: item.display_order ?? i
+            })),
+            { transaction }
+          );
+        }
+      }
+
+      await transaction.commit();
+
+      // Automatically regenerate PDF on update to ensure file is kept in sync on disk
+      try {
+        const updatedInvoice = await this.getInvoiceById(id, true);
+        const pdfPath = await invoicePdfService.generateInvoicePdf(updatedInvoice);
+        const normalized = pdfPath.replace(/\\/g, '/');
+        const splitResult = normalized.split('/uploads/');
+        const pdfRelative = splitResult.length > 1 ? `uploads/${splitResult[1]}` : normalized;
+        
+        // Update pdf_url on database
+        await Invoice.update({ pdf_url: pdfRelative }, { where: { id } });
+      } catch (pdfErr) {
+        console.error('Failed to auto-regenerate PDF on invoice update:', pdfErr.message);
+      }
+
+      return await this.getInvoiceById(id);
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async deleteInvoice(id) {

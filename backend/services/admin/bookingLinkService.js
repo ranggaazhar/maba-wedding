@@ -163,8 +163,12 @@ class BookingLinkService {
   async validateBookingLink(token) {
     const bookingLink = await this.getBookingLinkByToken(token);
     
-    // Check if already used
-    if (bookingLink.is_used) {
+    // Check if already used or booking exists in database
+    const bookingExists = await Booking.findOne({ where: { booking_link_id: bookingLink.id } });
+    if (bookingExists || bookingLink.is_used) {
+      if (!bookingLink.is_used) {
+        await bookingLink.update({ is_used: true });
+      }
       throw new Error('This booking link has already been used');
     }
     
