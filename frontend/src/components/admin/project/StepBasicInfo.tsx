@@ -99,23 +99,9 @@ export function StepBasicInfo({ formData, updateFormData, errors, setErrors }: S
             <Input
               id="slug"
               value={formData.slug}
-              onChange={(e) => {
-                const sanitized = e.target.value
-                  .toLowerCase()
-                  .replace(/[^a-z0-9\s-]/g, '');
-                updateFormData({ slug: sanitized });
-                setErrors((prev) => ({ ...prev, slug: '' }));
-              }}
-              onBlur={(e) => {
-                const cleaned = e.target.value
-                  .trim()
-                  .replace(/\s+/g, '-')
-                  .replace(/-+/g, '-')
-                  .replace(/^-+|-+$/g, '');
-                updateFormData({ slug: cleaned });
-              }}
               placeholder="ocean-blue-elegance"
-              className="w-full pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
+              className="w-full pr-4 py-2 bg-muted border border-transparent rounded-lg cursor-not-allowed text-muted-foreground text-sm"
+              readOnly
             />
             {errors.slug && <p className="text-sm text-destructive mt-1">{errors.slug}</p>}
           </div>

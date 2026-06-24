@@ -110,8 +110,9 @@ export default function PropertyForm() {
                 <Input
                   id="slug"
                   value={formData.slug}
-                  onChange={(e) => updateFormData("slug", e.target.value)}
                   placeholder="slug-property"
+                  className="bg-muted cursor-not-allowed text-muted-foreground"
+                  readOnly
                   required
                 />
                 <p className="text-xs text-muted-foreground">URL-friendly name (otomatis dibuat dari nama)</p>

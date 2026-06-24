@@ -121,8 +121,8 @@ export function PropertyCategoryDialog({
             <Input
               id="slug"
               {...register('slug', { required: 'Slug wajib diisi' })}
-              className="mt-1"
-              disabled={isLoading}
+              className="mt-1 bg-muted cursor-not-allowed text-muted-foreground"
+              readOnly
             />
             {errors.slug && <p className="text-sm text-destructive mt-1">{errors.slug.message}</p>}
           </div>

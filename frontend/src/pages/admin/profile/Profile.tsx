@@ -18,13 +18,6 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
-interface ApiError {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-}
 
 export default function Profile() {
   const navigate = useNavigate();

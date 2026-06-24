@@ -148,8 +148,8 @@ export function CategoryDialog({
                 },
               })}
               placeholder="wedding-set"
-              className="mt-1"
-              disabled={isLoading}
+              className="mt-1 bg-muted cursor-not-allowed text-muted-foreground"
+              readOnly
             />
             <p className="text-xs text-muted-foreground mt-1">
               URL-friendly identifier (huruf kecil, angka, dan tanda hubung)
