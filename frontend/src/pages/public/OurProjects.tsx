@@ -1,7 +1,7 @@
 // src/pages/OurProjects.tsx
 import { ImageWithFallback } from '@/components/fallbackimage/ImageWithFallback';
 import { Link } from 'react-router-dom';
-import { Search, Filter, ArrowRight } from 'lucide-react';
+import { Search, Filter, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useOurProjects } from '@/hooks/Customer/useOurProjects';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +83,7 @@ export function OurProjects() {
         </div>
       </section>
 
-     <section className="bg-white border-b border-[#E5E7EB] sticky top-20 z-40 shadow-sm -mt-16 relative">
+      <section className="bg-white border-b border-[#E5E7EB] sticky top-20 z-40 shadow-sm -mt-16">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             {/* Search Bar */}
@@ -205,14 +205,15 @@ export function OurProjects() {
 
               {/* ── Pagination ──────────────────────────────────────────── */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-12">
+                <div className="flex flex-wrap justify-center items-center gap-2 mt-12">
                   <Button
                     variant="outline"
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 h-auto border-2 border-[#A8DADC] text-[#457B9D] rounded-lg hover:bg-[#A8DADC] hover:text-white hover:border-[#A8DADC] transition-all disabled:opacity-40 font-sans"
+                    className="px-3 py-2 h-auto border-2 border-[#A8DADC] text-[#457B9D] rounded-lg hover:bg-[#A8DADC] hover:text-white hover:border-[#A8DADC] transition-all disabled:opacity-40 font-sans"
                   >
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
+                    <ChevronLeft className="w-4 h-4 sm:hidden" />
                   </Button>
 
                   {paginationRange.map((item, i) =>
@@ -223,7 +224,7 @@ export function OurProjects() {
                         key={item}
                         variant="ghost"
                         onClick={() => setCurrentPage(item as number)}
-                        className={`px-4 py-2 h-auto rounded-lg transition-all font-sans ${
+                        className={`px-3 py-2 h-auto rounded-lg transition-all font-sans ${
                           currentPage === item
                             ? 'bg-gradient-to-r from-[#457B9D] to-[#1D3557] text-white hover:text-white hover:opacity-90 shadow-lg'
                             : 'border-2 border-[#A8DADC] text-[#457B9D] hover:bg-[#A8DADC] hover:text-white'
@@ -238,9 +239,10 @@ export function OurProjects() {
                     variant="outline"
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 h-auto border-2 border-[#A8DADC] text-[#457B9D] rounded-lg hover:bg-[#A8DADC] hover:text-white hover:border-[#A8DADC] transition-all disabled:opacity-40 font-sans"
+                    className="px-3 py-2 h-auto border-2 border-[#A8DADC] text-[#457B9D] rounded-lg hover:bg-[#A8DADC] hover:text-white hover:border-[#A8DADC] transition-all disabled:opacity-40 font-sans"
                   >
-                    Next
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-4 h-4 sm:hidden" />
                   </Button>
                 </div>
               )}

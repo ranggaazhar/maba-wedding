@@ -153,17 +153,17 @@ export function Home() {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <div className="flex items-center gap-12 pt-8">
+              <div className="flex flex-wrap items-center gap-6 sm:gap-12 pt-8">
                 <div>
                   <p className="text-4xl text-[#1D3557] font-semibold mb-1">200+</p>
                   <p className="text-[#6B7280] text-sm">Projects Done</p>
                 </div>
-                <Separator orientation="vertical" className="h-16 bg-[#A8DADC]" />
+                <Separator orientation="vertical" className="h-16 bg-[#A8DADC] hidden sm:block" />
                 <div>
                   <p className="text-4xl text-[#1D3557] font-semibold mb-1">100+</p>
                   <p className="text-[#6B7280] text-sm">Happy Clients</p>
                 </div>
-                <Separator orientation="vertical" className="h-16 bg-[#A8DADC]" />
+                <Separator orientation="vertical" className="h-16 bg-[#A8DADC] hidden sm:block" />
                 <div>
                   <p className="text-4xl text-[#1D3557] font-semibold mb-1">5★</p>
                   <p className="text-[#6B7280] text-sm">Rating</p>
@@ -176,12 +176,12 @@ export function Home() {
                 <img
                   src={hero1}
                   alt="Romantic Wedding Decoration"
-                  className="w-full h-[500px] object-cover"
+                  className="w-full h-[320px] sm:h-[500px] object-cover"
                 />
                 <div className="absolute top-0 left-0 w-20 h-20 border-t-4 border-l-4 border-[#A8DADC] rounded-tl-3xl" />
                 <div className="absolute bottom-0 right-0 w-20 h-20 border-b-4 border-r-4 border-[#457B9D] rounded-br-3xl" />
               </div>
-              <Card className="absolute -bottom-6 -right-6 shadow-2xl border border-[#A8DADC]/30">
+              <Card className="absolute -bottom-6 right-2 sm:-right-6 shadow-2xl border border-[#A8DADC]/30">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
                     <Avatar className="w-12 h-12 bg-gradient-to-br from-[#A8DADC] to-[#457B9D]">
@@ -318,7 +318,7 @@ export function Home() {
               size="icon"
               onClick={() => setCurrentPortfolio(p => Math.max(0, p - 1))}
               disabled={currentPortfolio === 0}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-14 h-14 rounded-full shadow-2xl hover:bg-[#A8DADC] hover:text-white transition-all duration-300 disabled:opacity-40 group"
+              className="hidden md:inline-flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-14 h-14 rounded-full shadow-2xl hover:bg-[#A8DADC] hover:text-white transition-all duration-300 disabled:opacity-40 group"
             >
               <ChevronLeft className="w-6 h-6 text-[#1D3557] group-hover:text-white" />
             </Button>
@@ -327,7 +327,7 @@ export function Home() {
               size="icon"
               onClick={() => setCurrentPortfolio(p => Math.min(maxPortfolio, p + 1))}
               disabled={currentPortfolio >= maxPortfolio}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-14 h-14 rounded-full shadow-2xl hover:bg-[#A8DADC] hover:text-white transition-all duration-300 disabled:opacity-40 group"
+              className="hidden md:inline-flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-14 h-14 rounded-full shadow-2xl hover:bg-[#A8DADC] hover:text-white transition-all duration-300 disabled:opacity-40 group"
             >
               <ChevronRight className="w-6 h-6 text-[#1D3557] group-hover:text-white" />
             </Button>
@@ -438,7 +438,7 @@ export function Home() {
                     "{activeTestimonial?.review_text}"
                   </p>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <h4 className="!text-white font-semibold text-lg">
                         {activeTestimonial?.customer_name}
@@ -450,7 +450,7 @@ export function Home() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 self-end sm:self-auto">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -611,15 +611,17 @@ export function Home() {
                   Hubungi kami hari ini untuk konsultasi gratis
                 </p>
               </div>
-              <Link
-                to="/projects"
+              <a
+                href="https://wa.me/6281215061622?text=Halo%20Maba%20Dekorasi%2C%20saya%20ingin%20berkonsultasi%20mengenai%20dekorasi%20pernikahan."
+                target="_blank"
+                rel="noopener noreferrer"
                 className="px-10 py-4 bg-gradient-to-r from-[#457B9D] to-[#1D3557] !text-white rounded-full hover:shadow-2xl transition-all hover:scale-105 group"
               >
                 <span className="inline-flex items-center gap-2">
                   Mulai Konsultasi
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
-              </Link>
+              </a>
             </div>
           </div>
         </div>

@@ -1,5 +1,21 @@
-import { Heart, Instagram, Facebook, Mail, Phone, MapPin } from 'lucide-react';
+import { Heart, Instagram, Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+function Tiktok(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  );
+}
 
 export function Footer() {
   return (
@@ -13,18 +29,18 @@ export function Footer() {
                 <Heart className="w-5 h-5 text-white fill-white" />
               </div>
               <span className="font-['Playfair_Display']" style={{ fontSize: '1.25rem', fontWeight: 600 }}>
-                Ethereal Moments
+                Maba Dekorasi
               </span>
             </div>
             <p className="text-[#A8DADC] text-sm leading-relaxed">
-              Crafting timeless elegance for your most precious moments. Every detail tells your love story.
+              Every love story deserves a beautiful wedding decoration
             </p>
             <div className="flex gap-3">
               <a href="#" className="w-9 h-9 bg-white/10 hover:bg-[#A8DADC] rounded-full flex items-center justify-center transition-all hover:scale-110">
                 <Instagram className="w-4 h-4" />
               </a>
               <a href="#" className="w-9 h-9 bg-white/10 hover:bg-[#A8DADC] rounded-full flex items-center justify-center transition-all hover:scale-110">
-                <Facebook className="w-4 h-4" />
+                <Tiktok className="w-4 h-4" />
               </a>
             </div>
           </div>
@@ -57,22 +73,18 @@ export function Footer() {
             <ul className="space-y-3 !text-[#A8DADC] text-sm">
               <li className="flex items-start gap-2">
                 <Phone className="w-4 h-4 mt-1 flex-shrink-0" />
-                <span>+62 812-3456-7890</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Mail className="w-4 h-4 mt-1 flex-shrink-0" />
-                <span>hello@etherealmoments.com</span>
+                <span>081215061622</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                <span>Jakarta, Indonesia</span>
+                <span>Kulon Progo, Yogyakarta</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-[#A8DADC] text-sm">
-          <p>&copy; 2025 Ethereal Moments. All rights reserved. Crafted with love for your special day.</p>
+          <p>&copy; 2025 Maba Dekorasi. Every love story deserves a beautiful wedding decoration.</p>
         </div>
       </div>
     </footer>

@@ -51,12 +51,14 @@ export function Navbar() {
                 )}
               </Link>
             ))}
-            <Link
-              to="/projects"
+            <a
+              href="https://wa.me/6281215061622?text=Halo%20Maba%20Dekorasi%2C%20saya%20ingin%20berkonsultasi%20mengenai%20dekorasi%20pernikahan."
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-6 py-2.5 bg-gradient-to-r from-[#457B9D] to-[#1D3557] !text-white rounded-full hover:shadow-lg transition-all hover:scale-105"
             >
               Konsultasi
-            </Link>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,13 +91,15 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Link
-              to="/projects"
+            <a
+              href="https://wa.me/6281215061622?text=Halo%20Maba%20Dekorasi%2C%20saya%20ingin%20berkonsultasi%20mengenai%20dekorasi%20pernikahan."
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
               className="w-full text-center px-6 py-2.5 bg-gradient-to-r from-[#457B9D] to-[#1D3557] !text-white rounded-full hover:shadow-lg transition-all"
             >
               Konsultasi
-            </Link>
+            </a>
           </div>
         </div>
       )}

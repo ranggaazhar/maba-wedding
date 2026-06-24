@@ -64,7 +64,7 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
               <h4 className="font-semibold mb-3">Property Terpilih</h4>
               <div className="space-y-3">
                 {properties.map((prop, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 bg-background rounded-lg">
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-background rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium">{prop.property_name}</p>
                       <p className="text-sm text-muted-foreground">{prop.property_category}</p>
@@ -73,7 +73,7 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
                         Rp {Number(prop.subtotal).toLocaleString("id-ID")}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 self-end sm:self-auto">
                       <Button
                         variant="outline"
                         size="icon"
