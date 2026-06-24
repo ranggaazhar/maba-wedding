@@ -147,8 +147,11 @@ export default function CreateBookingLink() {
                 id="customer_phone"
                 value={formData.customer_phone}
                 onChange={(e) => {
-                  setFormData(prev => ({ ...prev, customer_phone: e.target.value }));
-                  if (errors.customer_phone) setErrors(prev => ({ ...prev, customer_phone: "" }));
+                  const val = e.target.value.replace(/\D/g, "");
+                  if (val.length <= 13) {
+                    setFormData(prev => ({ ...prev, customer_phone: val }));
+                    if (errors.customer_phone) setErrors(prev => ({ ...prev, customer_phone: "" }));
+                  }
                 }}
                 placeholder="08123456789"
                 className={`bg-background ${errors.customer_phone ? 'border-destructive' : ''}`}

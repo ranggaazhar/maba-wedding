@@ -188,8 +188,13 @@ export default function InvoiceForm() {
               <Label>No. Telepon <span className="text-destructive">*</span></Label>
               <Input
                 value={customerPhone}
-                onChange={e => setCustomerPhone(e.target.value)}
-                placeholder="0812-xxxx-xxxx"
+                onChange={e => {
+                  const val = e.target.value.replace(/\D/g, "");
+                  if (val.length <= 13) {
+                    setCustomerPhone(val);
+                  }
+                }}
+                placeholder="08123456789"
                 className="bg-muted/30"
               />
             </div>

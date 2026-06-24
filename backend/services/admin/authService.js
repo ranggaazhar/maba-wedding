@@ -12,16 +12,16 @@ class AuthService {
       });
       
       if (!admin) {
-        throw new Error('Invalid credentials');
+        throw new Error('Email tidak terdaftar');
       }
 
       if (!admin.is_active) {
-        throw new Error('Account is not active. Please contact administrator.');
+        throw new Error('Akun tidak aktif. Silakan hubungi administrator.');
       }
       const isPasswordValid = await bcrypt.compare(password, admin.password);
       
       if (!isPasswordValid) {
-        throw new Error('Invalid credentials');
+        throw new Error('Password salah');
       }
       const token = this.generateToken(admin.id);
       return {
@@ -139,13 +139,13 @@ class AuthService {
       const isPasswordValid = await bcrypt.compare(currentPassword, admin.password);
       
       if (!isPasswordValid) {
-        throw new Error('Current password is incorrect');
+        throw new Error('Password saat ini salah');
       }
 
       // Check if new password is same as current
       const isSamePassword = await bcrypt.compare(newPassword, admin.password);
       if (isSamePassword) {
-        throw new Error('New password must be different from current password');
+        throw new Error('Password baru tidak boleh sama dengan password saat ini');
       }
 
       // Hash new password with increased salt rounds

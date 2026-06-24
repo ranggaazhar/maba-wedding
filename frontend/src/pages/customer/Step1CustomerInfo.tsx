@@ -73,7 +73,12 @@ export default function Step1CustomerInfo({ formData, setFormData, onNext }: Ste
             id="customer_phone"
             type="tel"
             value={formData.customer_phone}
-            onChange={(e) => setFormData(prev => ({ ...prev, customer_phone: e.target.value }))}
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, "");
+              if (val.length <= 13) {
+                setFormData(prev => ({ ...prev, customer_phone: val }));
+              }
+            }}
             placeholder="08123456789"
             required
           />

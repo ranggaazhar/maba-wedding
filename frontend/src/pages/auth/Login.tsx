@@ -18,7 +18,7 @@ export default function Login() {
     email: '',
     password: '',
   });
-  const [showPassword,] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -26,15 +26,15 @@ export default function Login() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email wajib diisi';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = 'Format email salah';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Password wajib diisi';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Password minimal 6 karakter';
     }
 
     setErrors(newErrors);
@@ -62,27 +62,42 @@ export default function Login() {
         setAuth(response.data.admin, response.data.token);
         
         toast({
-          title: 'Login Successful',
-          description: `Welcome back, ${response.data.admin.name}!`,
+          title: 'Login Berhasil',
+          description: `Selamat datang kembali, ${response.data.admin.name}!`,
         });
 
         navigate('/dashboard');
       }
-    } catch (error) {
-      let errorMessage = 'Login failed. Please try again.';
+    } catch (error: any) {
+      let errorMessage = 'Login gagal. Silakan coba lagi.';
       
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
-        const apiError = error as { response?: { data?: { message?: string } } };
-        errorMessage = apiError.response?.data?.message || errorMessage;
+      if (error?.response?.status === 400 && error.response.data?.errors) {
+        const apiErrors = error.response.data.errors;
+        const newErrors: Record<string, string> = {};
+        apiErrors.forEach((err: { field: string; message: string }) => {
+          newErrors[err.field] = err.message;
+        });
+        setErrors(newErrors);
+        return;
       }
-      
-      toast({
-        title: 'Login Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      if (errorMessage === 'Email tidak terdaftar') {
+        setErrors(prev => ({ ...prev, email: 'Email tidak terdaftar' }));
+      } else if (errorMessage === 'Password salah') {
+        setErrors(prev => ({ ...prev, password: 'Password salah' }));
+      } else {
+        toast({
+          title: 'Login Gagal',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -135,6 +150,7 @@ export default function Login() {
                 />
                 <button
                   type="button"
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   disabled={isLoading}
                 >

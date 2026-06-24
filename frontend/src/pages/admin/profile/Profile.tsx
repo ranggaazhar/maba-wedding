@@ -51,16 +51,52 @@ export default function Profile() {
     confirm: false,
   });
 
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    
+    if (!profileData.name) {
+      newErrors.name = 'Nama wajib diisi';
+    }
+    if (!profileData.email) {
+      newErrors.email = 'Email wajib diisi';
+    } else if (!/\S+@\S+\.\S+/.test(profileData.email)) {
+      newErrors.email = 'Format email salah';
+    }
+    if (!profileData.phone) {
+      newErrors.phone = 'Nomor telepon wajib diisi';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setProfileErrors(newErrors);
+      return;
+    }
+
     try {
       setIsLoading(true);
+      setProfileErrors({});
       const response = await authApi.updateProfile(profileData);
       updateAdmin(response.data);
-      toast({ title: 'Success', description: response.message || 'Profile updated successfully' });
-    } catch (err: unknown) {
-      const error = err as ApiError;
-      toast({ title: 'Error', description: error.response?.data?.message || 'Failed', variant: 'destructive' });
+      toast({ title: 'Sukses', description: response.message || 'Profil berhasil diperbarui' });
+    } catch (err: any) {
+      if (err?.response?.status === 400 && err.response.data?.errors) {
+        const apiErrors = err.response.data.errors;
+        const targetErrors: Record<string, string> = {};
+        apiErrors.forEach((errorItem: any) => {
+          targetErrors[errorItem.field] = errorItem.message;
+        });
+        setProfileErrors(targetErrors);
+      } else {
+        const errMsg = err?.response?.data?.message || 'Gagal memperbarui profil';
+        if (errMsg.toLowerCase().includes('email')) {
+          setProfileErrors({ email: errMsg });
+        } else {
+          toast({ title: 'Gagal', description: errMsg, variant: 'destructive' });
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -68,19 +104,65 @@ export default function Profile() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordData.newPassword !== confirmPassword) {
-      toast({ title: 'Error', description: 'Passwords mismatch', variant: 'destructive' });
+    const newErrors: Record<string, string> = {};
+
+    if (!passwordData.currentPassword) {
+      newErrors.currentPassword = 'Password saat ini wajib diisi';
+    }
+
+    const newPass = passwordData.newPassword;
+    if (!newPass) {
+      newErrors.newPassword = 'Password baru wajib diisi';
+    } else {
+      if (newPass.length < 8) {
+        newErrors.newPassword = 'Password minimal 8 karakter';
+      } else if (!/[A-Z]/.test(newPass)) {
+        newErrors.newPassword = 'Password harus mengandung minimal 1 huruf besar';
+      } else if (!/\d/.test(newPass)) {
+        newErrors.newPassword = 'Password harus mengandung minimal 1 angka';
+      } else if (!/[^A-Za-z0-9]/.test(newPass)) {
+        newErrors.newPassword = 'Password harus mengandung minimal 1 simbol/tanda';
+      } else if (newPass === passwordData.currentPassword) {
+        newErrors.newPassword = 'Password baru tidak boleh sama dengan password saat ini';
+      }
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Konfirmasi password wajib diisi';
+    } else if (newPass !== confirmPassword) {
+      newErrors.confirmPassword = 'Konfirmasi password tidak cocok';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setPasswordErrors(newErrors);
       return;
     }
+
     try {
       setIsLoading(true);
+      setPasswordErrors({});
       await authApi.changePassword(passwordData);
-      toast({ title: 'Success', description: 'Password changed' });
+      toast({ title: 'Sukses', description: 'Password berhasil diubah' });
       setPasswordData({ currentPassword: '', newPassword: '' });
       setConfirmPassword('');
-    } catch (err: unknown) {
-      const error = err as ApiError;
-      toast({ title: 'Error', description: error.response?.data?.message || 'Failed', variant: 'destructive' });
+    } catch (err: any) {
+      if (err?.response?.status === 400 && err.response.data?.errors) {
+        const apiErrors = err.response.data.errors;
+        const targetErrors: Record<string, string> = {};
+        apiErrors.forEach((errorItem: any) => {
+          targetErrors[errorItem.field] = errorItem.message;
+        });
+        setPasswordErrors(targetErrors);
+      } else {
+        const errMsg = err?.response?.data?.message || 'Gagal mengubah password';
+        if (errMsg === 'Password saat ini salah') {
+          setPasswordErrors({ currentPassword: 'Password saat ini salah' });
+        } else if (errMsg === 'Password baru tidak boleh sama dengan password saat ini') {
+          setPasswordErrors({ newPassword: 'Password baru tidak boleh sama dengan password saat ini' });
+        } else {
+          toast({ title: 'Gagal', description: errMsg, variant: 'destructive' });
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -189,11 +271,20 @@ export default function Profile() {
                         <input
                           type="text"
                           value={profileData.name}
-                          onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                          className="w-full pl-10 pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
+                          onChange={(e) => {
+                            setProfileData({ ...profileData, name: e.target.value });
+                            if (profileErrors.name) setProfileErrors({ ...profileErrors, name: '' });
+                          }}
+                          className={cn(
+                            "w-full pl-10 pr-4 py-2 bg-[hsl(var(--ocean-pale))] border rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm",
+                            profileErrors.name ? "border-red-500 focus:border-red-500" : "border-transparent"
+                          )}
                           placeholder="Your Name"
                         />
                       </div>
+                      {profileErrors.name && (
+                        <p className="text-xs text-red-500 mt-1 ml-1">{profileErrors.name}</p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -203,11 +294,20 @@ export default function Profile() {
                         <input
                           type="email"
                           value={profileData.email}
-                          onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                          className="w-full pl-10 pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
+                          onChange={(e) => {
+                            setProfileData({ ...profileData, email: e.target.value });
+                            if (profileErrors.email) setProfileErrors({ ...profileErrors, email: '' });
+                          }}
+                          className={cn(
+                            "w-full pl-10 pr-4 py-2 bg-[hsl(var(--ocean-pale))] border rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm",
+                            profileErrors.email ? "border-red-500 focus:border-red-500" : "border-transparent"
+                          )}
                           placeholder="Email"
                         />
                       </div>
+                      {profileErrors.email && (
+                        <p className="text-xs text-red-500 mt-1 ml-1">{profileErrors.email}</p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5 md:col-span-2">
@@ -217,11 +317,23 @@ export default function Profile() {
                         <input
                           type="tel"
                           value={profileData.phone}
-                          onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                          className="w-full pl-10 pr-4 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 13) {
+                              setProfileData({ ...profileData, phone: val });
+                              if (profileErrors.phone) setProfileErrors({ ...profileErrors, phone: '' });
+                            }
+                          }}
+                          className={cn(
+                            "w-full pl-10 pr-4 py-2 bg-[hsl(var(--ocean-pale))] border rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm",
+                            profileErrors.phone ? "border-red-500 focus:border-red-500" : "border-transparent"
+                          )}
                           placeholder="Phone"
                         />
                       </div>
+                      {profileErrors.phone && (
+                        <p className="text-xs text-red-500 mt-1 ml-1">{profileErrors.phone}</p>
+                      )}
                     </div>
                   </div>
 
@@ -253,9 +365,14 @@ export default function Profile() {
                         <input
                           type={showPasswords.current ? 'text' : 'password'}
                           value={passwordData.currentPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                          className="w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white transition-all outline-none text-sm"
-                          required
+                          onChange={(e) => {
+                            setPasswordData({ ...passwordData, currentPassword: e.target.value });
+                            if (passwordErrors.currentPassword) setPasswordErrors({ ...passwordErrors, currentPassword: '' });
+                          }}
+                          className={cn(
+                            "w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border rounded-lg focus:bg-white transition-all outline-none text-sm",
+                            passwordErrors.currentPassword ? "border-red-500 focus:border-red-500" : "border-transparent"
+                          )}
                         />
                         <button
                           type="button"
@@ -265,6 +382,9 @@ export default function Profile() {
                           {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                      {passwordErrors.currentPassword && (
+                        <p className="text-xs text-red-500 mt-1 ml-1">{passwordErrors.currentPassword}</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -275,9 +395,14 @@ export default function Profile() {
                           <input
                             type={showPasswords.new ? 'text' : 'password'}
                             value={passwordData.newPassword}
-                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                            className="w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white text-sm outline-none"
-                            required
+                            onChange={(e) => {
+                              setPasswordData({ ...passwordData, newPassword: e.target.value });
+                              if (passwordErrors.newPassword) setPasswordErrors({ ...passwordErrors, newPassword: '' });
+                            }}
+                            className={cn(
+                              "w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border rounded-lg focus:bg-white text-sm outline-none",
+                              passwordErrors.newPassword ? "border-red-500 focus:border-red-500" : "border-transparent"
+                            )}
                           />
                           <button
                             type="button"
@@ -287,6 +412,9 @@ export default function Profile() {
                             {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
+                        {passwordErrors.newPassword && (
+                          <p className="text-xs text-red-500 mt-1 ml-1">{passwordErrors.newPassword}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-[hsl(var(--muted-foreground))] uppercase tracking-wider ml-1">Confirm New Password</label>
@@ -295,9 +423,14 @@ export default function Profile() {
                           <input
                             type={showPasswords.confirm ? 'text' : 'password'}
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white text-sm outline-none"
-                            required
+                            onChange={(e) => {
+                              setConfirmPassword(e.target.value);
+                              if (passwordErrors.confirmPassword) setPasswordErrors({ ...passwordErrors, confirmPassword: '' });
+                            }}
+                            className={cn(
+                              "w-full pl-10 pr-10 py-2 bg-[hsl(var(--ocean-pale))] border rounded-lg focus:bg-white text-sm outline-none",
+                              passwordErrors.confirmPassword ? "border-red-500 focus:border-red-500" : "border-transparent"
+                            )}
                           />
                           <button
                             type="button"
@@ -307,6 +440,9 @@ export default function Profile() {
                             {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
+                        {passwordErrors.confirmPassword && (
+                          <p className="text-xs text-red-500 mt-1 ml-1">{passwordErrors.confirmPassword}</p>
+                        )}
                       </div>
                     </div>
                   </div>
