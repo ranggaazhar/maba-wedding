@@ -10,6 +10,8 @@ interface CurrencyInputProps
   onChange: (rawValue: string) => void;
   /** Prefix currency, default "Rp" */
   prefix?: string;
+  /** Maksimal jumlah digit angka */
+  maxDigits?: number;
 }
 
 /**
@@ -26,7 +28,7 @@ interface CurrencyInputProps
  * />
  */
 const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
-  ({ className, value, onChange, prefix = 'Rp', placeholder, ...props }, ref) => {
+  ({ className, value, onChange, prefix = 'Rp', placeholder, maxDigits, ...props }, ref) => {
     // Format angka dengan titik ribuan: 1500000 → "1.500.000"
     const formatDisplay = (raw: string | number | undefined): string => {
       if (raw === undefined || raw === null || raw === '') return '';
@@ -72,8 +74,9 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
       // Hapus semua karakter bukan digit
       const rawDigits = inputVal.replace(/\D/g, '');
 
-      // Batasi panjang maksimal (15 digit = lebih dari cukup untuk Rupiah)
-      if (rawDigits.length > 15) return;
+      // Batasi panjang maksimal (default 15 digit jika tidak disediakan)
+      const limit = maxDigits ?? 15;
+      if (rawDigits.length > limit) return;
 
       // Update display (dengan format titik)
       const formatted = formatDisplay(rawDigits);

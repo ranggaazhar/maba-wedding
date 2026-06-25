@@ -194,6 +194,14 @@ export function useCustomerBookingForm() {
 
   // ── Custom request helpers ────────────────────────────────────────────────
   const handleAddCustomRequest = () => {
+    const totalUploaded = Object.values(customRequestFiles).reduce(
+      (sum, files) => sum + (files?.length || 0),
+      0
+    );
+    if (totalUploaded >= 25) {
+      Swal.fire('Batas Maksimal', 'Total foto referensi sudah mencapai batas maksimal 25 gambar. Anda tidak dapat menambahkan custom request baru.', 'warning');
+      return;
+    }
     setCustomRequests((prev) => [
       ...prev,
       { title: '', description: '', color_theme: '#d4a017', reference_images: [] },

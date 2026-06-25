@@ -142,6 +142,7 @@ export function StepBasicInfo({ formData, updateFormData, errors, setErrors }: S
                 updateFormData({ price: raw });
                 setErrors((prev) => ({ ...prev, price: '' }));
               }}
+              maxDigits={8}
               placeholder="Contoh: 15.000.000"
               className="w-full bg-[hsl(var(--ocean-pale))] border border-transparent rounded-lg focus:bg-white focus:border-[hsl(var(--ocean-light))] transition-all outline-none text-sm"
             />

@@ -308,7 +308,14 @@ export default function Step2CustomRequest({
       <Button
         variant="outline"
         className="w-full border-dashed border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400"
-        onClick={onAdd}
+        onClick={() => {
+          if (totalUploaded >= 25) {
+            alert("Maksimal total seluruh foto untuk semua request adalah 25 foto. Anda tidak bisa menambahkan custom request baru.");
+            return;
+          }
+          onAdd();
+        }}
+        disabled={totalUploaded >= 25}
       >
         <Plus size={16} className="mr-2" />
         Tambah Custom Request

@@ -246,7 +246,8 @@ export default function Step4Payment({
               <Input
                 id="account_number"
                 value={paymentData.account_number}
-                onChange={(e) => setPaymentData({ ...paymentData, account_number: e.target.value.replace(/[^0-9]/g, '') })}
+                onChange={(e) => setPaymentData({ ...paymentData, account_number: e.target.value.replace(/[^0-9]/g, '').slice(0, 20) })}
+                maxLength={20}
                 placeholder="1234567890"
               />
             </div>

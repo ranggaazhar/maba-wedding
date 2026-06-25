@@ -158,6 +158,7 @@ export default function PropertyForm() {
                     id="price"
                     value={formData.price}
                     onChange={(val) => updateFormData("price", val)}
+                    maxDigits={7}
                     placeholder="Contoh: 500.000"
                     required
                   />
