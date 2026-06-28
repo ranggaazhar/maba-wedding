@@ -87,7 +87,7 @@ export function OurProjects() {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             {/* Search Bar */}
-            <div className="relative flex-1 w-full max-w-md">
+            <div className="relative w-full md:w-80 lg:w-96 flex-shrink-0">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B7280]" />
               <input
                 type="text"

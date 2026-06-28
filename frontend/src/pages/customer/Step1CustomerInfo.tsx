@@ -203,7 +203,7 @@ export default function Step1CustomerInfo({ formData, setFormData, onNext }: Ste
 
       <div className="flex justify-end">
         <Button type="submit" size="lg">
-          Lanjut ke Pilih Model
+          Lanjut
           <ArrowRight size={18} className="ml-2" />
         </Button>
       </div>

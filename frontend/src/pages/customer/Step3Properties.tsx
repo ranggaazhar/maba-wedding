@@ -69,7 +69,7 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
                       <p className="font-medium">{prop.property_name}</p>
                       <p className="text-sm text-muted-foreground">{prop.property_category}</p>
                       <p className="text-sm text-primary font-semibold mt-1">
-                        Rp {Number(prop.price).toLocaleString("id-ID")} × {prop.quantity} = 
+                        Rp {Number(prop.price).toLocaleString("id-ID")} × {prop.quantity} =
                         Rp {Number(prop.subtotal).toLocaleString("id-ID")}
                       </p>
                     </div>
@@ -123,7 +123,7 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProperties.map(property => {
             const selectedProp = properties.find(p => p.property_id === property.id);
-            
+
             return (
               <Card key={property.id} className={`overflow-hidden ${selectedProp ? "ring-2 ring-primary" : ""}`}>
                 <div className="aspect-square overflow-hidden">
@@ -166,7 +166,7 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
           Kembali
         </Button>
         <Button onClick={onNext}>
-          Lanjut ke Pembayaran
+          Lanjut
           <ArrowRight size={18} className="ml-2" />
         </Button>
       </div>
