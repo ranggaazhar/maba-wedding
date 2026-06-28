@@ -77,7 +77,6 @@ class BookingService {
         model: BookingModel,
         as: 'models',
         include: [
-          { model: Category, as: 'category' },
           { model: Project, as: 'project' }
         ],
         separate: true,
@@ -125,7 +124,6 @@ class BookingService {
           model: BookingModel,
           as: 'models',
           include: [
-            { model: Category, as: 'category' },
             { 
               model: Project, 
               as: 'project',
@@ -178,7 +176,6 @@ class BookingService {
           model: BookingModel,
           as: 'models',
           include: [
-            { model: Category, as: 'category' },
             { 
               model: Project, 
               as: 'project',
@@ -273,7 +270,7 @@ class BookingService {
       if (hasModels) {
         const models = data.models.map((model, index) => ({
           booking_id:    booking.id,
-          category_id:   model.category_id,
+          project_category: model.project_category,
           project_id:    model.project_id,
           project_title: model.project_title,
           price:         model.price,
@@ -378,7 +375,7 @@ class BookingService {
         if (data.models.length > 0) {
           const modelEntries = data.models.map((m, index) => ({
             booking_id:    id,
-            category_id:   m.category_id,
+            project_category: m.project_category,
             project_id:    m.project_id,
             project_title: m.project_title,
             price:         m.price,

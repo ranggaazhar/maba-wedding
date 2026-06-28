@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'booking'
       });
       
-      // BookingModel belongs to Category
-      BookingModel.belongsTo(models.Category, {
-        foreignKey: 'category_id',
-        as: 'category'
-      });
+      // BookingModel belongs to Category (Removed due to Snapshot pattern)
+      // BookingModel.belongsTo(models.Category, {
+      //   foreignKey: 'category_id',
+      //   as: 'category'
+      // });
       
       // BookingModel belongs to Project
       BookingModel.belongsTo(models.Project, {
@@ -36,9 +36,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    category_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false
+    project_category: {
+      type: DataTypes.STRING(100),
+      allowNull: true
     },
     project_id: {
       type: DataTypes.INTEGER,

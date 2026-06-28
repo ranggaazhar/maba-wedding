@@ -179,8 +179,8 @@ const submitPaymentValidation = [
 
 const createBookingModelValidation = [
   param('bookingId').isInt({ min: 1 }).withMessage('Invalid booking ID'),
-  body('category_id').notEmpty().withMessage('Category ID is required')
-    .isInt({ min: 1 }).withMessage('Invalid category ID'),
+  body('project_category').optional().trim()
+    .isLength({ max: 100 }).withMessage('Project category must not exceed 100 characters'),
   body('project_id').notEmpty().withMessage('Project ID is required')
     .isInt({ min: 1 }).withMessage('Invalid project ID'),
   body('project_title').trim()

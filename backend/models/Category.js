@@ -10,10 +10,10 @@ module.exports = (sequelize, DataTypes) => {
         as: 'projects'
       });
 
-      Category.hasMany(models.BookingModel, {
-        foreignKey: 'category_id',
-        as: 'bookingModels'
-      });
+      // Category.hasMany(models.BookingModel, {
+      //   foreignKey: 'category_id',
+      //   as: 'bookingModels'
+      // });
     }
   }
 
