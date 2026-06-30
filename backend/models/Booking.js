@@ -5,6 +5,10 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Booking extends Model {
     static associate(models) {
+      Booking.belongsTo(models.Customer, {
+        foreignKey: 'customer_id',
+        as: 'customer'
+      });
       Booking.belongsTo(models.BookingLink, {
         foreignKey: 'booking_link_id',
         as: 'bookingLink'
@@ -32,6 +36,19 @@ module.exports = (sequelize, DataTypes) => {
         as: 'customRequests',
         onDelete: 'CASCADE'
       });
+
+      // Add defaultScope to always include Customer
+      Booking.addScope('defaultScope', {
+        include: [{ model: models.Customer, as: 'customer' }]
+      }, { override: true });
+    }
+
+    toJSON() {
+      const values = { ...this.get() };
+      values.customer_name = this.customer ? this.customer.name : null;
+      values.customer_phone = this.customer ? this.customer.phone : null;
+      values.full_address = this.customer ? this.customer.address : null;
+      return values;
     }
   }
 
@@ -41,6 +58,14 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
+    },
+    customer_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'customers',
+        key: 'id'
+      }
     },
     booking_link_id: {
       type: DataTypes.INTEGER,
@@ -53,16 +78,22 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     customer_name: {
-      type: DataTypes.STRING(100),
-      allowNull: false
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.customer ? this.customer.name : null;
+      }
     },
     customer_phone: {
-      type: DataTypes.STRING(20),
-      allowNull: false
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.customer ? this.customer.phone : null;
+      }
     },
     full_address: {
-      type: DataTypes.TEXT,
-      allowNull: false
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.customer ? this.customer.address : null;
+      }
     },
     event_venue: {
       type: DataTypes.TEXT,

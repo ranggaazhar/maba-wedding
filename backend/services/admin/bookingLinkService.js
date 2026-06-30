@@ -1,4 +1,4 @@
-const { BookingLink, Booking, Admin, sequelize } = require('../../models');
+const { BookingLink, Booking, Admin, Customer, sequelize } = require('../../models');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 
@@ -65,8 +65,8 @@ class BookingLinkService {
     
     if (filters.search) {
       const searchOr = [
-        { customer_name: { [Op.like]: `%${filters.search}%` } },
-        { customer_phone: { [Op.like]: `%${filters.search}%` } },
+        { '$customer.name$': { [Op.like]: `%${filters.search}%` } },
+        { '$customer.phone$': { [Op.like]: `%${filters.search}%` } },
         { token: { [Op.like]: `%${filters.search}%` } }
       ];
       // Gabungkan dengan Op.and yang sudah ada jika ada, atau tambah baru
@@ -149,10 +149,21 @@ class BookingLinkService {
     // Set default expiration to 30 days if not provided
     const expiresAt = data.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     
+    let customerId = null;
+    if (data.customer_phone) {
+      let customer = await Customer.findOne({ where: { phone: data.customer_phone } });
+      if (!customer) {
+        customer = await Customer.create({
+          name: data.customer_name || '',
+          phone: data.customer_phone
+        });
+      }
+      customerId = customer.id;
+    }
+
     const bookingLink = await BookingLink.create({
       token,
-      customer_name: data.customer_name,
-      customer_phone: data.customer_phone,
+      customer_id: customerId,
       expires_at: expiresAt,
       created_by: adminId || data.created_by
     });
@@ -168,10 +179,30 @@ class BookingLinkService {
       throw new Error('Cannot update a used booking link');
     }
     
+    let customerId = bookingLink.customer_id;
+    if (data.customer_phone) {
+      let customer = await Customer.findOne({ where: { phone: data.customer_phone } });
+      if (!customer) {
+        customer = await Customer.create({
+          name: data.customer_name || (bookingLink.customer ? bookingLink.customer.name : ''),
+          phone: data.customer_phone
+        });
+      } else {
+        await customer.update({
+          name: data.customer_name || customer.name
+        });
+      }
+      customerId = customer.id;
+    }
+
     const updateData = { ...data };
     if (updateData.expires_at === '') {
       updateData.expires_at = null;
     }
+    
+    updateData.customer_id = customerId;
+    delete updateData.customer_name;
+    delete updateData.customer_phone;
     
     await bookingLink.update(updateData);
     return bookingLink;
@@ -184,7 +215,31 @@ class BookingLinkService {
       throw new Error('Cannot delete a used booking link');
     }
     
-    await bookingLink.destroy();
+    const customerId = bookingLink.customer_id;
+    const transaction = await sequelize.transaction();
+    try {
+      await bookingLink.destroy({ transaction });
+      
+      if (customerId) {
+        const otherBookingsCount = await Booking.count({
+          where: { customer_id: customerId },
+          transaction
+        });
+        const otherLinksCount = await BookingLink.count({
+          where: { customer_id: customerId },
+          transaction
+        });
+        if (otherBookingsCount === 0 && otherLinksCount === 0) {
+          await Customer.destroy({ where: { id: customerId }, transaction });
+          console.log(`Deleted orphan customer: ${customerId}`);
+        }
+      }
+      await transaction.commit();
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+    
     return { message: 'Booking link deleted successfully' };
   }
   

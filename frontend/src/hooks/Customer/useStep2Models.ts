@@ -43,7 +43,7 @@ export function useStep2Models(models: BookingModel[], setModels: (m: BookingMod
       return;
     }
     setModels([...models, {
-      category_id: project.category_id, project_id: project.id,
+      project_category: project.category?.name || 'Uncategorized', project_id: project.id,
       project_title: project.title, price: project.price || '0',
       notes: '', display_order: models.length,
     }]);

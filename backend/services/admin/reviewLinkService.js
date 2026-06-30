@@ -44,8 +44,8 @@ class ReviewLinkService {
     if (filters.search) {
       const searchOr = [
         { token: { [Op.like]: `%${filters.search}%` } },
-        { '$booking.customer_name$': { [Op.like]: `%${filters.search}%` } },
-        { '$booking.customer_phone$': { [Op.like]: `%${filters.search}%` } }
+        { '$booking.customer.name$': { [Op.like]: `%${filters.search}%` } },
+        { '$booking.customer.phone$': { [Op.like]: `%${filters.search}%` } }
       ];
       
       if (where[Op.and]) {
@@ -56,7 +56,11 @@ class ReviewLinkService {
     }
     
     const include = [
-      { model: Booking, as: 'booking' }
+      { 
+        model: Booking, 
+        as: 'booking',
+        include: [{ model: require('../../models').Customer, as: 'customer' }]
+      }
     ];
     
     if (filters.includeReview) {

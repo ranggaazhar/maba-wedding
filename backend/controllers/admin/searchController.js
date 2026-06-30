@@ -25,8 +25,8 @@ class SearchController {
         where: {
           [Op.or]: [
             { booking_code: { [Op.like]: `%${q}%` } },
-            { customer_name: { [Op.like]: `%${q}%` } },
-            { customer_phone: { [Op.like]: `%${q}%` } }
+            { '$customer.name$': { [Op.like]: `%${q}%` } },
+            { '$customer.phone$': { [Op.like]: `%${q}%` } }
           ]
         },
         limit: 5

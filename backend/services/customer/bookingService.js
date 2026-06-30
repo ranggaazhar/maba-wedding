@@ -1,4 +1,3 @@
-// services/customer/bookingService.js
 const { 
   Booking, 
   BookingLink, 
@@ -10,7 +9,8 @@ const {
   ProjectPhoto,
   Property,
   Invoice,
-  ReviewLink
+  ReviewLink,
+  Customer
 } = require('../../models');
 const { sequelize } = require('../../models');
 const { Op } = require('sequelize');
@@ -33,8 +33,8 @@ class BookingService {
     if (filters.search) {
       where[Op.or] = [
         { booking_code: { [Op.like]: `%${filters.search}%` } },
-        { customer_name: { [Op.like]: `%${filters.search}%` } },
-        { customer_phone: { [Op.like]: `%${filters.search}%` } }
+        { '$customer.name$': { [Op.like]: `%${filters.search}%` } },
+        { '$customer.phone$': { [Op.like]: `%${filters.search}%` } }
       ];
     }
     
@@ -249,12 +249,26 @@ class BookingService {
       if (dpAmount !== null && totalEstimate !== null && dpAmount > totalEstimate) {
         dpAmount = totalEstimate;
       }
+      // Cari atau buat data Customer berdasarkan nomor telepon
+      let customer = await Customer.findOne({ where: { phone: data.customer_phone }, transaction });
+      if (!customer) {
+        customer = await Customer.create({
+          name: data.customer_name,
+          phone: data.customer_phone,
+          address: data.full_address
+        }, { transaction });
+      } else {
+        // Update data jika ada perubahan nama/alamat
+        await customer.update({
+          name: data.customer_name,
+          address: data.full_address
+        }, { transaction });
+      }
+
       const booking = await Booking.create({
+        customer_id:      customer.id,
         booking_link_id:  data.booking_link_id,
         booking_code:     bookingCode,
-        customer_name:    data.customer_name,
-        customer_phone:   data.customer_phone,
-        full_address:     data.full_address,
         event_venue:      data.event_venue,
         event_date:       data.event_date,
         event_type:       data.event_type,
@@ -355,10 +369,28 @@ class BookingService {
         transaction
       });
 
+      // Update atau buat data Customer
+      let customerId = booking.customer_id;
+      const phoneInput = data.customer_phone || (booking.customer ? booking.customer.phone : null);
+      if (phoneInput) {
+        let customer = await Customer.findOne({ where: { phone: phoneInput }, transaction });
+        if (!customer) {
+          customer = await Customer.create({
+            name: data.customer_name || (booking.customer ? booking.customer.name : ''),
+            phone: phoneInput,
+            address: data.full_address || (booking.customer ? booking.customer.address : null)
+          }, { transaction });
+        } else {
+          await customer.update({
+            name: data.customer_name || customer.name,
+            address: data.full_address || customer.address
+          }, { transaction });
+        }
+        customerId = customer.id;
+      }
+
       await booking.update({
-        customer_name:   data.customer_name,
-        customer_phone:  data.customer_phone,
-        full_address:    data.full_address,
+        customer_id:     customerId,
         event_venue:     data.event_venue,
         event_date:      data.event_date,
         event_type:      data.event_type,
@@ -445,14 +477,31 @@ class BookingService {
       await BookingProperty.destroy({ where: { booking_id: id }, transaction });
 
       // 5. Hapus booking
+      const customerId = booking.customer_id;
       await booking.destroy({ transaction });
 
-      // Reset booking link is_used to false
+      // Reset booking link is_used to false dan lepaskan data customer
       if (booking.booking_link_id) {
         await BookingLink.update(
-          { is_used: false },
+          { is_used: false, customer_id: null },
           { where: { id: booking.booking_link_id }, transaction }
         );
+      }
+
+      // 6. Bersihkan data customer jika tidak ada booking atau booking link lain
+      if (customerId) {
+        const otherBookingsCount = await Booking.count({
+          where: { customer_id: customerId },
+          transaction
+        });
+        const otherLinksCount = await BookingLink.count({
+          where: { customer_id: customerId },
+          transaction
+        });
+        if (otherBookingsCount === 0 && otherLinksCount === 0) {
+          await Customer.destroy({ where: { id: customerId }, transaction });
+          console.log(`Deleted orphan customer: ${customerId}`);
+        }
       }
 
       await transaction.commit();

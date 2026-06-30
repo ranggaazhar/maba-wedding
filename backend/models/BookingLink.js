@@ -5,6 +5,10 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class BookingLink extends Model {
     static associate(models) {
+      BookingLink.belongsTo(models.Customer, {
+        foreignKey: 'customer_id',
+        as: 'customer'
+      });
       // BookingLink belongs to Admin
       BookingLink.belongsTo(models.Admin, {
         foreignKey: 'created_by',
@@ -17,7 +21,19 @@ module.exports = (sequelize, DataTypes) => {
         as: 'booking',
         onDelete: 'SET NULL'
       });
+
+      // Add defaultScope to always include Customer
+      BookingLink.addScope('defaultScope', {
+        include: [{ model: models.Customer, as: 'customer' }]
+      }, { override: true });
     } 
+
+    toJSON() {
+      const values = { ...this.get() };
+      values.customer_name = this.customer ? this.customer.name : null;
+      values.customer_phone = this.customer ? this.customer.phone : null;
+      return values;
+    }
   }
 
   BookingLink.init({
@@ -27,18 +43,30 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false
     },
+    customer_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'customers',
+        key: 'id'
+      }
+    },
     token: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
     customer_name: {
-      type: DataTypes.STRING(100),
-      allowNull: true
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.customer ? this.customer.name : null;
+      }
     },
     customer_phone: {
-      type: DataTypes.STRING(20),
-      allowNull: true
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.customer ? this.customer.phone : null;
+      }
     },
     expires_at: {
       type: DataTypes.DATE,

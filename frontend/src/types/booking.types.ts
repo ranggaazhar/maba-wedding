@@ -26,13 +26,12 @@ export interface BookingLink {
 export interface BookingModel {
   id?: number;
   booking_id?: number;
-  category_id: number;
+  project_category: string;
   project_id: number;
   project_title: string;
   price?: string;
   notes?: string;
   display_order?: number;
-  category?: { name: string };
   project?: {
     photos: ProjectPhoto[];
     thumbnail_url?: string;

@@ -30,24 +30,24 @@ class DashboardService {
       waitingConfirmation,
       confirmed,
     ] = await Promise.all([
-      Booking.count(),
-      Booking.count({ where: { submitted_at: { [Op.gte]: thisMonthStart } } }),
-      Booking.count({ where: { submitted_at: { [Op.between]: [lastMonthStart, lastMonthEnd] } } }),
-      Booking.count({ where: { payment_status: 'PENDING' } }),
-      Booking.count({ where: { payment_status: 'WAITING_CONFIRMATION' } }),
-      Booking.count({ where: { payment_status: 'CONFIRMED' } }),
+      Booking.unscoped().count(),
+      Booking.unscoped().count({ where: { submitted_at: { [Op.gte]: thisMonthStart } } }),
+      Booking.unscoped().count({ where: { submitted_at: { [Op.between]: [lastMonthStart, lastMonthEnd] } } }),
+      Booking.unscoped().count({ where: { payment_status: 'PENDING' } }),
+      Booking.unscoped().count({ where: { payment_status: 'WAITING_CONFIRMATION' } }),
+      Booking.unscoped().count({ where: { payment_status: 'CONFIRMED' } }),
     ]);
 
     // ── Revenue (dp_amount from CONFIRMED bookings) ────────────────
     const [revenueThisMonth, revenueLastMonth, totalDpConfirmed, totalEstimateAll] = await Promise.all([
-      Booking.sum('dp_amount', {
+      Booking.unscoped().sum('dp_amount', {
         where: { payment_status: 'CONFIRMED', confirmed_at: { [Op.gte]: thisMonthStart } },
       }),
-      Booking.sum('dp_amount', {
+      Booking.unscoped().sum('dp_amount', {
         where: { payment_status: 'CONFIRMED', confirmed_at: { [Op.between]: [lastMonthStart, lastMonthEnd] } },
       }),
-      Booking.sum('dp_amount', { where: { payment_status: 'CONFIRMED' } }),
-      Booking.sum('total_estimate'),
+      Booking.unscoped().sum('dp_amount', { where: { payment_status: 'CONFIRMED' } }),
+      Booking.unscoped().sum('total_estimate'),
     ]);
 
     // ── Project & Property counts ──────────────────────────────────
@@ -74,10 +74,10 @@ class DashboardService {
     twelveMonthsAgo.setDate(1);
     twelveMonthsAgo.setHours(0, 0, 0, 0);
 
-    const monthlyData = await Booking.findAll({
+    const monthlyData = await Booking.unscoped().findAll({
       attributes: [
         [fn('DATE_FORMAT', col('submitted_at'), '%Y-%m'), 'month'],
-        [fn('COUNT', col('id')), 'total'],
+        [fn('COUNT', col('Booking.id')), 'total'], // Qualify id with model name to avoid any ambiguity
         [fn('SUM', col('dp_amount')), 'revenue'],
       ],
       where: { submitted_at: { [Op.gte]: twelveMonthsAgo } },
