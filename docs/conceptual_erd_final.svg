@@ -1,0 +1,335 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="100%" height="100%" style="background-color: #ffffff;">
+  <!-- Styles -->
+  <style>
+    .line { stroke: #bdc3c7; stroke-width: 1.5; }
+    .entity { fill: #ebf5fb; stroke: #2980b9; stroke-width: 2; }
+    .relationship { fill: #fef9e7; stroke: #f39c12; stroke-width: 2; }
+    .attribute { fill: #f2f4f4; stroke: #7f8c8d; stroke-width: 1.5; }
+    .text { font-family: system-ui, -apple-system, sans-serif; font-size: 12px; text-anchor: middle; dominant-baseline: middle; fill: #2c3e50; }
+    .text-bold { font-weight: bold; font-size: 13px; }
+    .cardinality { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: bold; fill: #e74c3c; }
+  </style>
+
+  <!-- ==================== CONNECTIONS (LINES) ==================== -->
+  
+  <!-- Connections from Admin to Attributes -->
+  <line class="line" x1="700" y1="150" x2="580" y2="90" />
+  <line class="line" x1="700" y1="150" x2="640" y2="70" />
+  <line class="line" x1="700" y1="150" x2="700" y2="50" />
+  <line class="line" x1="700" y1="150" x2="760" y2="70" />
+  <line class="line" x1="700" y1="150" x2="820" y2="90" />
+
+  <!-- Connections from Booking to Attributes (10 Attributes) -->
+  <line class="line" x1="700" y1="750" x2="600" y2="830" />
+  <line class="line" x1="700" y1="750" x2="700" y2="850" />
+  <line class="line" x1="700" y1="750" x2="800" y2="830" />
+  <line class="line" x1="700" y1="750" x2="550" y2="730" />
+  <line class="line" x1="700" y1="750" x2="580" y2="780" />
+  <line class="line" x1="700" y1="750" x2="480" y2="760" />
+  <line class="line" x1="700" y1="750" x2="850" y2="730" />
+  <line class="line" x1="700" y1="750" x2="820" y2="780" />
+  <line class="line" x1="700" y1="750" x2="920" y2="760" />
+  <line class="line" x1="700" y1="750" x2="430" y2="820" />
+
+  <!-- Connections from Project to Attributes -->
+  <line class="line" x1="200" y1="450" x2="80" y2="350" />
+  <line class="line" x1="200" y1="450" x2="100" y2="400" />
+  <line class="line" x1="200" y1="450" x2="80" y2="450" />
+  <line class="line" x1="200" y1="450" x2="100" y2="500" />
+  <line class="line" x1="200" y1="450" x2="80" y2="550" />
+  <line class="line" x1="200" y1="450" x2="180" y2="530" />
+  <line class="line" x1="200" y1="450" x2="180" y2="370" />
+  <line class="line" x1="200" y1="450" x2="100" y2="300" />
+  <line class="line" x1="200" y1="450" x2="120" y2="600" />
+
+  <!-- Connections from Properti to Attributes -->
+  <line class="line" x1="500" y1="450" x2="440" y2="370" />
+  <line class="line" x1="500" y1="450" x2="500" y2="360" />
+  <line class="line" x1="500" y1="450" x2="560" y2="370" />
+  <line class="line" x1="500" y1="450" x2="440" y2="530" />
+  <line class="line" x1="500" y1="450" x2="500" y2="540" />
+  <line class="line" x1="500" y1="450" x2="560" y2="530" />
+
+  <!-- Connections from Invoice to Attributes -->
+  <line class="line" x1="900" y1="450" x2="740" y2="370" />
+  <line class="line" x1="900" y1="450" x2="840" y2="370" />
+  <line class="line" x1="900" y1="450" x2="900" y2="360" />
+  <line class="line" x1="900" y1="450" x2="960" y2="370" />
+  <line class="line" x1="900" y1="450" x2="840" y2="530" />
+  <line class="line" x1="900" y1="450" x2="900" y2="540" />
+  <line class="line" x1="900" y1="450" x2="960" y2="530" />
+
+  <!-- Connections from Review to Attributes -->
+  <line class="line" x1="1200" y1="450" x2="1320" y2="350" />
+  <line class="line" x1="1200" y1="450" x2="1300" y2="400" />
+  <line class="line" x1="1200" y1="450" x2="1320" y2="450" />
+  <line class="line" x1="1200" y1="450" x2="1300" y2="500" />
+  <line class="line" x1="1200" y1="450" x2="1320" y2="550" />
+
+  <!-- ==================== RELATIONSHIPS LINES ==================== -->
+  
+  <!-- Admin to Booking (Vertical Axis) -->
+  <line class="line" x1="700" y1="150" x2="700" y2="450" />
+  <line class="line" x1="700" y1="450" x2="700" y2="750" />
+
+  <!-- Admin to Left Entities (Catalog) -->
+  <line class="line" x1="700" y1="150" x2="450" y2="300" />
+  <line class="line" x1="450" y1="300" x2="200" y2="450" />
+
+  <line class="line" x1="700" y1="150" x2="600" y2="300" />
+  <line class="line" x1="600" y1="300" x2="500" y2="450" />
+
+  <!-- Admin to Right Entities (Outputs) -->
+  <line class="line" x1="700" y1="150" x2="800" y2="300" />
+  <line class="line" x1="800" y1="300" x2="900" y2="450" />
+
+  <line class="line" x1="700" y1="150" x2="950" y2="300" />
+  <line class="line" x1="950" y1="300" x2="1200" y2="450" />
+
+  <!-- Booking to Left Entities (Catalog) -->
+  <line class="line" x1="700" y1="750" x2="450" y2="600" />
+  <line class="line" x1="450" y1="600" x2="200" y2="450" />
+
+  <line class="line" x1="700" y1="750" x2="600" y2="600" />
+  <line class="line" x1="600" y1="600" x2="500" y2="450" />
+
+  <!-- Booking to Right Entities (Outputs) -->
+  <line class="line" x1="700" y1="750" x2="800" y2="600" />
+  <line class="line" x1="800" y1="600" x2="900" y2="450" />
+
+  <line class="line" x1="700" y1="750" x2="950" y2="600" />
+  <line class="line" x1="950" y1="600" x2="1200" y2="450" />
+
+
+  <!-- ==================== NODES (SHAPES & TEXTS) ==================== -->
+
+  <!-- Entitas (Persegi Panjang) -->
+  <rect class="entity" x="640" y="127.5" width="120" height="45" rx="5" ry="5" />
+  <text class="text text-bold" x="700" y="150">admin</text>
+
+  <rect class="entity" x="640" y="727.5" width="120" height="45" rx="5" ry="5" />
+  <text class="text text-bold" x="700" y="750">booking</text>
+
+  <rect class="entity" x="140" y="427.5" width="120" height="45" rx="5" ry="5" />
+  <text class="text text-bold" x="200" y="450">project</text>
+
+  <rect class="entity" x="440" y="427.5" width="120" height="45" rx="5" ry="5" />
+  <text class="text text-bold" x="500" y="450">properti</text>
+
+  <rect class="entity" x="840" y="427.5" width="120" height="45" rx="5" ry="5" />
+  <text class="text text-bold" x="900" y="450">invoice</text>
+
+  <rect class="entity" x="1140" y="427.5" width="120" height="45" rx="5" ry="5" />
+  <text class="text text-bold" x="1200" y="450">review</text>
+
+
+  <!-- Relasi (Belah Ketupat / Diamonds) -->
+  <!-- Admin to Booking (Vertical) -->
+  <polygon class="relationship" points="700,425 760,450 700,475 640,450" />
+  <text class="text" x="700" y="450">dikonfirmasi</text>
+
+  <!-- Admin to Left (Catalog) -->
+  <polygon class="relationship" points="450,275 510,300 450,325 390,300" />
+  <text class="text" x="450" y="300">dikelola</text>
+
+  <polygon class="relationship" points="600,275 660,300 600,325 540,300" />
+  <text class="text" x="600" y="300">dikelola</text>
+
+  <!-- Admin to Right (Outputs) -->
+  <polygon class="relationship" points="800,275 860,300 800,325 740,300" />
+  <text class="text" x="800" y="300">diterbitkan</text>
+
+  <polygon class="relationship" points="950,275 1010,300 950,325 890,300" />
+  <text class="text" x="950" y="300">dimoderasi</text>
+
+  <!-- Booking to Left (Catalog) -->
+  <polygon class="relationship" points="450,575 510,600 450,625 390,600" />
+  <text class="text" x="450" y="600">dipesan</text>
+
+  <polygon class="relationship" points="600,575 660,600 600,625 540,600" />
+  <text class="text" x="600" y="600">dipesan</text>
+
+  <!-- Booking to Right (Outputs) -->
+  <polygon class="relationship" points="800,575 860,600 800,625 740,600" />
+  <text class="text" x="800" y="600">dimiliki</text>
+
+  <polygon class="relationship" points="950,575 1010,600 950,625 890,600" />
+  <text class="text" x="950" y="600">ditulis</text>
+
+
+  <!-- ==================== ATTRIBUTES ==================== -->
+  
+  <!-- Atribut Admin -->
+  <ellipse class="attribute" cx="580" cy="90" rx="40" ry="18" />
+  <text class="text" x="580" y="90"><tspan style="text-decoration: underline;">id</tspan></text>
+
+  <ellipse class="attribute" cx="640" cy="70" rx="40" ry="18" />
+  <text class="text" x="640" y="70">nama</text>
+
+  <ellipse class="attribute" cx="700" cy="50" rx="40" ry="18" />
+  <text class="text" x="700" y="50">no_telp</text>
+
+  <ellipse class="attribute" cx="760" cy="70" rx="45" ry="18" />
+  <text class="text" x="760" y="70">email</text>
+
+  <ellipse class="attribute" cx="820" cy="90" rx="45" ry="18" />
+  <text class="text" x="820" y="90">kata_sandi</text>
+
+  <!-- Atribut Booking (9 Attributes) -->
+  <ellipse class="attribute" cx="600" cy="830" rx="45" ry="18" />
+  <text class="text" x="600" y="830">tgl_acara</text>
+
+  <ellipse class="attribute" cx="700" cy="850" rx="45" ry="18" />
+  <text class="text" x="700" y="850">lokasi_acara</text>
+
+  <ellipse class="attribute" cx="800" cy="830" rx="45" ry="18" />
+  <text class="text" x="800" y="830">jenis_acara</text>
+
+  <ellipse class="attribute" cx="550" cy="730" rx="60" ry="18" />
+  <text class="text" x="550" y="730">nama_pelanggan</text>
+
+  <ellipse class="attribute" cx="580" cy="780" rx="60" ry="18" />
+  <text class="text" x="580" y="780">no_telp_pelanggan</text>
+
+  <ellipse class="attribute" cx="480" cy="760" rx="60" ry="18" />
+  <text class="text" x="480" y="760">alamat_pelanggan</text>
+
+  <ellipse class="attribute" cx="850" cy="730" rx="50" ry="18" />
+  <text class="text" x="850" y="730">kode_booking</text>
+
+  <ellipse class="attribute" cx="820" cy="780" rx="50" ry="18" />
+  <text class="text" x="820" y="780">total_biaya</text>
+
+  <ellipse class="attribute" cx="920" cy="760" rx="45" ry="18" />
+  <text class="text" x="920" y="760">jumlah_dp</text>
+
+  <!-- Atribut Bernilai Banyak (List/Array) -->
+  <ellipse class="attribute" cx="430" cy="820" rx="65" ry="18" />
+  <ellipse class="attribute" cx="430" cy="820" rx="61" ry="14" />
+  <text class="text" x="430" y="820">permintaan_kustom</text>
+
+  <!-- Atribut Project -->
+  <ellipse class="attribute" cx="80" cy="350" rx="40" ry="18" />
+  <text class="text" x="80" y="350"><tspan style="text-decoration: underline;">id</tspan></text>
+
+  <ellipse class="attribute" cx="180" cy="370" rx="45" ry="18" />
+  <text class="text" x="180" y="370">kategori</text>
+
+  <ellipse class="attribute" cx="100" cy="400" rx="40" ry="18" />
+  <text class="text" x="100" y="400">nama_paket</text>
+
+  <ellipse class="attribute" cx="80" cy="450" rx="40" ry="18" />
+  <text class="text" x="80" y="450">slug</text>
+
+  <ellipse class="attribute" cx="100" cy="500" rx="40" ry="18" />
+  <text class="text" x="100" y="500">harga</text>
+
+  <ellipse class="attribute" cx="80" cy="550" rx="40" ry="18" />
+  <text class="text" x="80" y="550">tema</text>
+
+  <ellipse class="attribute" cx="180" cy="530" rx="50" ry="18" />
+  <text class="text" x="180" y="530">deskripsi</text>
+
+  <!-- Atribut Bernilai Banyak (List/Array) -->
+  <ellipse class="attribute" cx="100" cy="300" rx="45" ry="18" />
+  <ellipse class="attribute" cx="100" cy="300" rx="41" ry="14" />
+  <text class="text" x="100" y="300">foto_paket</text>
+
+  <ellipse class="attribute" cx="120" cy="600" rx="55" ry="18" />
+  <ellipse class="attribute" cx="120" cy="600" rx="51" ry="14" />
+  <text class="text" x="120" y="600">fasilitas_paket</text>
+
+  <!-- Atribut Properti -->
+  <ellipse class="attribute" cx="440" cy="370" rx="40" ry="18" />
+  <text class="text" x="440" y="370"><tspan style="text-decoration: underline;">id</tspan></text>
+
+  <ellipse class="attribute" cx="500" cy="360" rx="40" ry="18" />
+  <text class="text" x="500" y="360">nama_properti</text>
+
+  <ellipse class="attribute" cx="560" cy="370" rx="40" ry="18" />
+  <text class="text" x="560" y="370">slug</text>
+
+  <ellipse class="attribute" cx="440" cy="530" rx="40" ry="18" />
+  <text class="text" x="440" y="530">harga_sewa</text>
+
+  <ellipse class="attribute" cx="500" cy="540" rx="50" ry="18" />
+  <text class="text" x="500" y="540">deskripsi</text>
+
+  <ellipse class="attribute" cx="560" cy="530" rx="45" ry="18" />
+  <text class="text" x="560" y="530">kategori</text>
+
+  <!-- Atribut Invoice -->
+  <ellipse class="attribute" cx="740" cy="370" rx="65" ry="18" />
+  <ellipse class="attribute" cx="740" cy="370" rx="61" ry="14" />
+  <text class="text" x="740" y="370">rincian_barang_sewa</text>
+
+  <ellipse class="attribute" cx="840" cy="370" rx="40" ry="18" />
+  <text class="text" x="840" y="370"><tspan style="text-decoration: underline;">id</tspan></text>
+
+  <ellipse class="attribute" cx="900" cy="360" rx="65" ry="18" />
+  <text class="text" x="900" y="360">no_invoice</text>
+
+  <ellipse class="attribute" cx="960" cy="370" rx="40" ry="18" />
+  <text class="text" x="960" y="370">total_tagihan</text>
+
+  <ellipse class="attribute" cx="840" cy="530" rx="45" ry="18" />
+  <text class="text" x="840" y="530">tgl_terbit</text>
+
+  <ellipse class="attribute" cx="900" cy="540" rx="45" ry="18" />
+  <text class="text" x="900" y="540">tgl_jatuh_tempo</text>
+
+  <ellipse class="attribute" cx="960" cy="530" rx="40" ry="18" />
+  <text class="text" x="960" y="530">status</text>
+
+  <!-- Atribut Review -->
+  <ellipse class="attribute" cx="1320" cy="350" rx="40" ry="18" />
+  <text class="text" x="1320" y="350"><tspan style="text-decoration: underline;">id</tspan></text>
+
+  <ellipse class="attribute" cx="1300" cy="400" rx="60" ry="18" />
+  <text class="text" x="1300" y="400">nama_pelanggan</text>
+
+  <ellipse class="attribute" cx="1320" cy="450" rx="40" ry="18" />
+  <text class="text" x="1320" y="450">penilaian</text>
+
+  <ellipse class="attribute" cx="1300" cy="500" rx="50" ry="18" />
+  <text class="text" x="1300" y="500">isi_ulasan</text>
+
+  <ellipse class="attribute" cx="1320" cy="550" rx="50" ry="18" />
+  <text class="text" x="1320" y="550">balasan_admin</text>
+
+
+  <!-- ==================== CARDINALITY LABELS ==================== -->
+
+  <!-- Admin (1) to Booking (N) -->
+  <text class="cardinality" x="710" y="195">1</text>
+  <text class="cardinality" x="710" y="710">N</text>
+
+  <!-- Admin (1) to Project (N) / Properti (N) -->
+  <text class="cardinality" x="655" y="180">1</text>
+  <text class="cardinality" x="220" y="420">N</text>
+
+  <text class="cardinality" x="665" y="190">1</text>
+  <text class="cardinality" x="480" y="420">N</text>
+
+  <!-- Admin (1) to Invoice (N) / Review (N) -->
+  <text class="cardinality" x="745" y="180">1</text>
+  <text class="cardinality" x="880" y="420">N</text>
+
+  <text class="cardinality" x="735" y="190">1</text>
+  <text class="cardinality" x="1120" y="420">N</text>
+
+  <!-- Booking (N) to Project (M) / Properti (M) -->
+  <text class="cardinality" x="655" y="720">N</text>
+  <text class="cardinality" x="220" y="480">M</text>
+
+  <text class="cardinality" x="665" y="710">N</text>
+  <text class="cardinality" x="480" y="480">M</text>
+
+  <!-- Booking (1) to Invoice (1) / Review (1) -->
+  <text class="cardinality" x="745" y="720">1</text>
+  <text class="cardinality" x="880" y="480">1</text>
+
+  <text class="cardinality" x="735" y="710">1</text>
+  <text class="cardinality" x="1120" y="480">1</text>
+
+</svg>
