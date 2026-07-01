@@ -1,4 +1,4 @@
-const { Category, Project, BookingModel } = require('../../models');
+const { Category, Project } = require('../../models');
 const { Op } = require('sequelize');
 
 class CategoryService {
@@ -20,8 +20,7 @@ class CategoryService {
       where,
       order: [['name', 'ASC']],
       include: filters.includeProjects ? [
-        { model: Project, as: 'projects' },
-        { model: BookingModel, as: 'bookingModels' }
+        { model: Project, as: 'projects' }
       ] : []
     });
     
@@ -30,8 +29,7 @@ class CategoryService {
   
   async getCategoryById(id, includeRelations = false) {
     const include = includeRelations ? [
-      { model: Project, as: 'projects' },
-      { model: BookingModel, as: 'bookingModels' }
+      { model: Project, as: 'projects' }
     ] : [];
     
     const category = await Category.findByPk(id, { include });
@@ -45,8 +43,7 @@ class CategoryService {
   
   async getCategoryBySlug(slug, includeRelations = false) {
     const include = includeRelations ? [
-      { model: Project, as: 'projects' },
-      { model: BookingModel, as: 'bookingModels' }
+      { model: Project, as: 'projects' }
     ] : [];
     
     const category = await Category.findOne({

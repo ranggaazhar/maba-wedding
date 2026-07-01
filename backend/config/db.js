@@ -54,6 +54,13 @@ async function connectDatabase() {
       console.log('ℹ️ invoices.status already altered or error altering:', queryErr.message);
     }
 
+    try {
+      await db.sequelize.query('ALTER TABLE bookings MODIFY COLUMN booking_link_id INT NULL');
+      console.log('✅ Database column bookings.booking_link_id altered to NULL');
+    } catch (queryErr) {
+      console.log('ℹ️ bookings.booking_link_id already nullable or error altering:', queryErr.message);
+    }
+
   } catch (err) {
     console.error('❌ Database connection failed:', err.message);
     process.exit(1);

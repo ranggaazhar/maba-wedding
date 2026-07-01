@@ -6,31 +6,45 @@ class BookingLinkService {
   async deleteAllBookingLinks() {
     const transaction = await sequelize.transaction();
     try {
-      // Find all booking_link_ids currently used by bookings
-      const bookings = await Booking.findAll({
-        attributes: ['booking_link_id'],
-        where: { booking_link_id: { [Op.ne]: null } },
+      // 1. Dapatkan semua customer_id yang terkait dengan booking links sebelum dihapus
+      const links = await BookingLink.findAll({
+        attributes: ['customer_id'],
         raw: true
       });
-      const usedLinkIds = bookings.map(b => b.booking_link_id).filter(Boolean);
+      const customerIds = [...new Set(links.map(l => l.customer_id).filter(Boolean))];
 
-      let deletedCount = 0;
-      if (usedLinkIds.length > 0) {
-        deletedCount = await BookingLink.destroy({
-          where: {
-            id: { [Op.notIn]: usedLinkIds }
-          },
-          transaction
-        });
-      } else {
-        deletedCount = await BookingLink.destroy({
-          where: {},
-          transaction
-        });
+      // 2. Putuskan hubungan booking_link_id di tabel bookings (ubah ke NULL)
+      await Booking.update(
+        { booking_link_id: null },
+        { where: {}, transaction }
+      );
+
+      // 3. Hapus semua data booking links
+      const deletedCount = await BookingLink.destroy({
+        where: {},
+        transaction
+      });
+
+      // 4. Bersihkan data customer yatim piatu (tidak ada booking dan tidak ada link)
+      if (customerIds.length > 0) {
+        for (const customerId of customerIds) {
+          const otherBookingsCount = await Booking.count({
+            where: { customer_id: customerId },
+            transaction
+          });
+          const otherLinksCount = await BookingLink.count({
+            where: { customer_id: customerId },
+            transaction
+          });
+          if (otherBookingsCount === 0 && otherLinksCount === 0) {
+            await Customer.destroy({ where: { id: customerId }, transaction });
+            console.log(`Deleted orphan customer during bulk delete: ${customerId}`);
+          }
+        }
       }
       
       await transaction.commit();
-      return { message: `${deletedCount} link booking yang belum digunakan berhasil dihapus` };
+      return { message: `Semua ${deletedCount} link booking berhasil dihapus` };
     } catch (error) {
       await transaction.rollback();
       throw error;
@@ -211,13 +225,15 @@ class BookingLinkService {
   async deleteBookingLink(id) {
     const bookingLink = await this.getBookingLinkById(id, true);
     
-    if (bookingLink.is_used || bookingLink.booking) {
-      throw new Error('Cannot delete a used booking link');
-    }
-    
     const customerId = bookingLink.customer_id;
     const transaction = await sequelize.transaction();
     try {
+      // Lepaskan referensi booking_link_id di tabel bookings agar data booking tidak ikut terhapus
+      await Booking.update(
+        { booking_link_id: null },
+        { where: { booking_link_id: id }, transaction }
+      );
+
       await bookingLink.destroy({ transaction });
       
       if (customerId) {
