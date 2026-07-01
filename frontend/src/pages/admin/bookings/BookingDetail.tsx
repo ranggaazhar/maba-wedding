@@ -354,9 +354,6 @@ export default function BookingDetail() {
                               className="w-28 h-20 rounded-lg object-cover border border-border shrink-0" />
                           )}
                           <div className="flex-1 space-y-1">
-                            {model.category?.name && (
-                              <Badge variant="outline" className="text-xs mb-1">{model.category.name}</Badge>
-                            )}
                             <h4 className="font-semibold text-foreground">{model.project_title}</h4>
                             {model.price && (
                               <p className="text-sm text-muted-foreground">{formatCurrency(model.price)}</p>
@@ -434,16 +431,7 @@ export default function BookingDetail() {
             {/* ── TAB: CUSTOM REQUEST ── */}
             {booking.has_custom_request && (
               <TabsContent value="custom" className="space-y-4">
-                <Card className="border-orange-100 bg-orange-50/30">
-                  <CardContent className="py-4">
-                    <div className="flex items-start gap-3">
-                      <Sparkles className="text-orange-500 mt-0.5 shrink-0" size={18} />
-                      <p className="text-sm text-orange-700">
-                        Customer mengajukan custom request. Diskusikan detail dan estimasi harga langsung dengan customer melalui <strong>WhatsApp</strong>.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+
 
                 {booking.customRequests && booking.customRequests.length > 0 ? (
                   booking.customRequests.map((cr: BookingCustomRequest) => (
