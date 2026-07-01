@@ -735,7 +735,7 @@ export default function BookingEdit() {
               </p>
             </div>
             {/* Tombol save sengaja tidak ada type="button" agar bisa trigger handleSave */}
-            <Button onClick={handleSave} disabled={isSaving} size="lg" className="w-full sm:w-auto">
+            <Button onClick={handleSave} disabled={isSaving} size="lg" className="w-full sm:w-auto gradient-ocean text-primary-foreground">
               {isSaving ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</>
               ) : (
@@ -857,7 +857,7 @@ export default function BookingEdit() {
               <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
                 Batal
               </Button>
-              <Button type="submit" disabled={isSaving}>
+              <Button type="submit" disabled={isSaving} className="gradient-ocean text-primary-foreground">
                 {isSaving ? "Menyimpan..." : "Simpan"}
               </Button>
             </DialogFooter>
@@ -999,7 +999,7 @@ export default function BookingEdit() {
               <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
                 Batal
               </Button>
-              <Button type="submit" disabled={isSaving}>
+              <Button type="submit" disabled={isSaving} className="gradient-ocean text-primary-foreground">
                 {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>
             </DialogFooter>
