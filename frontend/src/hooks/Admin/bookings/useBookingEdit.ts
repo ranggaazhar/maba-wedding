@@ -90,6 +90,7 @@ export function useBookingEdit() {
         setSelectedModels(booking.models || []);
         setSelectedProperties(booking.properties || []);
         setHasCustomRequest(booking.has_custom_request);
+        console.log('📌 useBookingEdit Loaded customRequests:', booking.customRequests);
         setCustomRequests(booking.customRequests || []);
       }
     } catch (error: unknown) {
@@ -131,7 +132,7 @@ export function useBookingEdit() {
     setSelectedModels([
       ...selectedModels,
       {
-        category_id: project.category_id,
+        project_category: project.category?.name || 'Uncategorized',
         project_id: project.id,
         project_title: project.title,
         price: project.price || '0',
@@ -285,6 +286,11 @@ export function useBookingEdit() {
   };
 
   const handleUpdateCustomRequest = async (crId: number, data: UpdateCustomRequestData, files?: File[]) => {
+    if (!crId) {
+      console.error('❌ Gagal Update: crId bernilai undefined!', { crId, data });
+      Swal.fire('Error', 'ID Custom Request tidak valid atau tidak ditemukan (undefined)', 'error');
+      return;
+    }
     try {
       setIsSaving(true);
       const res = await customRequestApi.update(crId, data, files);
@@ -309,6 +315,11 @@ export function useBookingEdit() {
   };
 
   const handleDeleteCustomRequest = async (crId: number) => {
+    if (!crId) {
+      console.error('❌ Gagal Hapus: crId bernilai undefined!', { crId });
+      Swal.fire('Error', 'ID Custom Request tidak valid atau tidak ditemukan (undefined)', 'error');
+      return;
+    }
     const result = await Swal.fire({
       title: 'Apakah Anda yakin?',
       text: 'Custom request ini akan dihapus secara permanen!',
@@ -341,6 +352,11 @@ export function useBookingEdit() {
   };
 
   const handleDeleteCustomRequestImage = async (crId: number, index: number) => {
+    if (!crId) {
+      console.error('❌ Gagal Hapus Image: crId bernilai undefined!', { crId, index });
+      Swal.fire('Error', 'ID Custom Request tidak valid atau tidak ditemukan (undefined)', 'error');
+      return;
+    }
     const result = await Swal.fire({
       title: 'Hapus Foto Referensi?',
       text: 'Foto ini akan dihapus dari request.',

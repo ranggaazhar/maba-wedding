@@ -148,7 +148,7 @@ export default function ProjectForm() {
               icon: 'error',
               title: 'Slug Duplikat',
               text: `"${formData.slug}" sudah digunakan oleh project lain ("${existingProject.title}"). Harap gunakan nama yang lain.`,
-              confirmButtonColor: '#ea580c'
+              confirmButtonColor: '#0284c7'
             });
             setSaving(false);
             return;

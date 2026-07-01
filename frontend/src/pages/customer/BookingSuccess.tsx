@@ -1,10 +1,8 @@
-import { CheckCircle2, Copy, Clock, Home, MessageCircle } from "lucide-react";
+import { CheckCircle2, Clock, Home, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import Swal from "sweetalert2";
 
 interface BookingSuccessProps {
   bookingCode: string;
@@ -12,16 +10,6 @@ interface BookingSuccessProps {
 }
 
 export default function BookingSuccess({ bookingCode }: BookingSuccessProps) {
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(bookingCode);
-    Swal.fire({
-      icon: "success",
-      title: "Tersalin!",
-      text: "Kode booking berhasil disalin",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 py-12 px-4">

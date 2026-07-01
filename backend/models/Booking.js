@@ -44,10 +44,10 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     toJSON() {
-      const values = { ...this.get() };
-      values.customer_name = this.customer ? this.customer.name : null;
-      values.customer_phone = this.customer ? this.customer.phone : null;
-      values.full_address = this.customer ? this.customer.address : null;
+      const values = this.get({ plain: true });
+      values.customer_name = values.customer ? values.customer.name : null;
+      values.customer_phone = values.customer ? values.customer.phone : null;
+      values.full_address = values.customer ? values.customer.address : null;
       return values;
     }
   }

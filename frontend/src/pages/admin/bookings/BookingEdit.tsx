@@ -88,12 +88,54 @@ export default function BookingEdit() {
   const handleAddFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files || []);
     if (newFiles.length === 0) return;
-    const remaining = 5 - selectedFiles.length;
-    if (remaining <= 0) {
-      Swal.fire('Info', 'Maksimal 5 foto referensi', 'info');
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    const invalidTypeFiles: string[] = [];
+    const invalidSizeFiles: string[] = [];
+    const validFiles: File[] = [];
+
+    newFiles.forEach((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        invalidTypeFiles.push(file.name);
+      } else if (file.size > 5 * 1024 * 1024) {
+        invalidSizeFiles.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    if (invalidTypeFiles.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Format File Tidak Valid',
+        text: `File berikut bukan gambar: ${invalidTypeFiles.join(', ')}. Harap gunakan format JPG, JPEG, PNG, atau WEBP.`,
+        confirmButtonColor: '#0284c7'
+      });
       return;
     }
-    const toAdd = newFiles.slice(0, remaining);
+
+    if (invalidSizeFiles.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Ukuran File Terlalu Besar',
+        text: `File berikut melebihi batas 5MB: ${invalidSizeFiles.join(', ')}.`,
+        confirmButtonColor: '#0284c7'
+      });
+      return;
+    }
+
+    const remaining = 5 - selectedFiles.length;
+    if (remaining <= 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Batas Foto',
+        text: 'Maksimal 5 foto referensi',
+        confirmButtonColor: '#0284c7'
+      });
+      return;
+    }
+
+    const toAdd = validFiles.slice(0, remaining);
     setSelectedFiles(prev => [...prev, ...toAdd]);
     if (fileInputAddRef.current) fileInputAddRef.current.value = '';
   };
@@ -105,13 +147,55 @@ export default function BookingEdit() {
   const handleEditFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files || []);
     if (newFiles.length === 0) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    const invalidTypeFiles: string[] = [];
+    const invalidSizeFiles: string[] = [];
+    const validFiles: File[] = [];
+
+    newFiles.forEach((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        invalidTypeFiles.push(file.name);
+      } else if (file.size > 5 * 1024 * 1024) {
+        invalidSizeFiles.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    if (invalidTypeFiles.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Format File Tidak Valid',
+        text: `File berikut bukan gambar: ${invalidTypeFiles.join(', ')}. Harap gunakan format JPG, JPEG, PNG, atau WEBP.`,
+        confirmButtonColor: '#0284c7'
+      });
+      return;
+    }
+
+    if (invalidSizeFiles.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Ukuran File Terlalu Besar',
+        text: `File berikut melebihi batas 5MB: ${invalidSizeFiles.join(', ')}.`,
+        confirmButtonColor: '#0284c7'
+      });
+      return;
+    }
+
     const existingCount = activeEditCR?.reference_images_urls?.length || 0;
     const remaining = 5 - existingCount - selectedFiles.length;
     if (remaining <= 0) {
-      Swal.fire('Info', `Maksimal 5 foto referensi (Saat ini sudah ada ${existingCount} foto terunggah)`, 'info');
+      Swal.fire({
+        icon: 'info',
+        title: 'Batas Foto',
+        text: `Maksimal 5 foto referensi (Saat ini sudah ada ${existingCount} foto terunggah)`,
+        confirmButtonColor: '#0284c7'
+      });
       return;
     }
-    const toAdd = newFiles.slice(0, remaining);
+
+    const toAdd = validFiles.slice(0, remaining);
     setSelectedFiles(prev => [...prev, ...toAdd]);
     if (fileInputEditRef.current) fileInputEditRef.current.value = '';
   };
@@ -563,8 +647,8 @@ export default function BookingEdit() {
               </Alert>
             ) : (
               <div className="grid grid-cols-1 gap-4">
-                {customRequests.map((cr) => (
-                  <Card key={cr.id} className="border-orange-100 bg-orange-50/10">
+                {customRequests.map((cr, index) => (
+                  <Card key={cr.id || `cr-${index}`} className="border-orange-100 bg-orange-50/10">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
