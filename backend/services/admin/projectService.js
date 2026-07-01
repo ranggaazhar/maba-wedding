@@ -97,6 +97,9 @@ class ProjectService {
         }
       }
       
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new Error('Slug project sudah digunakan oleh project lain. Harap gunakan slug yang berbeda.');
+      }
       throw error;
     }
   }
@@ -219,6 +222,9 @@ class ProjectService {
         for (const file of newFiles) {
           await FileHelper.deleteFile(file.path);
         }
+      }
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new Error('Slug project sudah digunakan oleh project lain. Harap gunakan slug yang berbeda.');
       }
       throw error;
     }

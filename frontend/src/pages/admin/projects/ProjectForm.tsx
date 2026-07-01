@@ -133,9 +133,42 @@ export default function ProjectForm() {
     return true;
   };
 
-  const nextStep = () => {
-    if (currentStep < steps.length) {
+  const nextStep = async () => {
+    if (currentStep === 1) {
+      if (!validateStep(1)) return;
+
+      try {
+        setSaving(true);
+        const response = await projectApi.getProjectBySlug(formData.slug);
+
+        if (response.success && response.data) {
+          const existingProject = response.data;
+          if (!isEdit || existingProject.id !== Number(id)) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Slug Duplikat',
+              text: `"${formData.slug}" sudah digunakan oleh project lain ("${existingProject.title}"). Harap gunakan nama yang lain.`,
+              confirmButtonColor: '#ea580c'
+            });
+            setSaving(false);
+            return;
+          }
+        }
+      } catch (error: any) {
+        if (error.response?.status !== 404) {
+          const msg = axios.isAxiosError(error) ? error.response?.data?.message : 'Gagal memverifikasi keunikan slug';
+          Swal.fire({ icon: 'error', title: 'Error', text: msg });
+          setSaving(false);
+          return;
+        }
+      } finally {
+        setSaving(false);
+      }
+    } else {
       if (!validateStep(currentStep)) return;
+    }
+
+    if (currentStep < steps.length) {
       setCurrentStep((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -254,8 +287,8 @@ export default function ProjectForm() {
               disabled={saving}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${currentStep === step.id ? 'border-primary bg-primary text-white scale-110' :
-                  currentStep > step.id ? 'border-green-500 bg-green-500 text-white' :
-                    'border-muted text-muted-foreground'
+                currentStep > step.id ? 'border-green-500 bg-green-500 text-white' :
+                  'border-muted text-muted-foreground'
                 }`}>
                 {currentStep > step.id ? <Check size={16} strokeWidth={3} /> : step.id}
               </div>
