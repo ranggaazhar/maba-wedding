@@ -171,8 +171,10 @@ export default function InvoiceForm() {
           </div>
         )}
 
-        {/* Customer Info */}
-        <div className="bg-card rounded-xl border border-border p-6 shadow-card space-y-4">
+        {isEdit || selectedBooking ? (
+          <>
+            {/* Customer Info */}
+            <div className="bg-card rounded-xl border border-border p-6 shadow-card space-y-4">
           <h2 className="font-semibold text-foreground text-lg">Informasi Pelanggan</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -474,21 +476,31 @@ export default function InvoiceForm() {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
-          <Button variant="outline" onClick={() => navigate('/admin/invoices')} className="w-full sm:w-auto">Batal</Button>
-          <Button
-            className="gradient-ocean text-primary-foreground w-full sm:w-auto"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting
-              ? <Loader2 size={16} className="animate-spin mr-2" />
-              : <Save size={16} className="mr-2" />
-            }
-            {isEdit ? 'Simpan Perubahan' : 'Buat Invoice'}
-          </Button>
-        </div>
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
+              <Button variant="outline" onClick={() => navigate('/admin/invoices')} className="w-full sm:w-auto">Batal</Button>
+              <Button
+                className="gradient-ocean text-primary-foreground w-full sm:w-auto"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting
+                  ? <Loader2 size={16} className="animate-spin mr-2" />
+                  : <Save size={16} className="mr-2" />
+                }
+                {isEdit ? 'Simpan Perubahan' : 'Buat Invoice'}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="bg-card rounded-xl border border-dashed border-muted-foreground/30 p-12 text-center shadow-sm">
+            <BookOpen className="mx-auto h-12 w-12 text-primary/60 mb-3 animate-pulse" />
+            <h3 className="font-semibold text-foreground text-lg mb-1">Silakan Pilih Booking Terlebih Dahulu</h3>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              Pilih salah satu data booking di atas untuk memuat detail informasi pelanggan dan merincikan item invoice secara otomatis.
+            </p>
+          </div>
+        )}
 
       </div>
     </div>
