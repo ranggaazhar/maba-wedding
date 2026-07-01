@@ -1,5 +1,6 @@
 // src/pages/customer/Step2CustomRequest.tsx
 import { useRef } from 'react';
+import Swal from 'sweetalert2';
 import {
   ArrowLeft, ArrowRight, Plus, Trash2,
   Upload, X, Image as ImageIcon, Sparkles, AlertCircle
@@ -23,7 +24,7 @@ interface Step2CustomRequestProps {
   onSetFiles: (index: number, files: File[]) => void;
   onNext: () => void;
   onBack: () => void;
-  optional?: boolean; 
+  optional?: boolean;
 }
 
 const MAX_FILES = 5;
@@ -52,37 +53,78 @@ export default function Step2CustomRequest({
     const newFiles = Array.from(e.target.files || []);
     if (newFiles.length === 0) return;
 
+    // Validasi tipe file (hanya gambar) dan ukuran (maks 5MB)
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    const invalidTypeFiles: string[] = [];
+    const invalidSizeFiles: string[] = [];
+    const validFiles: File[] = [];
+
+    newFiles.forEach((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        invalidTypeFiles.push(file.name);
+      } else if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        invalidSizeFiles.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    if (invalidTypeFiles.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Format File Tidak Valid',
+        text: `File berikut bukan gambar: ${invalidTypeFiles.join(', ')}. Harap gunakan format JPG, JPEG, PNG, atau WEBP.`,
+        confirmButtonColor: '#ea580c'
+      });
+      return;
+    }
+
+    if (invalidSizeFiles.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Ukuran File Terlalu Besar',
+        text: `File berikut melebihi batas ${MAX_SIZE_MB}MB: ${invalidSizeFiles.join(', ')}.`,
+        confirmButtonColor: '#ea580c'
+      });
+      return;
+    }
+
     const globalRemaining = 25 - totalUploaded;
     if (globalRemaining <= 0) {
-      alert("Maksimal total seluruh foto untuk semua request adalah 25 foto.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Batas Maksimal Foto',
+        text: 'Maksimal total seluruh foto untuk semua request adalah 25 foto.',
+        confirmButtonColor: '#ea580c'
+      });
       return;
     }
 
     const current = customRequestFiles[index] || [];
     const cardRemaining = MAX_FILES - current.length;
     if (cardRemaining <= 0) {
-      alert(`Maksimal ${MAX_FILES} foto per request`);
+      Swal.fire({
+        icon: 'warning',
+        title: 'Batas Per Request',
+        text: `Maksimal ${MAX_FILES} foto per request.`,
+        confirmButtonColor: '#ea580c'
+      });
       return;
     }
 
     // Batasan adalah yang paling kecil antara kapasitas sisa per card atau sisa global
     const allowedLimit = Math.min(cardRemaining, globalRemaining);
 
-    const toAdd: File[] = [];
-    const skipped: string[] = [];
-    newFiles.slice(0, allowedLimit).forEach((f) => {
-      if (f.size > MAX_SIZE_MB * 1024 * 1024) skipped.push(f.name);
-      else toAdd.push(f);
-    });
-
-    if (skipped.length > 0) {
-      alert(`File berikut melebihi ${MAX_SIZE_MB}MB:\n${skipped.join('\n')}`);
+    if (validFiles.length > allowedLimit) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Batas Kuota Foto',
+        text: `Hanya ${allowedLimit} foto pertama yang diproses karena batas kuota (Maksimal ${MAX_FILES} foto per request dan maksimal 25 total foto seluruh request).`,
+        confirmButtonColor: '#ea580c'
+      });
     }
 
-    if (newFiles.length > allowedLimit) {
-      alert(`Hanya ${allowedLimit} foto pertama yang diproses karena batas kuota (Maksimal ${MAX_FILES} foto per request dan maksimal 25 total foto seluruh request).`);
-    }
-
+    const toAdd = validFiles.slice(0, allowedLimit);
     if (toAdd.length > 0) {
       onSetFiles(index, [...current, ...toAdd]);
     }
@@ -99,7 +141,12 @@ export default function Step2CustomRequest({
 
   const handleNext = () => {
     if (totalUploaded > 25) {
-      alert("Total seluruh foto referensi untuk semua request tidak boleh melebihi 25 foto.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Batas Total Foto',
+        text: 'Total seluruh foto referensi untuk semua request tidak boleh melebihi 25 foto.',
+        confirmButtonColor: '#ea580c'
+      });
       return;
     }
 
@@ -109,7 +156,12 @@ export default function Step2CustomRequest({
         return r.title?.trim() && r.description?.trim() && files.length > 0;
       });
       if (!valid || customRequests.length === 0) {
-        alert('Lengkapi judul, deskripsi, tema warna, dan minimal 1 foto referensi untuk setiap custom request.');
+        Swal.fire({
+          icon: 'warning',
+          title: 'Lengkapi Data',
+          text: 'Lengkapi judul, deskripsi, tema warna, dan minimal 1 foto referensi untuk setiap custom request.',
+          confirmButtonColor: '#ea580c'
+        });
         return;
       }
     } else {
@@ -127,7 +179,12 @@ export default function Step2CustomRequest({
         }
       }
       if (hasInvalid) {
-        alert('Untuk custom request yang diisi, Anda harus melengkapi judul, deskripsi, tema warna, dan minimal 1 foto referensi.');
+        Swal.fire({
+          icon: 'warning',
+          title: 'Lengkapi Data',
+          text: 'Untuk custom request yang diisi, Anda harus melengkapi judul, deskripsi, tema warna, dan minimal 1 foto referensi.',
+          confirmButtonColor: '#ea580c'
+        });
         return;
       }
     }
@@ -169,7 +226,6 @@ export default function Step2CustomRequest({
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Sparkles size={16} className="text-orange-500" />
                     Request #{index + 1}
                   </CardTitle>
                   {customRequests.length > 1 && (
@@ -195,12 +251,9 @@ export default function Step2CustomRequest({
                     id={`title-${index}`}
                     value={request.title || ''}
                     onChange={(e) => onUpdate(index, { title: e.target.value })}
-                    placeholder="Contoh: Backdrop Bunga Mawar Merah"
+                    placeholder="Contoh: Dekorasi Panggung"
                     maxLength={200}
                   />
-                  <p className="text-xs text-muted-foreground text-right">
-                    {(request.title || '').length}/200
-                  </p>
                 </div>
 
                 {/* Deskripsi */}
@@ -212,12 +265,12 @@ export default function Step2CustomRequest({
                     id={`desc-${index}`}
                     value={request.description || ''}
                     onChange={(e) => onUpdate(index, { description: e.target.value })}
-                    placeholder="Jelaskan detail dekorasi yang Anda inginkan: ukuran, susunan, material, dll."
+                    placeholder="Jelaskan detail dekorasi yang Anda inginkan"
                     rows={4}
                   />
                 </div>
 
-                 {/* Tema warna */}
+                {/* Tema warna */}
                 <div className="space-y-2">
                   <Label htmlFor={`color-${index}`}>
                     Tema Warna <span className="text-destructive">*</span>
@@ -307,10 +360,15 @@ export default function Step2CustomRequest({
       {/* Tambah request */}
       <Button
         variant="outline"
-        className="w-full border-dashed border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400"
+        className="w-full border-dashed border-[hsl(var(--ocean-soft))] text-[hsl(var(--ocean-deep))] hover:bg-[hsl(var(--ocean-pale))] hover:border-[hsl(var(--ocean-soft))]"
         onClick={() => {
           if (totalUploaded >= 25) {
-            alert("Maksimal total seluruh foto untuk semua request adalah 25 foto. Anda tidak bisa menambahkan custom request baru.");
+            Swal.fire({
+              icon: 'warning',
+              title: 'Batas Total Foto',
+              text: 'Maksimal total seluruh foto untuk semua request adalah 25 foto. Anda tidak bisa menambahkan custom request baru.',
+              confirmButtonColor: '#ea580c'
+            });
             return;
           }
           onAdd();
@@ -326,7 +384,7 @@ export default function Step2CustomRequest({
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft size={18} className="mr-2" /> Kembali
         </Button>
-        <Button onClick={handleNext} className="gap-2">
+        <Button onClick={handleNext} className="gap-2 gradient-ocean text-primary-foreground">
           {optional && customRequests.length === 0
             ? 'Lewati'
             : 'Lanjut'}

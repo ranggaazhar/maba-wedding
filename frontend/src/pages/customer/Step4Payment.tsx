@@ -136,8 +136,8 @@ export default function Step4Payment({
                   <span className="text-muted-foreground">Persentase DP</span>
                   <Badge variant="outline">10%</Badge>
                 </div>
-                <Alert className="py-2">
-                  <AlertCircle className="h-4 w-4" />
+                <Alert className="py-2 flex items-center gap-3 [&>svg]:relative [&>svg]:left-0 [&>svg]:top-0 [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
                   <AlertDescription className="text-xs">
                     Keterangan: DP untuk booking katalog dihitung sebesar 10% dari total estimasi dekorasi.
                   </AlertDescription>
@@ -163,8 +163,8 @@ export default function Step4Payment({
                     </div>
                   </>
                 )}
-                <Alert className="py-2 border-orange-200 bg-orange-50 text-orange-800">
-                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                <Alert className="py-2 border-orange-200 bg-orange-50 text-orange-800 flex items-center gap-3 [&>svg]:relative [&>svg]:left-0 [&>svg]:top-0 [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
+                  <AlertCircle className="h-4 w-4 text-orange-600 shrink-0" />
                   <AlertDescription className="text-xs text-orange-800">
                     Keterangan: Booking kustom <strong>{eventType}</strong> dikenakan biaya DP flat sebesar <strong>{formatRupiah(customRequestFee)}</strong> untuk mengkonfirmasi antrean & pengerjaan request dekorasi.
                     {catalogTotalEstimate > 0 && ` Ditambah 10% DP dari properti tambahan (${formatRupiah(dpCatalogAmount)}).`}
@@ -187,8 +187,8 @@ export default function Step4Payment({
                   <span className="text-muted-foreground">DP Flat Custom Request ({eventType})</span>
                   <span className="font-medium">{formatRupiah(customRequestFee)}</span>
                 </div>
-                <Alert className="py-2 border-purple-200 bg-purple-50 text-purple-800">
-                  <AlertCircle className="h-4 w-4 text-purple-600" />
+                <Alert className="py-2 border-purple-200 bg-purple-50 text-purple-800 flex items-center gap-3 [&>svg]:relative [&>svg]:left-0 [&>svg]:top-0 [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
+                  <AlertCircle className="h-4 w-4 text-purple-600 shrink-0" />
                   <AlertDescription className="text-xs text-purple-800">
                     Keterangan: DP booking kombinasi terdiri dari 10% dekorasi katalog & properti (<strong>{formatRupiah(dpCatalogAmount)}</strong>) ditambah DP flat custom request <strong>{eventType}</strong> (<strong>{formatRupiah(customRequestFee)}</strong>).
                   </AlertDescription>
@@ -201,12 +201,6 @@ export default function Step4Payment({
               <span className="font-semibold text-base">Total DP yang Harus Dibayar</span>
               <span className="text-2xl font-bold text-primary">{formatRupiah(dpAmount)}</span>
             </div>
-            <Alert className="py-2">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-xs">
-                Sisa pembayaran <strong>{formatRupiah(totalEstimate - dpAmount)}</strong> akan dilunasi sebelum hari acara.
-              </AlertDescription>
-            </Alert>
           </CardContent>
         </Card>
 
@@ -283,7 +277,7 @@ export default function Step4Payment({
           <CardContent>
             {!paymentFile ? (
               <div
-                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-[hsl(var(--ocean-soft))] hover:bg-[hsl(var(--ocean-pale))] transition-colors"
                 onClick={() => document.getElementById("payment_proof")?.click()}
               >
                 <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
@@ -358,7 +352,7 @@ export default function Step4Payment({
           onClick={handleSubmit}
           disabled={isSubmitting || !isPaymentComplete}
           size="lg"
-          className={isPaymentComplete ? "" : "opacity-50 cursor-not-allowed"}
+          className={isPaymentComplete ? "gradient-ocean text-primary-foreground" : "opacity-50 cursor-not-allowed"}
         >
           {isSubmitting ? (
             <>

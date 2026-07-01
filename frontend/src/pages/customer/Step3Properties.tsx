@@ -147,7 +147,7 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
                   </p>
                   <Button
                     size="sm"
-                    className="w-full"
+                    className="w-full bg-[hsl(var(--ocean-deep))] hover:bg-[hsl(var(--ocean-soft))] text-white"
                     onClick={() => handleAddProperty(property)}
                   >
                     <Plus size={16} className="mr-2" />
@@ -165,7 +165,7 @@ export default function Step3Properties({ properties, setProperties, onNext, onB
           <ArrowLeft size={18} className="mr-2" />
           Kembali
         </Button>
-        <Button onClick={onNext}>
+        <Button onClick={onNext} className="gradient-ocean text-primary-foreground">
           Lanjut
           <ArrowRight size={18} className="ml-2" />
         </Button>

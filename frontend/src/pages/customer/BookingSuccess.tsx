@@ -40,24 +40,6 @@ export default function BookingSuccess({ bookingCode }: BookingSuccessProps) {
           </CardHeader>
         </Card>
 
-        {/* Booking Code */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Kode Booking Anda</CardTitle>
-            <CardDescription>Simpan kode ini untuk referensi pesanan Anda</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-              <div className="flex-1">
-                <p className="text-3xl font-bold text-primary tracking-wider">{bookingCode}</p>
-              </div>
-              <Button variant="outline" size="icon" onClick={handleCopyCode}>
-                <Copy size={18} />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Status saat ini */}
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-5">
@@ -71,7 +53,7 @@ export default function BookingSuccess({ bookingCode }: BookingSuccessProps) {
                   </Badge>
                 </div>
                 <p className="text-sm text-blue-600 mt-1">
-                  Admin akan memverifikasi bukti transfer Anda dalam 1×24 jam.
+                  Admin akan memverifikasi bukti transfer Anda.
                   Notifikasi akan dikirim ke WhatsApp Anda setelah dikonfirmasi.
                 </p>
               </div>
@@ -106,7 +88,7 @@ export default function BookingSuccess({ bookingCode }: BookingSuccessProps) {
               <div>
                 <p className="font-semibold">Verifikasi oleh Admin</p>
                 <p className="text-sm text-muted-foreground">
-                  Tim kami akan memverifikasi pembayaran DP dalam 1×24 jam kerja.
+                  Tim kami akan memverifikasi pembayaran DP.
                 </p>
               </div>
             </div>
@@ -141,21 +123,10 @@ export default function BookingSuccess({ bookingCode }: BookingSuccessProps) {
           </CardContent>
         </Card>
 
-        {/* Info penting */}
-        <Alert>
-          <AlertDescription>
-            <p className="font-semibold mb-1">Penting untuk diingat</p>
-            <p className="text-sm">
-              Simpan kode booking <strong>{bookingCode}</strong> dan pastikan nomor WhatsApp Anda aktif
-              untuk menerima notifikasi konfirmasi dari kami.
-            </p>
-          </AlertDescription>
-        </Alert>
-
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
-            className="flex-1"
+            className="flex-1 gradient-ocean text-primary-foreground"
             onClick={() => window.open(`https://wa.me/62081215061622?text=Halo, saya ingin konfirmasi booking dengan kode *${bookingCode}*`, '_blank')}
           >
             <MessageCircle size={18} className="mr-2" />

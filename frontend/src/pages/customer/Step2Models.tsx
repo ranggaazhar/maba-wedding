@@ -165,7 +165,7 @@ export default function Step2Models({ models, setModels, onNext, onBack }: Step2
                     </p>
                     <Button
                       size="sm"
-                      className="w-full"
+                      className={isSelected ? "w-full" : "w-full bg-[hsl(var(--ocean-deep))] hover:bg-[hsl(var(--ocean-soft))] text-white"}
                       variant={isSelected ? "secondary" : "default"}
                       onClick={() => handleAddModel(project)}
                       disabled={!!isSelected}
@@ -185,8 +185,8 @@ export default function Step2Models({ models, setModels, onNext, onBack }: Step2
           <ArrowLeft size={18} className="mr-2" />
           Kembali
         </Button>
-        <Button onClick={handleNext} disabled={models.length === 0}>
-          Lanjut ke Pilih Property
+        <Button onClick={handleNext} disabled={models.length === 0} className="gradient-ocean text-primary-foreground">
+          Lanjut
           <ArrowRight size={18} className="ml-2" />
         </Button>
       </div>
